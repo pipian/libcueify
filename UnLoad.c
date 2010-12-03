@@ -356,6 +356,7 @@ void ParseArguments(int argc, char *argv[], CmdArguments *args)
 			} else if (*ptr >= 'A' && *ptr <= 'Z') {
 			    args->dwDrivesOnLeft |= 1 << (*ptr - 'A');
 			}
+			ptr++;
 		    }
 		}
 		break;
