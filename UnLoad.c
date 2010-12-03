@@ -349,12 +349,12 @@ void ParseArguments(int argc, char *argv[], CmdArguments *args)
 		    ptr = szArg + 15;
 		    if (*ptr == '"') {
 			ptr++;
-			while (*ptr != '"' && *ptr != '\0') {
-			    if (*ptr >= 'a' && *ptr <= 'z') {
-				args->dwDrivesOnLeft |= 1 << (*ptr - 'a');
-			    } else if (*ptr >= 'A' && *ptr <= 'Z') {
-				args->dwDrivesOnLeft |= 1 << (*ptr - 'A');
-			    }
+		    }
+		    while (*ptr != '"' && *ptr != '\0') {
+			if (*ptr >= 'a' && *ptr <= 'z') {
+			    args->dwDrivesOnLeft |= 1 << (*ptr - 'a');
+			} else if (*ptr >= 'A' && *ptr <= 'Z') {
+			    args->dwDrivesOnLeft |= 1 << (*ptr - 'A');
 			}
 		    }
 		}
