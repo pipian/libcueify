@@ -100,4 +100,20 @@ BOOL AutoLoadVolume(HANDLE hVolume);
  */
 BOOL LoadVolume(TCHAR cDriveLetter, CmdArguments *args);
 
+/** Check the volume identified by the handle hVolume.
+ *
+ * @param hVolume A handle to a volume to check.
+ * @return TRUE if the volume contains media.
+ */
+BOOL CheckVolume(HANDLE hVolume);
+
+/** Determine if the volume specified by cDriveLetter has media in it.
+ *
+ * @param cDriveLetter The letter of the drive to test.
+ * @param args The command-line arguments (e.g. --drivesonleft) of the
+ *             executable.
+ * @return TRUE if the drive specified by cDriveLetter contains media.
+ */
+BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args);
+
 #endif

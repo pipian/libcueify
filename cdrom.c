@@ -207,3 +207,37 @@ BOOL LoadVolume(TCHAR cDriveLetter, CmdArguments *args)
     
     return TRUE;
 }
+
+BOOL CheckVolume(HANDLE hVolume)
+{
+    DWORD dwBytesReturned;
+    
+    return DeviceIoControl(hVolume,
+			   IOCTL_STORAGE_CHECK_VERIFY,
+			   NULL, 0,
+			   NULL, 0,
+			   &dwBytesReturned,
+			   NULL);
+}
+
+BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args)
+{
+    HANDLE hVolume;
+    BOOL fHasMedia = FALSE;
+    
+    /* Open the volume. */
+    hVolume = OpenVolume(cDriveLetter);
+    if (hVolume == INVALID_HANDLE_VALUE) {
+	return FALSE;
+    }
+    
+    /* Test the volume for media. */
+    if (CheckVolume(hVolume)) {
+	fHasMedia = TRUE;
+    }
+    
+    /* Close the volume so other processes can use the drive. */
+    CloseVolume(hVolume);
+    
+    return fHasMedia;
+}
