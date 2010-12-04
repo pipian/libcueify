@@ -153,8 +153,7 @@ BOOL EjectVolume(TCHAR cDriveLetter, CmdArguments *args)
     }
     
     /* Lock and dismount the volume. */
-    if (LockVolume(hVolume, args->dwWatchdog, &args->dwElapsed) &&
-	DismountVolume(hVolume)) {
+    if (DismountVolume(hVolume)) {
 	fRemoveSafely = TRUE;
 	
 	/* Set prevent removal to false and eject the volume. */
