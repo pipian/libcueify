@@ -81,7 +81,7 @@ BOOL LockVolume(HANDLE hVolume, DWORD dwWatchdog, DWORD *dwElapsed)
     DWORD dwSleepAmount;
     int nTryCount;
     
-    dwSleepAmount = dwWatchdog / LOCK_RETRIES;
+    dwSleepAmount = 10000 / LOCK_RETRIES;
     
     /* Do this in a loop until a timeout period has expired */
     for (nTryCount = 0; nTryCount < LOCK_RETRIES; nTryCount++) {
@@ -153,16 +153,17 @@ BOOL EjectVolume(TCHAR cDriveLetter, CmdArguments *args)
     }
     
     /* Lock and dismount the volume. */
-    if (LockVolume(hVolume, args->dwWatchdog, &args->dwElapsed) &&
+/*    if (LockVolume(hVolume, args->dwWatchdog, &args->dwElapsed) &&
 	DismountVolume(hVolume)) {
 	fRemoveSafely = TRUE;
 	
-	/* Set prevent removal to false and eject the volume. */
+	/* Set prevent removal to false and eject the volume. *
 	if (PreventRemovalOfVolume(hVolume, FALSE) &&
 	    AutoEjectVolume(hVolume)) {
 	    fAutoEject = TRUE;
 	}
-    }
+    }*/
+    AutoEjectVolume(hVolume);
     
     /* Close the volume so other processes can use the drive. */
     if (!CloseVolume(hVolume)) {
