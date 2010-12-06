@@ -72,62 +72,6 @@ BOOL CloseVolume(HANDLE hVolume)
     return CloseHandle(hVolume);
 }
 
-/** The number of times to try locking the volume. */
-#define LOCK_RETRIES 3
-
-BOOL LockVolume(HANDLE hVolume, DWORD dwWatchdog, DWORD *dwElapsed)
-{
-    DWORD dwBytesReturned;
-    DWORD dwSleepAmount;
-    int nTryCount;
-    
-    dwSleepAmount = 10000 / LOCK_RETRIES;
-    
-    /* Do this in a loop until a timeout period has expired */
-    for (nTryCount = 0; nTryCount < LOCK_RETRIES; nTryCount++) {
-	if (DeviceIoControl(hVolume,
-			    FSCTL_LOCK_VOLUME,
-			    NULL, 0,
-			    NULL, 0,
-			    &dwBytesReturned,
-			    NULL)) {
-	    return TRUE;
-	}
-	
-	Sleep(dwSleepAmount);
-	*dwElapsed += dwSleepAmount;
-    }
-    
-    return FALSE;
-}
-
-BOOL DismountVolume(HANDLE hVolume)
-{
-    DWORD dwBytesReturned;
-    
-    return DeviceIoControl(hVolume,
-			   FSCTL_DISMOUNT_VOLUME,
-			   NULL, 0,
-			   NULL, 0,
-			   &dwBytesReturned,
-			   NULL);
-}
-
-BOOL PreventRemovalOfVolume(HANDLE hVolume, BOOL fPreventRemoval)
-{
-    DWORD dwBytesReturned;
-    PREVENT_MEDIA_REMOVAL PMRBuffer;
-    
-    PMRBuffer.PreventMediaRemoval = fPreventRemoval;
-    
-    return DeviceIoControl(hVolume,
-			   IOCTL_STORAGE_MEDIA_REMOVAL,
-			   &PMRBuffer, sizeof(PREVENT_MEDIA_REMOVAL),
-			   NULL, 0,
-			   &dwBytesReturned,
-			   NULL);
-}
-
 BOOL AutoEjectVolume(HANDLE hVolume)
 {
     DWORD dwBytesReturned;
@@ -143,7 +87,6 @@ BOOL AutoEjectVolume(HANDLE hVolume)
 BOOL EjectVolume(TCHAR cDriveLetter, CmdArguments *args)
 {
     HANDLE hVolume;
-    BOOL fRemoveSafely = FALSE;
     BOOL fAutoEject = FALSE;
     
     /* Open the volume. */
@@ -152,25 +95,17 @@ BOOL EjectVolume(TCHAR cDriveLetter, CmdArguments *args)
 	return FALSE;
     }
     
-    /* Lock and dismount the volume. */
-/*    if (LockVolume(hVolume, args->dwWatchdog, &args->dwElapsed) &&
-	DismountVolume(hVolume)) {
-	fRemoveSafely = TRUE;
-	
-	/* Set prevent removal to false and eject the volume. *
-	if (PreventRemovalOfVolume(hVolume, FALSE) &&
-	    AutoEjectVolume(hVolume)) {
-	    fAutoEject = TRUE;
-	}
-    }*/
-    AutoEjectVolume(hVolume);
+    /* Eject the volume without locking (since dBpoweramp already locks). */
+    if (!AutoEjectVolume(hVolume)) {
+	fAutoEject = TRUE;
+    }
     
     /* Close the volume so other processes can use the drive. */
     if (!CloseVolume(hVolume)) {
 	return FALSE;
     }
     
-    return TRUE;
+    return fAutoEject;
 }
 
 BOOL AutoLoadVolume(HANDLE hVolume)
@@ -197,7 +132,7 @@ BOOL LoadVolume(TCHAR cDriveLetter, CmdArguments *args)
     }
     
     /* Load the volume. */
-    if (AutoLoadVolume(hVolume)) {
+    if (!AutoLoadVolume(hVolume)) {
 	fAutoLoad = TRUE;
     }
     
@@ -206,7 +141,7 @@ BOOL LoadVolume(TCHAR cDriveLetter, CmdArguments *args)
 	return FALSE;
     }
     
-    return TRUE;
+    return fAutoLoad;
 }
 
 BOOL CheckVolume(HANDLE hVolume)

@@ -48,6 +48,8 @@ typedef struct LoadArguments {
     BOOL fRejectIfNoDisc;
     /* Bitmask where true bits mark drives on the left (LSB A:\, etc.) */
     DWORD dwDrivesOnLeft;
+    /* Whether or not to shake the arm on loading a disc from the stack. */
+    BOOL fShake;
 } CmdArguments;
 
 /** Parse command-line arguments.
@@ -57,5 +59,13 @@ typedef struct LoadArguments {
  * @param args A pointer to a CmdArguments structure to store parsed arguments.
  */
 void ParseArguments(int argc, char *argv[], CmdArguments *args);
+
+/** Determines whether the given drive is on the left.
+ *
+ * @param dwDrivesOnLeft Bitmask where true bits mark drives on the left (LSB A:\, etc.)
+ * @param cDriveLetter The letter of the drive to determine.
+ * @return TRUE if the drive in cDriveLetter is on the left.
+ */
+BOOL IsDriveOnLeft(DWORD dwDrivesOnLeft, char cDriveLetter);
 
 #endif
