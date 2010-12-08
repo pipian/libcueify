@@ -96,7 +96,7 @@ BOOL EjectVolume(TCHAR cDriveLetter, CmdArguments *args)
     }
     
     /* Eject the volume without locking (since dBpoweramp already locks). */
-    if (!AutoEjectVolume(hVolume)) {
+    if (AutoEjectVolume(hVolume)) {
 	fAutoEject = TRUE;
     }
     
@@ -132,7 +132,7 @@ BOOL LoadVolume(TCHAR cDriveLetter, CmdArguments *args)
     }
     
     /* Load the volume. */
-    if (!AutoLoadVolume(hVolume)) {
+    if (AutoLoadVolume(hVolume)) {
 	fAutoLoad = TRUE;
     }
     
