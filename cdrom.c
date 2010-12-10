@@ -156,7 +156,7 @@ BOOL CheckVolume(HANDLE hVolume)
 			   NULL);
 }
 
-BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args)
+BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args, int iDelay)
 {
     HANDLE hVolume;
     BOOL fHasMedia = FALSE;
@@ -168,7 +168,17 @@ BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args)
     }
     
     /* Test the volume for media. */
-    if (CheckVolume(hVolume)) {
+    while (!CheckVolume(hVolume) && iDelay > 0) {
+	/*
+	 * If the volume doesn't have media, wait a little bit in case
+	 * the drive is settling.
+	 */
+	iDelay--;
+	if (iDelay > 0) {
+	    Sleep(1000);
+	}
+    }
+    if (iDelay > 0) {
 	fHasMedia = TRUE;
     }
     

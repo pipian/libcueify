@@ -112,8 +112,9 @@ BOOL CheckVolume(HANDLE hVolume);
  * @param cDriveLetter The letter of the drive to test.
  * @param args The command-line arguments (e.g. --drivesonleft) of the
  *             executable.
+ * @param iDelay The maximum number of seconds to wait for the volume to load.
  * @return TRUE if the drive specified by cDriveLetter contains media.
  */
-BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args);
+BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args, int iDelay);
 
 #endif
