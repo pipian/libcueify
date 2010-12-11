@@ -68,4 +68,11 @@ void ParseArguments(int argc, char *argv[], CmdArguments *args);
  */
 BOOL IsDriveOnLeft(DWORD dwDrivesOnLeft, char cDriveLetter);
 
+/** Write a string to the log file, if specified.
+ *
+ * @param args The command line arguments of the app.
+ * @param string A null-terminated pointer to a character string to write to the log file.
+ */
+void Log(CmdArguments *args, char *s);
+
 #endif
