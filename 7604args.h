@@ -38,7 +38,7 @@ typedef struct LoadArguments {
     TCHAR *szPortName;
     /* The log file to write. (Unsupported) */
     TCHAR *szLogFile;
-    /* The error file to pass errors back with. (Unsupported) */
+    /* The error file to pass errors back with. */
     TCHAR *szPassErrorsBack;
     /* The amount of time (in milliseconds) before the process is killed. */
     DWORD dwWatchdog;
@@ -50,6 +50,8 @@ typedef struct LoadArguments {
     DWORD dwDrivesOnLeft;
     /* Whether or not to shake the arm on loading a disc from the stack. */
     BOOL fShake;
+    /* An extra log file to write to. */
+    TCHAR *szExtraLogFile;
 } CmdArguments;
 
 /** Parse command-line arguments.
