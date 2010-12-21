@@ -50,8 +50,6 @@ typedef struct LoadArguments {
     DWORD dwDrivesOnLeft;
     /* Whether or not to shake the arm on loading a disc from the stack. */
     BOOL fShake;
-    /* An extra log file to write to. */
-    TCHAR *szExtraLogFile;
 } CmdArguments;
 
 /** Parse command-line arguments.
