@@ -149,7 +149,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			    cdtextData->tracks[0].tocInfo2);
 		}
 		if (cdtextData->tracks[0].upc_ean != NULL) {
-		    fprintf(log, "REM UPC_EAN \"%s\"\n",
+		    fprintf(log, "REM CATALOG %s\n",
 			    cdtextData->tracks[0].upc_ean);
 		}
 		if (cdtextData->tracks[0].sizeInfo != NULL) {
@@ -214,7 +214,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 				cdtextData->tracks[iTrack].tocInfo2);
 		    }
 		    if (cdtextData->tracks[iTrack].upc_ean != NULL) {
-			fprintf(log, "    REM ISRC \"%s\"\n",
+			fprintf(log, "    REM ISRC %s\n",
 				cdtextData->tracks[iTrack].upc_ean);
 		    }
 		    if (cdtextData->tracks[iTrack].sizeInfo != NULL) {

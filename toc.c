@@ -220,6 +220,11 @@ static unsigned char *wchar_to_utf8(wchar_t *wchar, size_t memsize)
 struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks)
 {
     int iDescriptor;
+    char *szLeftOver = NULL;
+    wchar_t *wszLeftOver = NULL;
+    int iLeftOver;
+    char *szPrev = NULL;
+    int iPrev = 0;
     struct CDText *cdtextData = NULL;
     
     if (((cdtext->Length[0] << 8) | cdtext->Length[1]) > 0) {
@@ -247,6 +252,7 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks)
 	    }
 	    
 	    /* Parse out the descriptor text into UTF-8. */
+	    szLeftOver = NULL;
 	    switch (cdtext->Descriptors[iDescriptor].PackType) {
 	    case CDROM_CD_TEXT_PACK_ALBUM_NAME:
 	    case CDROM_CD_TEXT_PACK_PERFORMER:
@@ -258,11 +264,23 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks)
 	    case CDROM_CD_TEXT_PACK_GENRE:
 	    case CDROM_CD_TEXT_PACK_UPC_EAN:
 		if (cdtext->Descriptors[iDescriptor].Unicode) {
+		    if (wcslen(cdtext->Descriptors[iDescriptor].WText) < 5) {
+			wszLeftOver = cdtext->Descriptors[iDescriptor].WText + wcslen(cdtext->Descriptors[iDescriptor].WText) + 1;
+			iLeftOver = 6 - wcslen(cdtext->Descriptors[iDescriptor].WText) - 1;
+			szLeftOver = wchar_to_utf8(wszLeftOver, iLeftOver);
+			wszLeftOver = NULL;
+			iLeftOver = strlen(szLeftOver);
+		    }
 		    text = wchar_to_utf8(cdtext->Descriptors[iDescriptor].WText, 6);
 		    if (text == NULL) {
 			text = strdup(baseText);
 		    }
 		} else {
+		    if (strlen(cdtext->Descriptors[iDescriptor].Text) < 11) {
+			szLeftOver = strdup(cdtext->Descriptors[iDescriptor].Text + strlen(cdtext->Descriptors[iDescriptor].Text) + 1);
+			wszLeftOver = NULL;
+			iLeftOver = 12 - strlen(cdtext->Descriptors[iDescriptor].Text) - 1;
+		    }
 		    memcpy(baseText, cdtext->Descriptors[iDescriptor].Text, 12);
 		    text = baseText;
 		}
@@ -355,16 +373,33 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks)
 		    *(*datum + *datumSize + 24) = '\0';
 		    *datumSize += 24;
 		} else if (cdtext->Descriptors[iDescriptor].Unicode) {
+		    if (szPrev != NULL && *szPrev != '\0') {
+			*datum = realloc(*datum, *datumSize + iPrev);
+			if (*datum == NULL) {
+			    if (cdtext->Descriptors[iDescriptor].Unicode) {
+				free(text);
+			    }
+			    goto ParseCDTextError;
+			}
+			memcpy(*datum + *datumSize, szPrev, iPrev);
+			*datumSize += iPrev;
+		    }
 		    *datum = realloc(*datum, *datumSize + 36);
 		    if (*datum == NULL) {
-			if (cdtext->Descriptors[iDescriptor].Unicode) {
-			    free(text);
-			}
+			free(text);
 			goto ParseCDTextError;
 		    }
 		    memcpy(*datum + *datumSize, text, 36);
 		    *datumSize += 36;
 		} else {
+		    if (szPrev != NULL && *szPrev != '\0') {
+			*datum = realloc(*datum, *datumSize + iPrev);
+			if (*datum == NULL) {
+			    goto ParseCDTextError;
+			}
+			memcpy(*datum + *datumSize, szPrev, iPrev);
+			*datumSize += iPrev;
+		    }
 		    *datum = realloc(*datum, *datumSize + 12);
 		    if (*datum == NULL) {
 			goto ParseCDTextError;
@@ -392,11 +427,23 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks)
 	    default:
 		break;
 	    }
+	    
+	    if (szPrev != NULL) {
+		free(szPrev);
+	    }
+	    szPrev = szLeftOver;
+	    iPrev = iLeftOver;
 	}
     }
     
+    if (szPrev != NULL) {
+	free(szPrev);
+    }
     return cdtextData;
 ParseCDTextError:
+    if (szPrev != NULL) {
+	free(szPrev);
+    }
     FreeCDText(cdtextData);
     return NULL;
 }
