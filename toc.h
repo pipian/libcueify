@@ -184,6 +184,47 @@ typedef union _SUB_Q_CHANNEL_DATA {
     SUB_Q_TRACK_ISRC  TrackIsrc;
 } SUB_Q_CHANNEL_DATA, *PSUB_Q_CHANNEL_DATA;
 
+/* CDROM_AUDIO_CONTROL.LbaFormat constants */
+#define AUDIO_WITH_PREEMPHASIS            0x1
+#define DIGITAL_COPY_PERMITTED            0x2
+#define AUDIO_DATA_TRACK                  0x4
+#define TWO_FOUR_CHANNEL_AUDIO            0x8
+
+struct CDTextTrack {
+    char *title;
+    int titleSize;
+    char *performer;
+    int performerSize;
+    char *songwriter;
+    int songwriterSize;
+    char *composer;
+    int composerSize;
+    char *arranger;
+    int arrangerSize;
+    char *messages;
+    int messagesSize;
+    char *discId;
+    int discIdSize;
+    char *genre;
+    int genreSize;
+    char *tocInfo;
+    int tocInfoSize;
+    char *tocInfo2;
+    int tocInfo2Size;
+    char *upc_ean;
+    int upc_eanSize;
+    char *sizeInfo;
+    int sizeInfoSize;
+};
+
+struct CDText {
+    int iTracks;                /** The number of tracks in this CD-Text. */
+    struct CDTextTrack *tracks; /** The track data of this CD-Text.
+				 *  There should be iTracks + 1 CDTextTracks.
+				 *  Index 0 contains disc-level CD-Text data.
+				 */
+};
+
 /** Convert an MSF address into the corresponding LBA address.
  *
  * @param address An MSF address.
@@ -210,14 +251,13 @@ BOOL ReadLastSession(HANDLE hDevice, CDROM_TOC_SESSION_DATA *session);
 BOOL ReadTOC(HANDLE hDevice, CDROM_TOC *toc);
 
 /** Read the contents of the CD-Text into a CDROM_TOC_CD_TEXT_DATA
- *  variable provided.
+ *  variable provided.  The returned pointer should be freed using free().
  *
  * @param hDevice A handle to the drive to read the CD-Text data from.
- * @param cdtext A pointer to the CDROM_TOC_CD_TEXT_DATA to populate.
- * @param size The size of the CDROM_TOC_CD_TEXT_DATA pointer.
- * @return TRUE if the command succeeded.
+ * @return An allocated CDROM_TOC_CD_TEXT_DATA structure if the command
+ *         succeeded, or NULL if it failed.
  */
-BOOL ReadCDText(HANDLE hDevice, CDROM_TOC_CD_TEXT_DATA *cdtext, size_t size);
+CDROM_TOC_CD_TEXT_DATA *ReadCDText(HANDLE hDevice);
 
 /** Read the CD-ROM's MCN into a SUB_Q_CHANNEL_DATA variable provided.
  *
@@ -235,5 +275,21 @@ BOOL ReadMCN(HANDLE hDevice, SUB_Q_CHANNEL_DATA *data);
  * @return TRUE if the command succeeded.
  */
 BOOL ReadISRC(HANDLE hDevice, int iTrack, SUB_Q_CHANNEL_DATA *data);
+
+/** Parse a CDROM_TOC_CD_TEXT_DATA struct into a meaningful CDText struct.
+ *
+ * @param cdtext The CDROM_TOC_CD_TEXT_DATA struct to parse.
+ * @param iTracks The number of tracks on the CD-ROM.
+ * @return An allocated CDText structure containing the parsed contents of
+ *         cdtext if successful (this should be freed with FreeCDText()),
+ *         or NULL if not.
+ */
+struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks);
+
+/** Free an allocated CDText struct.
+ *
+ * @param cdtextData The CDText struct to free.
+ */
+void FreeCDText(struct CDText *cdtextData);
 
 #endif
