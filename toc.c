@@ -88,6 +88,38 @@ BOOL ReadTOC(HANDLE hDevice, CDROM_TOC *toc)
 			   &dwReturned, NULL);
 }
 
+CDROM_TOC_FULL_TOC_DATA *ReadFullTOC(HANDLE hDevice)
+{
+    DWORD dwReturned;
+    CDROM_READ_TOC_EX toc_ex;
+    CDROM_TOC_FULL_TOC_DATA *fulltoc = NULL;
+    int iSize = 256 * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) + sizeof(CDROM_TOC_FULL_TOC_DATA);
+    
+    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_FULL_TOC;
+    toc_ex.Reserved1 = 0;
+    toc_ex.Msf = TRUE;
+    toc_ex.SessionTrack = 1;
+    toc_ex.Reserved2 = 0;
+    toc_ex.Reserved3 = 0;
+    
+    /* Can't call IOCTL_CDROM_READ_TOC_EX twice for some reason, so we just
+     * have to guess. */
+    fulltoc = calloc(1, iSize);
+    
+    if (fulltoc != NULL) {
+	if (!DeviceIoControl(hDevice,
+			     IOCTL_CDROM_READ_TOC_EX,
+			     &toc_ex, sizeof(CDROM_READ_TOC_EX),
+			     fulltoc, iSize,
+			     &dwReturned, NULL)) {
+	    free(fulltoc);
+	    return NULL;
+	}
+    }
+    
+    return fulltoc;
+}
+
 CDROM_TOC_CD_TEXT_DATA *ReadCDText(HANDLE hDevice)
 {
     DWORD dwReturned;
@@ -107,13 +139,16 @@ CDROM_TOC_CD_TEXT_DATA *ReadCDText(HANDLE hDevice)
 			&toc_ex, sizeof(CDROM_READ_TOC_EX),
 			&dummy, sizeof(dummy),
 			&dwReturned, NULL)) {
-	cdtext = malloc(((dummy.Length[0] << 8) | dummy.Length[1]) + 2);
+	cdtext = calloc(1, ((dummy.Length[0] << 8) | dummy.Length[1]) + 2);
 	if (cdtext != NULL) {
-	    DeviceIoControl(hDevice,
-			    IOCTL_CDROM_READ_TOC_EX,
-			    &toc_ex, sizeof(CDROM_READ_TOC_EX),
-			    cdtext, ((dummy.Length[0] << 8) | dummy.Length[1]) + 2,
-			    &dwReturned, NULL);
+	    if (!DeviceIoControl(hDevice,
+				 IOCTL_CDROM_READ_TOC_EX,
+				 &toc_ex, sizeof(CDROM_READ_TOC_EX),
+				 cdtext, ((dummy.Length[0] << 8) | dummy.Length[1]) + 2,
+				 &dwReturned, NULL)) {
+		free(cdtext);
+		return NULL;
+	    }
 	}
     }
     

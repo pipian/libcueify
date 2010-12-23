@@ -141,6 +141,24 @@ typedef struct _CDROM_TOC_CD_TEXT_DATA {
     CDROM_TOC_CD_TEXT_DATA_BLOCK  Descriptors[0];
 } CDROM_TOC_CD_TEXT_DATA, *PCDROM_TOC_CD_TEXT_DATA;
 
+typedef struct _CDROM_TOC_FULL_TOC_DATA_BLOCK {
+  UCHAR  SessionNumber;
+  UCHAR  Control : 4;
+  UCHAR  Adr : 4;
+  UCHAR  Reserved1;
+  UCHAR  Point;
+  UCHAR  MsfExtra[3];
+  UCHAR  Zero;
+  UCHAR  Msf[3];
+} CDROM_TOC_FULL_TOC_DATA_BLOCK, *PCDROM_TOC_FULL_TOC_DATA_BLOCK;
+
+typedef struct _CDROM_TOC_FULL_TOC_DATA {
+  UCHAR  Length[2];
+  UCHAR  FirstCompleteSession;
+  UCHAR  LastCompleteSession;
+  CDROM_TOC_FULL_TOC_DATA_BLOCK  Descriptors[0];
+} CDROM_TOC_FULL_TOC_DATA, *PCDROM_TOC_FULL_TOC_DATA;
+
 /* SUB_Q_HEADER.AudioStatus constants */
 #define AUDIO_STATUS_NOT_SUPPORTED  0x00
 #define AUDIO_STATUS_IN_PROGRESS    0x11
@@ -263,8 +281,17 @@ BOOL ReadLastSession(HANDLE hDevice, CDROM_TOC_SESSION_DATA *session);
  */
 BOOL ReadTOC(HANDLE hDevice, CDROM_TOC *toc);
 
+/** Read the contents of the CD-ROM TOC into a CDROM_TOC_FULL_TOC_DATA
+ *  value.  The returned pointer should be freed using free().
+ *
+ * @param hDevice A handle to the drive to read the TOC data from.
+ * @return An allocated CDROM_TOC_FULL_TOC_DATA structure if the command
+ *         succeeded, or NULL if it failed.
+ */
+CDROM_TOC_FULL_TOC_DATA *ReadFullTOC(HANDLE hDevice);
+
 /** Read the contents of the CD-Text into a CDROM_TOC_CD_TEXT_DATA
- *  variable provided.  The returned pointer should be freed using free().
+ *  value.  The returned pointer should be freed using free().
  *
  * @param hDevice A handle to the drive to read the CD-Text data from.
  * @return An allocated CDROM_TOC_CD_TEXT_DATA structure if the command

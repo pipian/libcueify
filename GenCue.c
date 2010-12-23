@@ -55,7 +55,7 @@ static struct TrackIndex RemoveDiscPregap(struct TrackIndex index)
  *
  * @param szFile The cuesheet file to write.
  * @param cDriveLetter The letter of the drive to generate the cuesheet from.
- * @return 1 if successful.
+ * @return 0 if succeeded.
  */
 int GenCuesheet(char *szFile, char cDriveLetter)
 {
@@ -68,16 +68,18 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	char szTime[256];
 	HANDLE hDevice;
 	CDROM_TOC toc;
+	CDROM_TOC_FULL_TOC_DATA *fulltoc;
 	CDROM_TOC_SESSION_DATA session;
 	unsigned char cdtextBacking[4096];
 	CDROM_TOC_CD_TEXT_DATA *cdtext = (CDROM_TOC_CD_TEXT_DATA *)cdtextBacking;
 	SUB_Q_CHANNEL_DATA data;
-	int iTrack, iIndex;
+	int iTrack, iIndex, iDescriptor;
 	struct CDText *cdtextData;
 	struct TrackIndices indices;
 	BOOL bHasPregap = FALSE;
 	struct TrackIndex pregap;
 	struct TrackIndex offset;
+	UCHAR curSession = 0;
 	
 	hDevice = OpenVolume(cDriveLetter);
 	if (hDevice != INVALID_HANDLE_VALUE) {
@@ -129,6 +131,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	    
 	    /* Then get the raw TOC data. */
 	    ReadTOC(hDevice, &toc);
+	    fulltoc = ReadFullTOC(hDevice);
 	    /* And the CD-Text. */
 	    cdtext = ReadCDText(hDevice);
 	    /* And actually parse the CD-Text. */
@@ -197,63 +200,71 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	    /* And lastly the track stuff. */
 	    fprintf(log, "FILE \"disc.bin\" BINARY\n");
 	    for (iTrack = toc.FirstTrack; iTrack <= toc.LastTrack; iTrack++) {
+		/* Find the appropriate descriptor. */
+		for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != iTrack || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
+		if (curSession != fulltoc->Descriptors[iDescriptor].SessionNumber) {
+		    curSession = fulltoc->Descriptors[iDescriptor].SessionNumber;
+		    fprintf(log,
+			    "  REM SESSION %02d\n",
+			    curSession);
+		}
 		if (toc.TrackData[iTrack - 1].Control & AUDIO_DATA_TRACK) {
 		    fprintf(log,
-			    "  TRACK %02d MODE1/2352\n",
+			    "    TRACK %02d MODE1/2352\n",
 			    iTrack);
 		} else {
 		    fprintf(log,
-			    "  TRACK %02d AUDIO\n",
+			    "    TRACK %02d AUDIO\n",
 			    iTrack);
 		}
 		
 		if (cdtextData != NULL) {
 		    if (cdtextData->tracks[iTrack].arranger != NULL) {
-			fprintf(log, "    REM ARRANGER \"%s\"\n",
+			fprintf(log, "      REM ARRANGER \"%s\"\n",
 				cdtextData->tracks[iTrack].arranger);
 		    }
 		    if (cdtextData->tracks[iTrack].composer != NULL) {
-			fprintf(log, "    REM COMPOSER \"%s\"\n",
+			fprintf(log, "      REM COMPOSER \"%s\"\n",
 				cdtextData->tracks[iTrack].composer);
 		    }
 		    if (cdtextData->tracks[iTrack].discId != NULL) {
-			fprintf(log, "    REM DISK_ID \"%s\"\n",
+			fprintf(log, "      REM DISK_ID \"%s\"\n",
 				cdtextData->tracks[iTrack].discId);
 		    }
 		    if (cdtextData->tracks[iTrack].genre != NULL) {
-			fprintf(log, "    REM GENRE \"%s\"\n",
+			fprintf(log, "      REM GENRE \"%s\"\n",
 				cdtextData->tracks[iTrack].genre);
 		    }
 		    if (cdtextData->tracks[iTrack].messages != NULL) {
-			fprintf(log, "    REM MESSAGE \"%s\"\n",
+			fprintf(log, "      REM MESSAGE \"%s\"\n",
 				cdtextData->tracks[iTrack].messages);
 		    }
 		    if (cdtextData->tracks[iTrack].performer != NULL) {
-			fprintf(log, "    PERFORMER \"%s\"\n",
+			fprintf(log, "      PERFORMER \"%s\"\n",
 				cdtextData->tracks[iTrack].performer);
 		    }
 		    if (cdtextData->tracks[iTrack].songwriter != NULL) {
-			fprintf(log, "    SONGWRITER \"%s\"\n",
+			fprintf(log, "      SONGWRITER \"%s\"\n",
 				cdtextData->tracks[iTrack].songwriter);
 		    }
 		    if (cdtextData->tracks[iTrack].title != NULL) {
-			fprintf(log, "    TITLE \"%s\"\n",
+			fprintf(log, "      TITLE \"%s\"\n",
 				cdtextData->tracks[iTrack].title);
 		    }
 		    if (cdtextData->tracks[iTrack].tocInfo != NULL) {
-			fprintf(log, "    REM TOC_INFO %s\n",
+			fprintf(log, "      REM TOC_INFO %s\n",
 				cdtextData->tracks[iTrack].tocInfo);
 		    }
 		    if (cdtextData->tracks[iTrack].tocInfo2 != NULL) {
-			fprintf(log, "    REM TOC_INFO2 %s\n",
+			fprintf(log, "      REM TOC_INFO2 %s\n",
 				cdtextData->tracks[iTrack].tocInfo2);
 		    }
 		    if (cdtextData->tracks[iTrack].upc_ean != NULL) {
-			fprintf(log, "    REM ISRC %s\n",
+			fprintf(log, "      REM ISRC %s\n",
 				cdtextData->tracks[iTrack].upc_ean);
 		    }
 		    if (cdtextData->tracks[iTrack].sizeInfo != NULL) {
-			fprintf(log, "    REM SIZE_INFO %s\n",
+			fprintf(log, "      REM SIZE_INFO %s\n",
 				cdtextData->tracks[iTrack].sizeInfo);
 		    }
 		}
@@ -262,13 +273,13 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		    char szISRC[16] = "";
 		    memcpy(szISRC, data.TrackIsrc.TrackIsrc, 15);
 		    
-		    fprintf(log, "    ISRC %s\n", szISRC);
+		    fprintf(log, "      ISRC %s\n", szISRC);
 		}
 		
 		if ((toc.TrackData[iTrack - 1].Control & ~AUDIO_DATA_TRACK) != 0) {
 		    int iControl = toc.TrackData[iTrack - 1].Control;
 		    
-		    fprintf(log, "    FLAGS");
+		    fprintf(log, "      FLAGS");
 		    
 		    if ((iControl & AUDIO_WITH_PREEMPHASIS) > 0) {
 			fprintf(log, " PRE");
@@ -285,7 +296,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		if (bHasPregap) {
 		    pregap = RemoveDiscPregap(pregap);
 		    fprintf(log,
-			    "    INDEX 00 %02d:%02d:%02d\n",
+			    "      INDEX 00 %02d:%02d:%02d\n",
 			    pregap.M,
 			    pregap.S,
 			    pregap.F);
@@ -294,7 +305,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			   (toc.TrackData[iTrack - 1].Address[1] != 0 ||
 			    toc.TrackData[iTrack - 1].Address[2] > 2 ||
 			    toc.TrackData[iTrack - 1].Address[3] != 0)) {
-		    fprintf(log, "    INDEX 00 00:00:00\n");
+		    fprintf(log, "      INDEX 00 00:00:00\n");
 		}
 		
 		offset.M = toc.TrackData[iTrack - 1].Address[1];
@@ -303,7 +314,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		offset = RemoveDiscPregap(offset);
 		
 		fprintf(log,
-			"    INDEX 01 %02d:%02d:%02d\n",
+			"      INDEX 01 %02d:%02d:%02d\n",
 			offset.M,
 			offset.S,
 			offset.F);
@@ -321,7 +332,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			offset = RemoveDiscPregap(indices.indices[iIndex]);
 			
 			fprintf(log,
-				"    INDEX %02d %02d:%02d:%02d\n",
+				"      INDEX %02d %02d:%02d:%02d\n",
 				iIndex + 1,
 				offset.M,
 				offset.S,
@@ -344,6 +355,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	    
 	    free(cdtext);
 	    FreeCDText(cdtextData);
+	    free(fulltoc);
 	    CloseVolume(hDevice);
 	}
 	
