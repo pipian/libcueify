@@ -563,7 +563,7 @@ BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
 	    AddressToSectors(toc->TrackData[iTrack].Address);
 	
 	/* Get the index of the penultimate second of the track. */
-	iLBA = iLastLBA - 25;
+	iLBA = iLastLBA - 1;
 	if (iLBA < iLeftLBA) {
 	    iLBA = (iLeftLBA + iLastLBA) / 2;
 	}
@@ -632,7 +632,7 @@ BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
 	    iLeftLBA = iFirstLBA;
 	    
 	    /* And calculate the TRUE index count. */
-	    iLBA = iLastLBA - 25;
+	    iLBA = iLastLBA - 1;
 	    if (iLBA < iLeftLBA) {
 		iLBA = (iLeftLBA + iLastLBA) / 2;
 	    }
