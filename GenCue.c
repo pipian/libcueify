@@ -48,6 +48,8 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	int iTrack, iIndex;
 	struct CDText *cdtextData;
 	struct TrackIndices indices;
+	BOOL bHasPregap = FALSE;
+	struct TrackIndex pregap;
 	
 	hDevice = OpenVolume(cDriveLetter);
 	if (hDevice != INVALID_HANDLE_VALUE) {
@@ -248,6 +250,14 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		    fprintf(log, "\n");
 		}
 		
+		if (bHasPregap) {
+		    fprintf(log,
+			    "    INDEX 00 %02d:%02d:%02d\n",
+			    pregap.M,
+			    pregap.S,
+			    pregap.F);
+		    bHasPregap = FALSE;
+		}
 		fprintf(log,
 			"    INDEX 01 %02d:%02d:%02d\n",
 			toc.TrackData[iTrack - 1].Address[1],
@@ -257,6 +267,12 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		/* Detect any other indices. */
 		if (DetectTrackIndices(hDevice, &toc, iTrack, &indices)) {
 		    for (iIndex = 1; iIndex < indices.iIndices; iIndex++) {
+			if (iIndex + 1 == indices.iIndices &&
+			    indices.bHasPregap) {
+			    pregap = indices.indices[iIndex];
+			    bHasPregap = TRUE;
+			    continue;
+			}
 			fprintf(log,
 				"    INDEX %02d %02d:%02d:%02d\n",
 				iIndex + 1,

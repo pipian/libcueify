@@ -554,10 +554,11 @@ BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
 	/* First, see if there appears to be more than one index. */
 	SUB_Q_CHANNEL_DATA data;
 	int iMinute, iSecond, iFrame;
-	int iLBA, iLeftLBA, iRightLBA, iLastLBA;
+	int iLBA, iFirstLBA, iLeftLBA, iRightLBA, iLastLBA;
 	int iIndex;
 	
-	iLeftLBA = AddressToSectors(toc->TrackData[iTrack - 1].Address);
+	iFirstLBA = iLeftLBA =
+	    AddressToSectors(toc->TrackData[iTrack - 1].Address);
 	iLastLBA = iRightLBA =
 	    AddressToSectors(toc->TrackData[iTrack].Address);
 	
@@ -577,14 +578,97 @@ BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
 	if (data.CurrentPosition.TrackNumber == iTrack &&
 	    data.CurrentPosition.IndexNumber != 1) {
 	    indices->iIndices = data.CurrentPosition.IndexNumber;
+	    indices->bHasPregap = FALSE;
 	    indices->indices = calloc(indices->iIndices,
 				      sizeof(struct TrackIndex));
+	    if (indices->indices == NULL) {
+		return FALSE;
+	    }
 	    indices->indices[0].M = toc->TrackData[iTrack - 1].Address[1];
 	    indices->indices[0].S = toc->TrackData[iTrack - 1].Address[2];
 	    indices->indices[0].F = toc->TrackData[iTrack - 1].Address[3];
+	} else if (data.CurrentPosition.TrackNumber == iTrack + 1) {
+	    indices->iIndices = 2;
+	    indices->bHasPregap = TRUE;
+	    indices->indices = calloc(indices->iIndices,
+				      sizeof(struct TrackIndex));
+	    if (indices->indices == NULL) {
+		return FALSE;
+	    }
+	    indices->indices[0].M = toc->TrackData[iTrack - 1].Address[1];
+	    indices->indices[0].S = toc->TrackData[iTrack - 1].Address[2];
+	    indices->indices[0].F = toc->TrackData[iTrack - 1].Address[3];
+	    
+	    /* Detect the pre-gap. */
+	    while (iLeftLBA != iRightLBA) {
+		iLBA = (iLeftLBA + iRightLBA) / 2;
+		SectorsToAddress(iLBA, &iMinute, &iSecond, &iFrame);
+		
+		if (!ReadCurrentPosition(hDevice, iTrack,
+					 iMinute, iSecond, iFrame,
+					 &data)) {
+		    free(indices->indices);
+		    indices->indices = NULL;
+		    return FALSE;
+		}
+		
+		if (data.CurrentPosition.TrackNumber == iTrack) {
+		    /* Choose the right half. */
+		    iLeftLBA = iLBA + 1;
+		} else {
+		    /* Choose the left half. */
+		    iRightLBA = iLBA;
+		}
+	    }
+	    
+	    /* Found the start address. */
+	    SectorsToAddress(iLeftLBA, &iMinute, &iSecond, &iFrame);
+	    indices->indices[1].M = iMinute;
+	    indices->indices[1].S = iSecond;
+	    indices->indices[1].F = iFrame;
+	    
+	    /* Reset the right and left sides. */
+	    iLastLBA = iRightLBA = iLBA;
+	    iLeftLBA = iFirstLBA;
+	    
+	    /* And calculate the TRUE index count. */
+	    iLBA = iLastLBA - 75;
+	    if (iLBA < iLeftLBA) {
+		iLBA = (iLeftLBA + iLastLBA) / 2;
+	    }
+	    
+	    SectorsToAddress(iLBA, &iMinute, &iSecond, &iFrame);
+	    
+	    if (!ReadCurrentPosition(hDevice, iTrack, iMinute, iSecond, iFrame,
+				     &data)) {
+		return FALSE;
+	    }
+	    
+	    if (data.CurrentPosition.TrackNumber == iTrack &&
+		data.CurrentPosition.IndexNumber != 1) {
+		indices->iIndices = data.CurrentPosition.IndexNumber + 1;
+		indices->indices = realloc(indices->indices,
+					   indices->iIndices * sizeof(struct TrackIndex));
+		if (indices->indices == NULL) {
+		    return FALSE;
+		}
+		
+		/* TODO: Test me. */
+		/* Copy the pre-gap indices over. */
+		memcpy(&(indices->indices[indices->iIndices]),
+		       &(indices->indices[1]),
+		       sizeof(struct TrackIndex));
+	    } else {
+		/* That's it. */
+		return TRUE;
+	    }
 	} else {
 	    indices->iIndices = 1;
+	    indices->bHasPregap = FALSE;
 	    indices->indices = calloc(1, sizeof(struct TrackIndex));
+	    if (indices->indices == NULL) {
+		return FALSE;
+	    }
 	    indices->indices[0].M = toc->TrackData[iTrack - 1].Address[1];
 	    indices->indices[0].S = toc->TrackData[iTrack - 1].Address[2];
 	    indices->indices[0].F = toc->TrackData[iTrack - 1].Address[3];

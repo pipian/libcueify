@@ -241,6 +241,7 @@ struct TrackIndex {
 
 struct TrackIndices {
     int iIndices;
+    BOOL bHasPregap;
     struct TrackIndex *indices;
 };
 
