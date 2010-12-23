@@ -30,6 +30,33 @@
 #include "cdrom.h"
 #include "toc.h"
 
+/** Subtract the 2-second disc pregap from the specified TrackIndex struct.
+ *
+ * @param index The TrackIndex struct to subtract two seconds from.
+ * @return index, with two seconds subtracted from it.
+ */
+static struct TrackIndex RemoveDiscPregap(struct TrackIndex index)
+{
+    struct TrackIndex retval;
+    
+    retval.F = index.F;
+    retval.S = index.S - 2;
+    retval.M = index.M;
+    
+    if (retval.S >= 60) {
+	retval.S += 60;
+	retval.M--;
+    }
+    
+    return retval;
+}
+
+/** Generate a Cuesheet file from the contents of the drive cDriveLetter.
+ *
+ * @param szFile The cuesheet file to write.
+ * @param cDriveLetter The letter of the drive to generate the cuesheet from.
+ * @return 1 if successful.
+ */
 int GenCuesheet(char *szFile, char cDriveLetter)
 {
     /* Do some extra logging of disc data, since dBpoweramp falls down
@@ -50,6 +77,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	struct TrackIndices indices;
 	BOOL bHasPregap = FALSE;
 	struct TrackIndex pregap;
+	struct TrackIndex offset;
 	
 	hDevice = OpenVolume(cDriveLetter);
 	if (hDevice != INVALID_HANDLE_VALUE) {
@@ -88,11 +116,16 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		fprintf(log, "\n");
 	    }
 		    
+	    offset.M = session.TrackData[0].Address[1];
+	    offset.S = session.TrackData[0].Address[2];
+	    offset.F = session.TrackData[0].Address[3];
+	    offset = RemoveDiscPregap(offset);
+	    
 	    fprintf(log,
 		    "REM LASTSESSION INDEX 01 %02d:%02d:%02d\n",
-		    session.TrackData[0].Address[1],
-		    session.TrackData[0].Address[2],
-		    session.TrackData[0].Address[3]);
+		    offset.M,
+		    offset.S,
+		    offset.F);
 	    
 	    /* Then get the raw TOC data. */
 	    ReadTOC(hDevice, &toc);
@@ -162,17 +195,16 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	    }
 	    
 	    /* And lastly the track stuff. */
+	    fprintf(log, "FILE \"disc.bin\" BINARY\n");
 	    for (iTrack = toc.FirstTrack; iTrack <= toc.LastTrack; iTrack++) {
 		if (toc.TrackData[iTrack - 1].Control & AUDIO_DATA_TRACK) {
 		    fprintf(log,
-			    "FILE \"track%02d.bin\" BINARY\n"
 			    "  TRACK %02d MODE1/2352\n",
-			    iTrack, iTrack);
+			    iTrack);
 		} else {
 		    fprintf(log,
-			    "FILE \"track%02d.wav\" WAVE\n"
 			    "  TRACK %02d AUDIO\n",
-			    iTrack, iTrack);
+			    iTrack);
 		}
 		
 		if (cdtextData != NULL) {
@@ -251,6 +283,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		}
 		
 		if (bHasPregap) {
+		    pregap = RemoveDiscPregap(pregap);
 		    fprintf(log,
 			    "    INDEX 00 %02d:%02d:%02d\n",
 			    pregap.M,
@@ -261,14 +294,19 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			   (toc.TrackData[iTrack - 1].Address[1] != 0 ||
 			    toc.TrackData[iTrack - 1].Address[2] > 2 ||
 			    toc.TrackData[iTrack - 1].Address[3] != 0)) {
-		    fprintf(log, "    INDEX 00 00:02:00\n");
+		    fprintf(log, "    INDEX 00 00:00:00\n");
 		}
+		
+		offset.M = toc.TrackData[iTrack - 1].Address[1];
+		offset.S = toc.TrackData[iTrack - 1].Address[2];
+		offset.F = toc.TrackData[iTrack - 1].Address[3];
+		offset = RemoveDiscPregap(offset);
 		
 		fprintf(log,
 			"    INDEX 01 %02d:%02d:%02d\n",
-			toc.TrackData[iTrack - 1].Address[1],
-			toc.TrackData[iTrack - 1].Address[2],
-			toc.TrackData[iTrack - 1].Address[3]);
+			offset.M,
+			offset.S,
+			offset.F);
 		
 		/* Detect any other indices. */
 		if (DetectTrackIndices(hDevice, &toc, iTrack, &indices)) {
@@ -279,22 +317,30 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			    bHasPregap = TRUE;
 			    continue;
 			}
+			
+			offset = RemoveDiscPregap(indices.indices[iIndex]);
+			
 			fprintf(log,
 				"    INDEX %02d %02d:%02d:%02d\n",
 				iIndex + 1,
-				indices.indices[iIndex].M,
-				indices.indices[iIndex].S,
-				indices.indices[iIndex].F);
+				offset.M,
+				offset.S,
+				offset.F);
 		    }
 		    free(indices.indices);
 		}
 	    }
 	    
+	    offset.M = toc.TrackData[iTrack - 1].Address[1];
+	    offset.S = toc.TrackData[iTrack - 1].Address[2];
+	    offset.F = toc.TrackData[iTrack - 1].Address[3];
+	    offset = RemoveDiscPregap(offset);
+	    
 	    fprintf(log,
 		    "REM LEADOUT %02d:%02d:%02d\n",
-		    toc.TrackData[iTrack - 1].Address[1],
-		    toc.TrackData[iTrack - 1].Address[2],
-		    toc.TrackData[iTrack - 1].Address[3]);
+		    offset.M,
+		    offset.S,
+		    offset.F);
 	    
 	    free(cdtext);
 	    FreeCDText(cdtextData);
