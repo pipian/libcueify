@@ -233,7 +233,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		    fprintf(log, "    ISRC %s\n", szISRC);
 		}
 		
-		if (toc.TrackData[iTrack - 1].Control != 0) {
+		if ((toc.TrackData[iTrack - 1].Control & ~AUDIO_DATA_TRACK) != 0) {
 		    int iControl = toc.TrackData[iTrack - 1].Control;
 		    
 		    fprintf(log, "    FLAGS");
