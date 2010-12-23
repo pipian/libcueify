@@ -39,10 +39,12 @@
 
 #define IOCTL_CDROM_BASE                  FILE_DEVICE_CD_ROM
 
-#define IOCTL_CDROM_READ_TOC_EX \
-    CTL_CODE(IOCTL_CDROM_BASE, 0x0015, METHOD_BUFFERED, FILE_READ_ACCESS)
 #define IOCTL_CDROM_READ_Q_CHANNEL \
     CTL_CODE(IOCTL_CDROM_BASE, 0x000B, METHOD_BUFFERED, FILE_READ_ACCESS)
+#define IOCTL_CDROM_READ_TOC_EX \
+    CTL_CODE(IOCTL_CDROM_BASE, 0x0015, METHOD_BUFFERED, FILE_READ_ACCESS)
+#define IOCTL_CDROM_SEEK_AUDIO_MSF \
+    CTL_CODE(IOCTL_CDROM_BASE, 0x0001, METHOD_BUFFERED, FILE_READ_ACCESS)
 
 #define MAXIMUM_NUMBER_TRACKS             100
 
@@ -71,6 +73,12 @@ typedef struct _CDROM_READ_TOC_EX {
     UCHAR  Reserved2;
     UCHAR  Reserved3;
 } CDROM_READ_TOC_EX, *PCDROM_READ_TOC_EX;
+
+typedef struct _CDROM_SEEK_AUDIO_MSF {
+  UCHAR  M;
+  UCHAR  S;
+  UCHAR  F;
+} CDROM_SEEK_AUDIO_MSF, *PCDROM_SEEK_AUDIO_MSF;
 
 /* CDROM_SUB_Q_DATA_FORMAT.Format constants */
 #define IOCTL_CDROM_SUB_Q_CHANNEL         0x00
@@ -225,12 +233,16 @@ struct CDText {
 				 */
 };
 
-/** Convert an MSF address into the corresponding LBA address.
- *
- * @param address An MSF address.
- * @return The corresponding LBA address.
- */
-int AddressToSectors(UCHAR address[4]);
+struct TrackIndex {
+    UCHAR M;
+    UCHAR S;
+    UCHAR F;
+};
+
+struct TrackIndices {
+    int iIndices;
+    struct TrackIndex *indices;
+};
 
 /** Read the contents of the session data into a
  *  CDROM_TOC_SESSION_DATA variable provided.
@@ -276,6 +288,20 @@ BOOL ReadMCN(HANDLE hDevice, SUB_Q_CHANNEL_DATA *data);
  */
 BOOL ReadISRC(HANDLE hDevice, int iTrack, SUB_Q_CHANNEL_DATA *data);
 
+/** Read the current position into a SUB_Q_CHANNEL_DATA variable provided.
+ *
+ * @param hDevice A handle to the drive to read the current position from.
+ * @param iTrack The track to read the current position from.
+ * @param iMinute The absolute minute to seek to prior to getting position.
+ * @param iSecond The absolute second to seek to prior to getting position.
+ * @param iFrame The absolute frame to seek to prior to getting position.
+ * @param data A pointer to the SUB_Q_CHANNEL_DATA to populate.
+ * @return TRUE if the command succeeded.
+ */
+BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
+			 int iMinute, int iSecond, int iFrame,
+			 SUB_Q_CHANNEL_DATA *data);
+
 /** Parse a CDROM_TOC_CD_TEXT_DATA struct into a meaningful CDText struct.
  *
  * @param cdtext The CDROM_TOC_CD_TEXT_DATA struct to parse.
@@ -291,5 +317,16 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks);
  * @param cdtextData The CDText struct to free.
  */
 void FreeCDText(struct CDText *cdtextData);
+
+/** Detect indices on the given track.
+ *
+ * @param hDevice A handle to the drive to detect indices on.
+ * @param toc The TOC of the current CD.
+ * @param iTrack The track to detect indices on.
+ * @param indices The TrackIndices struct to populate.
+ * @return TRUE if the detection succeeded.
+ */
+BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
+			struct TrackIndices *indices);
 
 #endif

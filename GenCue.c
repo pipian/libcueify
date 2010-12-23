@@ -45,8 +45,9 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	unsigned char cdtextBacking[4096];
 	CDROM_TOC_CD_TEXT_DATA *cdtext = (CDROM_TOC_CD_TEXT_DATA *)cdtextBacking;
 	SUB_Q_CHANNEL_DATA data;
-	int iTrack;
+	int iTrack, iIndex;
 	struct CDText *cdtextData;
+	struct TrackIndices indices;
 	
 	hDevice = OpenVolume(cDriveLetter);
 	if (hDevice != INVALID_HANDLE_VALUE) {
@@ -235,13 +236,13 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		    
 		    fprintf(log, "    FLAGS");
 		    
-		    if (iControl & AUDIO_WITH_PREEMPHASIS) {
+		    if ((iControl & AUDIO_WITH_PREEMPHASIS) > 0) {
 			fprintf(log, " PRE");
 		    }
-		    if (iControl & DIGITAL_COPY_PERMITTED) {
+		    if ((iControl & DIGITAL_COPY_PERMITTED) > 0) {
 			fprintf(log, " DCP");
 		    }
-		    if (iControl & TWO_FOUR_CHANNEL_AUDIO) {
+		    if ((iControl & TWO_FOUR_CHANNEL_AUDIO) > 0) {
 			fprintf(log, " 4CH");
 		    }
 		    fprintf(log, "\n");
@@ -252,6 +253,19 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			toc.TrackData[iTrack - 1].Address[1],
 			toc.TrackData[iTrack - 1].Address[2],
 			toc.TrackData[iTrack - 1].Address[3]);
+		
+		/* Detect any other indices. */
+		if (DetectTrackIndices(hDevice, &toc, iTrack, &indices)) {
+		    for (iIndex = 1; iIndex < indices.iIndices; iIndex++) {
+			fprintf(log,
+				"    INDEX %02d %02d:%02d:%02d\n",
+				iIndex + 1,
+				indices.indices[iIndex].M,
+				indices.indices[iIndex].S,
+				indices.indices[iIndex].F);
+		    }
+		    free(indices.indices);
+		}
 	    }
 	    
 	    fprintf(log,

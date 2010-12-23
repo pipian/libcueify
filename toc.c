@@ -26,9 +26,28 @@
 #include <windows.h>
 #include "toc.h"
 
-int AddressToSectors(UCHAR address[4])
+/** Convert an MSF address into the corresponding LBA address.
+ *
+ * @param address An MSF address.
+ * @return The corresponding LBA address.
+ */
+static int AddressToSectors(UCHAR address[4])
 {
     return (((address[1] * 60) + address[2]) * 75) + address[3];
+}
+
+/** Convert an LBA address into the corresponding MSF address.
+ *
+ * @param sectors An LBA address.
+ * @param m A pointer to store the minute value of the MSF address.
+ * @param s A pointer to store the second value of the MSF address.
+ * @param f A pointer to store the frame value of the MSF address.
+ */
+static void SectorsToAddress(int sectors, int *m, int *s, int *f)
+{
+    *m = sectors / (60 * 75);
+    *s = sectors / 75 % 60;
+    *f = sectors % 75;
 }
 
 BOOL ReadLastSession(HANDLE hDevice, CDROM_TOC_SESSION_DATA *session)
@@ -129,6 +148,37 @@ BOOL ReadISRC(HANDLE hDevice, int iTrack, SUB_Q_CHANNEL_DATA *data)
 			   &format, sizeof(format),
 			   data, sizeof(*data),
 			   &dwReturned, NULL);
+}
+
+BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
+			 int iMinute, int iSecond, int iFrame,
+			 SUB_Q_CHANNEL_DATA *data)
+{
+    DWORD dwReturned;
+    CDROM_SEEK_AUDIO_MSF seek;
+    CDROM_SUB_Q_DATA_FORMAT format;
+    
+    /* First, seek to the desired absolute position. */
+    seek.M = iMinute;
+    seek.S = iSecond;
+    seek.F = iFrame;
+    if (DeviceIoControl(hDevice,
+			IOCTL_CDROM_SEEK_AUDIO_MSF,
+			&seek, sizeof(seek),
+			NULL, 0,
+			&dwReturned, NULL)) {
+	/* Next, get the "current" position. */
+	format.Track = iTrack;
+	format.Format = IOCTL_CDROM_CURRENT_POSITION;
+	
+	return DeviceIoControl(hDevice,
+			       IOCTL_CDROM_READ_Q_CHANNEL,
+			       &format, sizeof(format),
+			       data, sizeof(*data),
+			       &dwReturned, NULL);
+    }
+    
+    return FALSE;
 }
 
 /** Allocate a character string containing the UTF-8 conversion of the given
@@ -494,5 +544,88 @@ void FreeCDText(struct CDText *cdtextData)
 	    free(cdtextData->tracks);
 	}
 	free(cdtextData);
+    }
+}
+
+BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
+			struct TrackIndices *indices)
+{
+    if (iTrack <= toc->LastTrack) {
+	/* First, see if there appears to be more than one index. */
+	SUB_Q_CHANNEL_DATA data;
+	int iMinute, iSecond, iFrame;
+	int iLBA, iLeftLBA, iRightLBA, iLastLBA;
+	int iIndex;
+	
+	iLeftLBA = AddressToSectors(toc->TrackData[iTrack - 1].Address);
+	iLastLBA = iRightLBA =
+	    AddressToSectors(toc->TrackData[iTrack].Address);
+	
+	/* Get the index of the penultimate second of the track. */
+	iLBA = iLastLBA - 75;
+	if (iLBA < iLeftLBA) {
+	    iLBA = (iLeftLBA + iLastLBA) / 2;
+	}
+	
+	SectorsToAddress(iLBA, &iMinute, &iSecond, &iFrame);
+	
+	if (!ReadCurrentPosition(hDevice, iTrack, iMinute, iSecond, iFrame,
+				 &data)) {
+	    return FALSE;
+	}
+	
+	if (data.CurrentPosition.TrackNumber == iTrack &&
+	    data.CurrentPosition.IndexNumber != 1) {
+	    indices->iIndices = data.CurrentPosition.IndexNumber;
+	    indices->indices = calloc(indices->iIndices,
+				      sizeof(struct TrackIndex));
+	    indices->indices[0].M = toc->TrackData[iTrack - 1].Address[1];
+	    indices->indices[0].S = toc->TrackData[iTrack - 1].Address[2];
+	    indices->indices[0].F = toc->TrackData[iTrack - 1].Address[3];
+	} else {
+	    indices->iIndices = 1;
+	    indices->indices = calloc(1, sizeof(struct TrackIndex));
+	    indices->indices[0].M = toc->TrackData[iTrack - 1].Address[1];
+	    indices->indices[0].S = toc->TrackData[iTrack - 1].Address[2];
+	    indices->indices[0].F = toc->TrackData[iTrack - 1].Address[3];
+	    return TRUE;
+	}
+	
+	for (iIndex = 1; iIndex < indices->iIndices; iIndex++) {
+	    /* Detect the given index by binary search. */
+	    while (iLeftLBA != iRightLBA) {
+		iLBA = (iLeftLBA + iRightLBA) / 2;
+		SectorsToAddress(iLBA, &iMinute, &iSecond, &iFrame);
+		
+		if (!ReadCurrentPosition(hDevice, iTrack,
+					 iMinute, iSecond, iFrame,
+					 &data)) {
+		    free(indices->indices);
+		    indices->indices = NULL;
+		    return FALSE;
+		}
+		
+		if (data.CurrentPosition.IndexNumber >= iIndex + 1) {
+		    /* Choose the left half. */
+		    iRightLBA = iLBA;
+		} else {
+		    /* Choose the right half. */
+		    iLeftLBA = iLBA + 1;
+		}
+	    }
+	    
+	    /* Found the start address. */
+	    SectorsToAddress(iLeftLBA, &iMinute, &iSecond, &iFrame);
+	    indices->indices[iIndex].M = iMinute;
+	    indices->indices[iIndex].S = iSecond;
+	    indices->indices[iIndex].F = iFrame;
+	    
+	    /* Reset the right side. */
+	    iRightLBA = iLastLBA;
+	}
+	
+	return TRUE;
+    } else {
+	return FALSE;
     }
 }
