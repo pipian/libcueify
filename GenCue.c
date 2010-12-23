@@ -257,7 +257,13 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			    pregap.S,
 			    pregap.F);
 		    bHasPregap = FALSE;
+		} else if (iTrack == 1 &&
+			   (toc.TrackData[iTrack - 1].Address[1] != 0 ||
+			    toc.TrackData[iTrack - 1].Address[2] > 2 ||
+			    toc.TrackData[iTrack - 1].Address[3] != 0)) {
+		    fprintf(log, "    INDEX 00 00:02:00\n");
 		}
+		
 		fprintf(log,
 			"    INDEX 01 %02d:%02d:%02d\n",
 			toc.TrackData[iTrack - 1].Address[1],
