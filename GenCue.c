@@ -203,6 +203,22 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		/* Find the appropriate descriptor. */
 		for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != iTrack || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
 		if (curSession != fulltoc->Descriptors[iDescriptor].SessionNumber) {
+		    if (curSession != 0) {
+			/* Print the leadout of the last session. */
+			int iLeadoutDescriptor;
+			
+			for (iLeadoutDescriptor = 0; iLeadoutDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iLeadoutDescriptor].Point != 0xA2 || fulltoc->Descriptors[iLeadoutDescriptor].Adr != 1 || fulltoc->Descriptors[iLeadoutDescriptor].SessionNumber != curSession); iLeadoutDescriptor++);
+			offset.M = fulltoc->Descriptors[iLeadoutDescriptor].Msf[0];
+			offset.S = fulltoc->Descriptors[iLeadoutDescriptor].Msf[1];
+			offset.F = fulltoc->Descriptors[iLeadoutDescriptor].Msf[2];
+			offset = RemoveDiscPregap(offset);
+			
+			fprintf(log,
+				"  REM LEAD-OUT %02d:%02d:%02d\n",
+				offset.M,
+				offset.S,
+				offset.F);
+		    }
 		    curSession = fulltoc->Descriptors[iDescriptor].SessionNumber;
 		    fprintf(log,
 			    "  REM SESSION %02d\n",
@@ -348,7 +364,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	    offset = RemoveDiscPregap(offset);
 	    
 	    fprintf(log,
-		    "REM LEADOUT %02d:%02d:%02d\n",
+		    "  REM LEAD-OUT %02d:%02d:%02d\n",
 		    offset.M,
 		    offset.S,
 		    offset.F);
