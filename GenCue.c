@@ -195,6 +195,21 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		    fprintf(log, "REM SIZE_INFO %s\n",
 			    cdtextData->tracks[0].sizeInfo);
 		}
+		for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != 0xA0 || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
+		switch (fulltoc->Descriptors[iDescriptor].Msf[1]) {
+		case 0x00:
+		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD\n");
+		    break;
+		case 0x10:
+		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-I\n");
+		    break;
+		case 0x20:
+		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-XA\n");
+		    break;
+		default:
+		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
+		    break;
+		}
 	    }
 	    
 	    /* And lastly the track stuff. */
