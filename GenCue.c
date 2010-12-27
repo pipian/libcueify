@@ -79,7 +79,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	BOOL bHasPregap = FALSE;
 	struct TrackIndex pregap;
 	struct TrackIndex offset;
-	UCHAR curSession = 0;
+	UCHAR curSession = 0, trackMode = 1;
 	
 	hDevice = OpenVolume(cDriveLetter);
 	if (hDevice != INVALID_HANDLE_VALUE) {
@@ -199,12 +199,15 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		switch (fulltoc->Descriptors[iDescriptor].Msf[1]) {
 		case 0x00:
 		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD\n");
+		    trackMode = 1;
 		    break;
 		case 0x10:
 		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-I\n");
+		    trackMode = 3;
 		    break;
 		case 0x20:
 		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-XA\n");
+		    trackMode = 2;
 		    break;
 		default:
 		    fprintf(log, "REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
@@ -240,9 +243,28 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 			    curSession);
 		}
 		if (toc.TrackData[iTrack - 1].Control & AUDIO_DATA_TRACK) {
-		    fprintf(log,
-			    "    TRACK %02d MODE1/2352\n",
-			    iTrack);
+		    switch (trackMode) {
+		    case 1:
+			fprintf(log,
+				"    TRACK %02d MODE1/2352\n",
+				iTrack);
+			break;
+		    case 2:
+			fprintf(log,
+				"    TRACK %02d MODE2/2352\n",
+				iTrack);
+			break;
+		    case 3:
+			fprintf(log,
+				"    TRACK %02d CDI/2352\n",
+				iTrack);
+			break;
+		    default:
+			fprintf(log,
+				"    TRACK %02d MODE1/2352\n",
+				iTrack);
+			break;
+		    }
 		} else {
 		    fprintf(log,
 			    "    TRACK %02d AUDIO\n",
