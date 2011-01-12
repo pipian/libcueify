@@ -1,6 +1,6 @@
 /* GenCue.c - A utility to generate CD cuesheets.
  *
- * Copyright (c) 2010 Ian Jacobi
+ * Copyright (c) 2010,2011 Ian Jacobi
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -51,19 +51,66 @@ static struct TrackIndex RemoveDiscPregap(struct TrackIndex index)
     return retval;
 }
 
+/** Perform a partial sum of the CDDB DiscID.
+ *
+ * @param n The number of seconds in a track.
+ * @return The partial sum of the CDDB DiscID so far.
+ */
+int cddb_sum(int n)
+{
+    int ret;
+
+    /* For backward compatibility this algorithm must not change */
+
+    ret = 0;
+    while (n > 0) {
+	ret = ret + (n % 10);
+	n = n / 10;
+    }
+    return (ret);
+}
+
+/** Generate the CDDB DiscID for a given CDROM_TOC.
+ *
+ * @param toc A pointer to the CDROM_TOC to generate a DiscID for.
+ * @return The CDDB DiscID for this disc.
+ */
+unsigned long cddb_discid(CDROM_TOC *toc)
+{
+    int i,
+	t = 0,
+	n = 0;
+    
+    /* For backward compatibility this algorithm must not change */
+
+    i = 0;
+    while (i < toc->LastTrack) {
+	n = n + cddb_sum((toc->TrackData[i].Msf[1] * 60) + toc->TrackData[i].Msf[2]);
+	i++;
+    }
+    t = ((toc->TrackData[toc->LastTrack].Msf[1] * 60) + toc->TrackData[toc->LastTrack].Msf[2]) - ((toc->TrackData[0].Msf[1] * 60) + toc->TrackData[0].Msf[2]);
+    return ((n % 0xff) << 24 | t << 8 | toc->LastTrack);
+}
+
 /** Generate a Cuesheet file from the contents of the drive cDriveLetter.
  *
  * @param szFile The cuesheet file to write.
  * @param cDriveLetter The letter of the drive to generate the cuesheet from.
+ * @param bAutonameCuesheet If TRUE, szFile will be treated as a directory to
+ *                          write the cuesheet in, and the cuesheet will be
+ *                          given a name based on the CDDB DiscID.
  * @return 0 if succeeded.
  */
-int GenCuesheet(char *szFile, char cDriveLetter)
+int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 {
     /* Do some extra logging of disc data, since dBpoweramp falls down
      * on the job. */
-    FILE *log = fopen(szFile, "wb");
+    FILE *log;
+    if (!bAutonameCuesheet) {
+	log = fopen(szFile, "wb");
+    }
     
-    if (log != NULL) {
+    if (bAutonameCuesheet || log != NULL) {
 	time_t t = time(NULL);
 	char szTime[256];
 	HANDLE hDevice;
@@ -83,6 +130,20 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 	
 	hDevice = OpenVolume(cDriveLetter);
 	if (hDevice != INVALID_HANDLE_VALUE) {
+	    /* Read the TOC now, in case we are autonaming the cuesheet. */
+	    ReadTOC(hDevice, &toc);
+	    if (bAutonameCuesheet) {
+		/* Generate the CDDB DiscID. */
+		int iDiscID = cddb_discid(&toc);
+		char szGenPath[256] = "";
+		
+		snprintf(szGenPath, 255, "%s\%08x.cue", szFile, iDiscID);
+		log = fopen(szGenPath, "wb");
+		if (log == NULL) {
+		    return 1;
+		}
+	    }
+	    
 	    strftime(szTime, 256, "%Y-%m-%dT%H:%M:%S", gmtime(&t));
 	    /* First read the last-session data. */
 	    ReadLastSession(hDevice, &session);
@@ -129,7 +190,7 @@ int GenCuesheet(char *szFile, char cDriveLetter)
 		    offset.S,
 		    offset.F);
 	    
-	    /* Then get the raw TOC data. */
+	    /* Then get the full TOC data. */
 	    ReadTOC(hDevice, &toc);
 	    fulltoc = ReadFullTOC(hDevice);
 	    /* And the CD-Text. */
@@ -425,17 +486,23 @@ int main(int argc, char *argv[])
 {
     char *szDriveLetter;
     char *szCuesheet;
+    BOOL bAutonameCuesheet;
     
     /* Just got two command-line arguments we expect: drive letter and log. */
-    if (argc != 3) {
-	printf("Usage: GenCue DRIVELETTER CUESHEET\n");
+    if ((argc != 3 && argc != 4) || (argc == 4 && strcmp(argv[2], "--cuesheet-directory") != 0)) {
+	printf("Usage: GenCue DRIVELETTER CUESHEET\n      GenCue DRIVELETTER --cuesheet-directory DIRECTORY\n");
 	return 0;
     }
     
     szDriveLetter = argv[1];
     szCuesheet = argv[2];
+    bAutonameCuesheet = FALSE;
+    if (argc == 4) {
+	szCuesheet = argv[3];
+	bAutonameCuesheet = TRUE;
+    }
     
-    if (GenCuesheet(szCuesheet, szDriveLetter[0])) {
+    if (GenCuesheet(szCuesheet, szDriveLetter[0], bAutonameCuesheet)) {
 	printf("There was an issue writing the cuesheet!\n");
     }
     

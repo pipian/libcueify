@@ -2,7 +2,7 @@
  *              MFDigital 7602/7604 Ripstation driver for dBpoweramp
  *              BatchRipper.
  *
- * Copyright (c) 2010 Ian Jacobi
+ * Copyright (c) 2010,2011 Ian Jacobi
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -50,6 +50,8 @@ typedef struct LoadArguments {
     DWORD dwDrivesOnLeft;
     /* Whether or not to shake the arm on loading a disc from the stack. */
     BOOL fShake;
+    /* The directory to write cuesheet files to. */
+    TCHAR *szCuesheetDirectory;
 } CmdArguments;
 
 /** Parse command-line arguments.
