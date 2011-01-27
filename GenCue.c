@@ -85,10 +85,10 @@ unsigned long cddb_discid(CDROM_TOC *toc)
 
     i = 0;
     while (i < toc->LastTrack) {
-	n = n + cddb_sum((toc->TrackData[i].Msf[1] * 60) + toc->TrackData[i].Msf[2]);
+	n = n + cddb_sum((toc->TrackData[i].Address[1] * 60) + toc->TrackData[i].Address[2]);
 	i++;
     }
-    t = ((toc->TrackData[toc->LastTrack].Msf[1] * 60) + toc->TrackData[toc->LastTrack].Msf[2]) - ((toc->TrackData[0].Msf[1] * 60) + toc->TrackData[0].Msf[2]);
+    t = ((toc->TrackData[toc->LastTrack].Address[1] * 60) + toc->TrackData[toc->LastTrack].Address[2]) - ((toc->TrackData[0].Address[1] * 60) + toc->TrackData[0].Address[2]);
     return ((n % 0xff) << 24 | t << 8 | toc->LastTrack);
 }
 
