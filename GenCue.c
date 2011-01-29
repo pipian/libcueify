@@ -137,6 +137,11 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		int iDiscID = cddb_discid(&toc);
 		char szGenPath[256] = "";
 		
+		/* A DiscID should never be 0 (0 tracks? Really?) */
+		if (iDiscID == 0) {
+		    return 1;
+		}
+		
 		snprintf(szGenPath, 255, "%s\%08x.cue", szFile, iDiscID);
 		log = fopen(szGenPath, "wb");
 		if (log == NULL) {
