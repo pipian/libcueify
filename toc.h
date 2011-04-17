@@ -116,6 +116,7 @@ typedef struct _CDROM_TOC_SESSION_DATA {
 #define CDROM_CD_TEXT_PACK_GENRE      0x87
 #define CDROM_CD_TEXT_PACK_TOC_INFO   0x88
 #define CDROM_CD_TEXT_PACK_TOC_INFO2  0x89
+#define CDROM_CD_TEXT_PACK_CLOSED     0x8d
 #define CDROM_CD_TEXT_PACK_UPC_EAN    0x8e
 #define CDROM_CD_TEXT_PACK_SIZE_INFO  0x8f
 
@@ -216,39 +217,172 @@ typedef union _SUB_Q_CHANNEL_DATA {
 #define AUDIO_DATA_TRACK                  0x4
 #define TWO_FOUR_CHANNEL_AUDIO            0x8
 
-struct CDTextTrack {
-    char *title;
-    int titleSize;
-    char *performer;
-    int performerSize;
-    char *songwriter;
-    int songwriterSize;
-    char *composer;
-    int composerSize;
-    char *arranger;
-    int arrangerSize;
-    char *messages;
-    int messagesSize;
-    char *discId;
-    int discIdSize;
-    char *genre;
-    int genreSize;
-    char *tocInfo;
-    int tocInfoSize;
-    char *tocInfo2;
-    int tocInfo2Size;
-    char *upc_ean;
-    int upc_eanSize;
-    char *sizeInfo;
-    int sizeInfoSize;
+struct CDTextTOC {
+    unsigned char firstTrack; /** The first track in this CD-Text TOC. */
+    unsigned char lastTrack;  /** The last track in this CD-Text TOC. */
+    /**
+     * Pointers to all track offsets in this CD-Text TOC. Index 0
+     * contains the leadout.
+     */
+    struct TrackIndex trackPointers[MAXIMUM_NUMBER_TRACKS];
+};
+
+/** Data for a single TOC interval in CD-Text. */
+struct CDTextTOCInterval {
+    unsigned char priorityNumber; /** Priority number of this interval. */
+    unsigned char numIntervals;   /** Number of intervals for a track. */
+    struct TrackIndex start;      /** Start index of this interval. */
+    struct TrackIndex end;        /** End index of this interval. */
+};
+
+struct CDTextTOC2 {
+    int iIntervals;        /** The number of track interval structs. */
+    /** The track interval structs. */
+    struct CDTextTOCInterval *intervals;
+};
+
+#define CD_TEXT_CHARSET_ISO8859_1 0x00
+#define CD_TEXT_CHARSET_ASCII     0x01
+#define CD_TEXT_CHARSET_MSJIS     0x80
+#define CD_TEXT_CHARSET_KOREAN    0x81
+#define CD_TEXT_CHARSET_CHINESE   0x82
+
+enum {
+    CD_TEXT_LANG_UNKNOWN  = 0x00,
+    CD_TEXT_LANG_ALBANIAN,
+    CD_TEXT_LANG_BRETON,
+    CD_TEXT_LANG_CATALAN,
+    CD_TEXT_LANG_CROATIAN,
+    CD_TEXT_LANG_WELSH,
+    CD_TEXT_LANG_CZECH,
+    CD_TEXT_LANG_DANISH,
+    CD_TEXT_LANG_GERMAN,
+    CD_TEXT_LANG_ENGLISH,
+    CD_TEXT_LANG_SPANISH,
+    CD_TEXT_LANG_ESPERANTO,
+    CD_TEXT_LANG_ESTONIAN,
+    CD_TEXT_LANG_BASQUE,
+    CD_TEXT_LANG_FAROESE,
+    CD_TEXT_LANG_FRENCH,
+    CD_TEXT_LANG_FRISIAN,
+    CD_TEXT_LANG_IRISH,
+    CD_TEXT_LANG_GAELIC,
+    CD_TEXT_LANG_GALICIAN,
+    CD_TEXT_LANG_ICELANDIC,
+    CD_TEXT_LANG_ITALIAN,
+    CD_TEXT_LANG_SAMI,
+    CD_TEXT_LANG_LATIN,
+    CD_TEXT_LANG_LATVIAN,
+    CD_TEXT_LANG_LUXEMBOURGISH,
+    CD_TEXT_LANG_LITHUANIAN,
+    CD_TEXT_LANG_HUNGARIAN,
+    CD_TEXT_LANG_MALTESE,
+    CD_TEXT_LANG_DUTCH,
+    CD_TEXT_LANG_NORWEGIAN,
+    CD_TEXT_LANG_OCCITAN,
+    CD_TEXT_LANG_POLISH,
+    CD_TEXT_LANG_PORTUGUESE,
+    CD_TEXT_LANG_ROMANIAN,
+    CD_TEXT_LANG_ROMANSH,
+    CD_TEXT_LANG_SERBIAN,
+    CD_TEXT_LANG_SLOVAK,
+    CD_TEXT_LANG_SLOVENIAN,
+    CD_TEXT_LANG_FINNISH,
+    CD_TEXT_LANG_SWEDISH,
+    CD_TEXT_LANG_TURKISH,
+    CD_TEXT_LANG_FLEMISH,
+    CD_TEXT_LANG_WALLOON,
+    CD_TEXT_LANG_ZULU = 0x45,
+    CD_TEXT_LANG_VIETNAMESE,
+    CD_TEXT_LANG_UZBEK,
+    CD_TEXT_LANG_URDU,
+    CD_TEXT_LANG_UKRAINIAN,
+    CD_TEXT_LANG_THAI,
+    CD_TEXT_LANG_TELUGU,
+    CD_TEXT_LANG_TATAR,
+    CD_TEXT_LANG_TAMIL,
+    CD_TEXT_LANG_TAJIK,
+    CD_TEXT_LANG_SWAHILI,
+    CD_TEXT_LANG_SRANAN_TONGO,
+    CD_TEXT_LANG_SOMALI,
+    CD_TEXT_LANG_SINHALA,
+    CD_TEXT_LANG_SHONA,
+    CD_TEXT_LANG_SERBOCROAT,
+    CD_TEXT_LANG_RUTHENIAN,
+    CD_TEXT_LANG_RUSSIAN,
+    CD_TEXT_LANG_QUECHUA,
+    CD_TEXT_LANG_PUSHTU,
+    CD_TEXT_LANG_PUNJABI,
+    CD_TEXT_LANG_PERSIAN,
+    CD_TEXT_LANG_PAPIAMENTO,
+    CD_TEXT_LANG_ORIYA,
+    CD_TEXT_LANG_NEPALI,
+    CD_TEXT_LANG_NDEBELE,
+    CD_TEXT_LANG_MARATHI,
+    CD_TEXT_LANG_MOLDAVIAN,
+    CD_TEXT_LANG_MALAYSIAN,
+    CD_TEXT_LANG_MALAGASY,
+    CD_TEXT_LANG_MACEDONIAN,
+    CD_TEXT_LANG_LAO,
+    CD_TEXT_LANG_KOREAN,
+    CD_TEXT_LANG_KHMER,
+    CD_TEXT_LANG_KAZAKH,
+    CD_TEXT_LANG_KANNADA,
+    CD_TEXT_LANG_JAPANESE,
+    CD_TEXT_LANG_INDONESIAN,
+    CD_TEXT_LANG_HINDI,
+    CD_TEXT_LANG_HEBREW,
+    CD_TEXT_LANG_HAUSA,
+    CD_TEXT_LANG_GUARANI,
+    CD_TEXT_LANG_GUJARATI,
+    CD_TEXT_LANG_GREEK,
+    CD_TEXT_LANG_GEORGIAN,
+    CD_TEXT_LANG_FULAH,
+    CD_TEXT_LANG_DARI,
+    CD_TEXT_LANG_CHUVASH,
+    CD_TEXT_LANG_CHINESE,
+    CD_TEXT_LANG_BURMESE,
+    CD_TEXT_LANG_BULGARIAN,
+    CD_TEXT_LANG_BENGALI,
+    CD_TEXT_LANG_BELARUSIAN,
+    CD_TEXT_LANG_BAMBARA,
+    CD_TEXT_LANG_AZERBAIJANI,
+    CD_TEXT_LANG_ASSAMESE,
+    CD_TEXT_LANG_ARMENIAN,
+    CD_TEXT_LANG_ARABIC,
+    CD_TEXT_LANG_AMHARIC
+};
+
+/**
+ * Data for a single CD-Text language block. For arrays storing both
+ * disc and track information, index 0 contains disc information, and
+ * subsequent indices contain track information.
+ */
+struct CDTextBlock {
+    unsigned char charset;  /** The character set used to encode this block. */
+    unsigned char language; /** The language of the text in this block. */
+    int iTracks;            /** The number of tracks in this block. */
+    BOOL bMode2;            /** Is there CD-Text in MODE 2? */
+    BOOL bProgramCopyright; /** Is there copyrighted CD-Text in MODE 2? */
+    BOOL bMessageCopyright; /** Are the MESSAGEs copyrighted? */
+    BOOL bNameCopyright;    /** Are names (PERFORMER, etc.) copyrighted? */
+    BOOL bTitleCopyright;   /** Are titles copyrighted? */
+    char **titles;          /** Disc and track titles. */
+    char **performers;      /** Disc and track performer names. */
+    char **songwriters;     /** Disc and track songwriter names. */
+    char **composers;       /** Disc and track composer names. */
+    char **arrangers;       /** Disc and track arranger names. */
+    char **messages;        /** Disc and track messages. */
+    char **upc_ean_isrcs;   /** Disc UPC/EAN and track ISRCs. */
+    char *disc_id;          /** Disc ID. */
+    int genreCode;          /** CD-Text genre code. */
+    char *genreName;        /** CD-Text supplementary genre name. */
 };
 
 struct CDText {
-    int iTracks;                /** The number of tracks in this CD-Text. */
-    struct CDTextTrack *tracks; /** The track data of this CD-Text.
-				 *  There should be iTracks + 1 CDTextTracks.
-				 *  Index 0 contains disc-level CD-Text data.
-				 */
+    struct CDTextBlock blocks[8]; /** The blocks in the CD-Text. */
+    struct CDTextTOC tocInfo;     /** The TOC info in the CD-Text. */
+    struct CDTextTOC2 tocInfo2;   /** The 2nd TOC info in the CD-Text. */
 };
 
 struct TrackIndex {
@@ -333,12 +467,11 @@ BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
 /** Parse a CDROM_TOC_CD_TEXT_DATA struct into a meaningful CDText struct.
  *
  * @param cdtext The CDROM_TOC_CD_TEXT_DATA struct to parse.
- * @param iTracks The number of tracks on the CD-ROM.
  * @return An allocated CDText structure containing the parsed contents of
  *         cdtext if successful (this should be freed with FreeCDText()),
  *         or NULL if not.
  */
-struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks);
+struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext);
 
 /** Free an allocated CDText struct.
  *

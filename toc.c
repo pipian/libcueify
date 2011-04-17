@@ -24,6 +24,7 @@
  */
 
 #include <windows.h>
+#include "charsets.h"
 #include "toc.h"
 
 /** Convert an MSF address into the corresponding LBA address.
@@ -224,7 +225,8 @@ BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
  * @return An allocated character string containing the UTF-8 conversion of
  *         wchar, or NULL if an error occurred.
  */
-static unsigned char *wchar_to_utf8(wchar_t *wchar, size_t memsize)
+static unsigned char *wchar_to_utf8(wchar_t *wchar, size_t memsize,
+				    size_t *buflen)
 {
     int i, hasSurrogate = 0;
     unsigned long surrogate;
@@ -298,236 +300,270 @@ static unsigned char *wchar_to_utf8(wchar_t *wchar, size_t memsize)
     }
     
     mem = realloc(mem, ptr - mem + 1);
+    *buflen = ptr - mem;
     
     return mem;
 }
 
-struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext, int iTracks)
+struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 {
-    int iDescriptor;
-    char *szLeftOver = NULL;
-    wchar_t *wszLeftOver = NULL;
-    int iLeftOver;
-    char *szPrev = NULL;
-    int iPrev = 0;
+    int iDescriptor, i;
+    unsigned char *packData[8 * 16];
+    unsigned char *pack;
+    size_t packSizes[8 * 16];
     struct CDText *cdtextData = NULL;
+    struct CDROM_TOC_CD_TEXT_DATA_BLOCK *descriptor = NULL;
+    
+    for (i = 0; i < 8 * 16; i++) {
+	packData[i] = NULL;
+	packSizes[i] = 0;
+    }
     
     if (((cdtext->Length[0] << 8) | cdtext->Length[1]) > 0) {
-	cdtextData = malloc(sizeof(struct CDText));
+	cdtextData = calloc(1, sizeof(struct CDText));
 	if (cdtextData == NULL) {
-	    goto ParseCDTextError;
-	}
-	
-	cdtextData->iTracks = iTracks;
-	cdtextData->tracks = calloc(iTracks + 1,
-				    sizeof(struct CDTextTrack));
-	if (cdtextData->tracks == NULL) {
 	    goto ParseCDTextError;
 	}
 	
 	for (iDescriptor = 0;
 	     iDescriptor * sizeof(CDROM_TOC_CD_TEXT_DATA_BLOCK) < ((cdtext->Length[0] << 8) | cdtext->Length[1]) - (sizeof(cdtext->Reserved1) + sizeof(cdtext->Reserved2));
 	     iDescriptor++) {
-	    char baseText[25] = "";
-	    char *text;
-	    int i;
+	    descriptor = &(cdtext->Descriptors[iDescriptor]);
 	    
-	    if (cdtext->Descriptors[iDescriptor].ExtensionFlag) {
+	    /* Also, ignore extension blocks. */
+	    if (descriptor->ExtensionFlag ||
+		descriptor->PackType < 0x80 ||
+		descriptor->PackType > 0x8F) {
 		continue;
 	    }
 	    
-	    /* Parse out the descriptor text into UTF-8. */
-	    szLeftOver = NULL;
-	    switch (cdtext->Descriptors[iDescriptor].PackType) {
-	    case CDROM_CD_TEXT_PACK_ALBUM_NAME:
-	    case CDROM_CD_TEXT_PACK_PERFORMER:
-	    case CDROM_CD_TEXT_PACK_SONGWRITER:
-	    case CDROM_CD_TEXT_PACK_COMPOSER:
-	    case CDROM_CD_TEXT_PACK_ARRANGER:
-	    case CDROM_CD_TEXT_PACK_MESSAGES:
-	    case CDROM_CD_TEXT_PACK_DISC_ID:
-	    case CDROM_CD_TEXT_PACK_GENRE:
-	    case CDROM_CD_TEXT_PACK_UPC_EAN:
-		if (cdtext->Descriptors[iDescriptor].Unicode) {
-		    if (wcslen(cdtext->Descriptors[iDescriptor].WText) < 5) {
-			wszLeftOver = cdtext->Descriptors[iDescriptor].WText + wcslen(cdtext->Descriptors[iDescriptor].WText) + 1;
-			iLeftOver = 6 - wcslen(cdtext->Descriptors[iDescriptor].WText) - 1;
-			szLeftOver = wchar_to_utf8(wszLeftOver, iLeftOver);
-			wszLeftOver = NULL;
-			iLeftOver = strlen(szLeftOver);
-		    }
-		    text = wchar_to_utf8(cdtext->Descriptors[iDescriptor].WText, 6);
-		    if (text == NULL) {
-			text = strdup(baseText);
-		    }
-		} else {
-		    if (strlen(cdtext->Descriptors[iDescriptor].Text) < 11) {
-			szLeftOver = strdup(cdtext->Descriptors[iDescriptor].Text + strlen(cdtext->Descriptors[iDescriptor].Text) + 1);
-			wszLeftOver = NULL;
-			iLeftOver = 12 - strlen(cdtext->Descriptors[iDescriptor].Text) - 1;
-		    }
-		    memcpy(baseText, cdtext->Descriptors[iDescriptor].Text, 12);
-		    text = baseText;
-		}
-		break;
-	    default:
-		text = cdtext->Descriptors[iDescriptor].Text;
-		for (i = 0; i < 12; i++) {
-		    if (((text[i] >> 4) & 0xF) < 0xA) {
-			baseText[i * 2] = '0' + ((text[i] >> 4) & 0xF);
-		    } else {
-			baseText[i * 2] = 'A' + (((text[i] >> 4) - 0xA) & 0xF);
-		    }
-		    if ((text[i] & 0xF) < 0xA) {
-			baseText[i * 2 + 1] = '0' + (text[i] & 0xF);
-		    } else {
-			baseText[i * 2 + 1] = 'A' + ((text[i] & 0xF) - 0xA);
-		    }
-		}
-		text = baseText;
-		break;
+	    pack = 
+		packData[descriptor->BlockNumber * 16 +
+			 descriptor->PackType - 0x80];
+	    packData[descriptor->BlockNumber * 16 +
+		     descriptor->PackType - 0x80] = NULL;
+	    packSize = packSizes[descriptor->BlockNumber * 16 +
+				 descriptor->PackType - 0x80];
+	    pack = realloc(pack, packSize + 12);
+	    if (pack == NULL) {
+		goto ParseCDTextError;
+	    }
+	    memcpy(pack + packSize, descriptor->Text, 12);
+	    packSize += 12;
+	    
+	    packData[descriptor->BlockNumber * 16 +
+		     descriptor->PackType - 0x80] = data;
+	    packSizes[descriptor->BlockNumber * 16 +
+		      descriptor->PackType - 0x80] = packSize;
+	}
+	
+	/*
+	 * Now that we have collected all of the packs on a per-type
+	 * basis, parse the SIZE_INFO packs to get the character code,
+	 * track, and language code info.
+	 */
+	for (i = 0; i < 8; i++) {
+	    /* Don't know how to handle any other size! */
+	    if (packSizes[i * 16 + 15] != 36) {
+		continue;
 	    }
 	    
-	    /* Attach the packet to the correct string. */
-	    struct CDTextTrack *track = &(cdtextData->tracks[cdtext->Descriptors[iDescriptor].TrackNumber]);
-	    char **datum = NULL;
-	    int *datumSize = NULL;
-	    
-	    switch (cdtext->Descriptors[iDescriptor].PackType) {
-	    case CDROM_CD_TEXT_PACK_ALBUM_NAME:
-		datum = &(track->title);
-		datumSize = &(track->titleSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_PERFORMER:
-		datum = &(track->performer);
-		datumSize = &(track->performerSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_SONGWRITER:
-		datum = &(track->songwriter);
-		datumSize = &(track->songwriterSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_COMPOSER:
-		datum = &(track->composer);
-		datumSize = &(track->composerSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_ARRANGER:
-		datum = &(track->arranger);
-		datumSize = &(track->arrangerSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_MESSAGES:
-		datum = &(track->messages);
-		datumSize = &(track->messagesSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_DISC_ID:
-		datum = &(track->discId);
-		datumSize = &(track->discIdSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_GENRE:
-		datum = &(track->genre);
-		datumSize = &(track->genreSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_TOC_INFO:
-		datum = &(track->tocInfo);
-		datumSize = &(track->tocInfoSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_TOC_INFO2:
-		datum = &(track->tocInfo2);
-		datumSize = &(track->tocInfo2Size);
-		break;
-	    case CDROM_CD_TEXT_PACK_UPC_EAN:
-		datum = &(track->upc_ean);
-		datumSize = &(track->upc_eanSize);
-		break;
-	    case CDROM_CD_TEXT_PACK_SIZE_INFO:
-		datum = &(track->sizeInfo);
-		datumSize = &(track->sizeInfoSize);
-		break;
-	    default:
-		break;
+	    cdtextData->blocks[i].charset = packData[i * 16 + 15][0];
+	    cdtextData->blocks[i].language = packData[15][i + 28];
+	    cdtextData->blocks[i].iTracks = packData[i * 16 + 15][2];
+	    cdtextData->blocks[i].bMode2 = (packData[15][3] >> 7) & 1;
+	    cdtextData->blocks[i].bProgramCopyright =
+		(packData[15][3] >> 6) & 1;
+	    cdtextData->blocks[i].bMessageCopyright =
+		(packData[15][3] >> 2) & 1;
+	    cdtextData->blocks[i].bNameCopyright = (packData[15][3] >> 1) & 1;
+	    cdtextData->blocks[i].bTitleCopyright = packData[15][3] & 1;
+	    cdtextData->blocks[i].titles =
+		calloc(cdtextData->blocks[i].iTracks + 1, sizeof(char *));
+	    if (cdtextData->blocks[i].titles == NULL) {
+		goto ParseCDTextError;
 	    }
-	    
-	    if (datum != NULL) {
-		if (cdtext->Descriptors[iDescriptor].PackType == CDROM_CD_TEXT_PACK_TOC_INFO ||
-		    cdtext->Descriptors[iDescriptor].PackType == CDROM_CD_TEXT_PACK_TOC_INFO2 ||
-		    cdtext->Descriptors[iDescriptor].PackType == CDROM_CD_TEXT_PACK_SIZE_INFO) {
-		    *datum = realloc(*datum, *datumSize + 25);
-		    if (*datum == NULL) {
-			goto ParseCDTextError;
+	    cdtextData->blocks[i].performers =
+		calloc(cdtextData->blocks[i].iTracks + 1, sizeof(char *));
+	    if (cdtextData->blocks[i].performers == NULL) {
+		goto ParseCDTextError;
+	    }
+	    cdtextData->blocks[i].songwriters =
+		calloc(cdtextData->blocks[i].iTracks + 1, sizeof(char *));
+	    if (cdtextData->blocks[i].songwriters == NULL) {
+		goto ParseCDTextError;
+	    }
+	    cdtextData->blocks[i].composers =
+		calloc(cdtextData->blocks[i].iTracks + 1, sizeof(char *));
+	    if (cdtextData->blocks[i].composers == NULL) {
+		goto ParseCDTextError;
+	    }
+	    cdtextData->blocks[i].arrangers =
+		calloc(cdtextData->blocks[i].iTracks + 1, sizeof(char *));
+	    if (cdtextData->blocks[i].arrangers == NULL) {
+		goto ParseCDTextError;
+	    }
+	    cdtextData->blocks[i].messages =
+		calloc(cdtextData->blocks[i].iTracks + 1, sizeof(char *));
+	    if (cdtextData->blocks[i].messages == NULL) {
+		goto ParseCDTextError;
+	    }
+	    cdtextData->blocks[i].upc_ean_isrcs =
+		calloc(cdtextData->blocks[i].iTracks + 1, sizeof(char *));
+	    if (cdtextData->blocks[i].upc_ean_isrcs == NULL) {
+		goto ParseCDTextError;
+	    }
+	}
+	
+	for (i = 0; i < 8 * 16; i++) {
+	    if (packSizes[i] > 0) {
+		unsigned char packType = i % 16 + 0x80;
+		char *data = NULL, *dataPtr = NULL;
+		
+		switch (packType) {
+		case CDROM_CD_TEXT_PACK_ALBUM_NAME:
+		case CDROM_CD_TEXT_PACK_PERFORMER:
+		case CDROM_CD_TEXT_PACK_SONGWRITER:
+		case CDROM_CD_TEXT_PACK_COMPOSER:
+		case CDROM_CD_TEXT_PACK_ARRANGER:
+		case CDROM_CD_TEXT_PACK_MESSAGES:
+		case CDROM_CD_TEXT_PACK_UPCEAN:
+		    data = NULL;
+		    switch (cdtextData->blocks[i / 16].charset) {
+		    case CDROM_CD_TEXT_CHARSET_ASCII:
+		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
+			data = ConvertLatin1(packData[i], packSizes[i]);
+			if (data == NULL) {
+			    goto ParseCDTextError;
+			}
+			break;
+		    case CDROM_CD_TEXT_CHARSET_MSJIS:
+			data = ConvertMSJIS(packData[i], packSizes[i] / 2);
+			if (data == NULL) {
+			    goto ParseCDTextError;
+			}
+			break;
+		    default:
+			/* Ignore! */
+			break;
 		    }
-		    memcpy(*datum + *datumSize, text, 24);
-		    *(*datum + *datumSize + 24) = '\0';
-		    *datumSize += 24;
-		} else if (cdtext->Descriptors[iDescriptor].Unicode) {
-		    if (szPrev != NULL && *szPrev != '\0') {
-			*datum = realloc(*datum, *datumSize + iPrev);
-			if (*datum == NULL) {
-			    if (cdtext->Descriptors[iDescriptor].Unicode) {
-				free(text);
+		    
+		    /* Split data by track. */
+		    switch (packType) {
+		    case CDROM_CD_TEXT_PACK_ALBUM_NAME:
+			datum = cdtextData->blocks[i / 16].titles;
+			break;
+		    case CDROM_CD_TEXT_PACK_PERFORMER:
+			datum = cdtextData->blocks[i / 16].performers;
+			break;
+		    case CDROM_CD_TEXT_PACK_SONGWRITER:
+			datum = cdtextData->blocks[i / 16].songwriters;
+			break;
+		    case CDROM_CD_TEXT_PACK_COMPOSER:
+			datum = cdtextData->blocks[i / 16].composers;
+			break;
+		    case CDROM_CD_TEXT_PACK_ARRANGER:
+			datum = cdtextData->blocks[i / 16].arrangers;
+			break;
+		    case CDROM_CD_TEXT_PACK_MESSAGES:
+			datum = cdtextData->blocks[i / 16].messages;
+			break;
+		    case CDROM_CD_TEXT_PACK_UPCEAN:
+			datum = cdtextData->blocks[i / 16].upc_ean_isrcs;
+			break;
+		    default:
+			break;
+		    }
+		    
+		    if (data != NULL) {
+			dataPtr = data;
+			for (j = 0;
+			     j < cdtextData->blocks[i / 16].iTracks + 1;
+			     j++) {
+			    datum[j] = strdup(dataPtr);
+			    if (datum[j] == NULL) {
+				goto ParseCDTextError;
 			    }
-			    goto ParseCDTextError;
+			    dataPtr += strlen(dataPtr) + 1;
 			}
-			memcpy(*datum + *datumSize, szPrev, iPrev);
-			*datumSize += iPrev;
+			free(data);
 		    }
-		    *datum = realloc(*datum, *datumSize + 36);
-		    if (*datum == NULL) {
-			free(text);
-			goto ParseCDTextError;
+		    break;
+		case CDROM_CD_TEXT_PACK_DISC_ID:
+		    cdtextData->blocks[i / 16].discID =
+			ConvertLatin1(packData[i], packSizes[i]);
+		    break;
+		case CDROM_CD_TEXT_PACK_GENRE:
+		    /* Genre includes a genre code in addition to text. */
+		    cdtextData->blocks[i / 16].genreCode =
+			((unsigned char)packData[i][0] << 8) |
+			((unsigned char)packData[i][1]);
+		    cdtextData->blocks[i / 16].genreName =
+			ConvertLatin1(packData[i] + 2, packSizes[i] - 2);
+		    break;
+		case CDROM_CD_TEXT_PACK_TOC_INFO:
+		    /* This basically encodes another (short) TOC. */
+		    cdtextData->tocInfo.firstTrack = packData[i][0];
+		    cdtextData->tocInfo.lastTrack = packData[i][1];
+		    cdtextData->tocInfo.trackPointers[0].M = packData[i][3];
+		    cdtextData->tocInfo.trackPointers[0].S = packData[i][4];
+		    cdtextData->tocInfo.trackPointers[0].F = packData[i][5];
+		    for (j = 0; j < cdtextData->tocInfo.lastTrack; j++) {
+			cdtextData->tocInfo.trackPointers[j + 1].M =
+			    packData[i][12 + j * 3];
+			cdtextData->tocInfo.trackPointers[j + 1].S =
+			    packData[i][12 + j * 3 + 1];
+			cdtextData->tocInfo.trackPointers[j + 1].F =
+			    packData[i][12 + j * 3 + 2];
 		    }
-		    memcpy(*datum + *datumSize, text, 36);
-		    *datumSize += 36;
-		} else {
-		    if (szPrev != NULL && *szPrev != '\0') {
-			*datum = realloc(*datum, *datumSize + iPrev);
-			if (*datum == NULL) {
-			    goto ParseCDTextError;
+		    break;
+		case CDROM_CD_TEXT_PACK_TOC_INFO2:
+		    cdtextData->tocInfo2.iIntervals =
+			packSizes[i] / 12;
+		    cdtextData->tocInfo2.intervals =
+			realloc(cdtextData->tocInfo2.intervals,
+				cdtextData->tocInfo2.iIntervals *
+				sizeof(CDTextTOCInterval));
+		    if (cdtextData->tocInfo2.intervals != NULL) {
+			memset(&(cdtextData->tocInfo2.intervals), 0,
+			       cdtextData->tocInfo2.iIntervals *
+			       sizeof(CDTextTOCInterval));
+			for (j = 0; j < cdtextData->tocInfo2.iIntervals; j++) {
+			    cdtextData->tocInfo2.intervals[j].priorityNumber =
+				packData[i][j * 12];
+			    cdtextData->tocInfo2.intervals[i].numIntervals =
+				packData[i][j * 12 + 1];
+			    cdtextData->tocInfo2.intervals[i].start.M =
+				packData[i][j * 12 + 6];
+			    cdtextData->tocInfo2.intervals[i].start.S =
+				packData[i][j * 12 + 7];
+			    cdtextData->tocInfo2.intervals[i].start.F =
+				packData[i][j * 12 + 8];
+			    cdtextData->tocInfo2.intervals[i].end.M =
+				packData[i][j * 12 + 9];
+			    cdtextData->tocInfo2.intervals[i].end.S =
+				packData[i][j * 12 + 10];
+			    cdtextData->tocInfo2.intervals[i].end.F =
+				packData[i][j * 12 + 11];
 			}
-			memcpy(*datum + *datumSize, szPrev, iPrev);
-			*datumSize += iPrev;
 		    }
-		    *datum = realloc(*datum, *datumSize + 12);
-		    if (*datum == NULL) {
-			goto ParseCDTextError;
-		    }
-		    memcpy(*datum + *datumSize, text, 12);
-		    *datumSize += 12;
+		    break;
+		case CDROM_CD_TEXT_PACK_SIZE_INFO:
+		default:
+		    /* Ignore! */
+		    break;
 		}
 	    }
-	    
-	    /* Free the UTF-8 string if need be. */
-	    switch (cdtext->Descriptors[iDescriptor].PackType) {
-	    case CDROM_CD_TEXT_PACK_ALBUM_NAME:
-	    case CDROM_CD_TEXT_PACK_PERFORMER:
-	    case CDROM_CD_TEXT_PACK_SONGWRITER:
-	    case CDROM_CD_TEXT_PACK_COMPOSER:
-	    case CDROM_CD_TEXT_PACK_ARRANGER:
-	    case CDROM_CD_TEXT_PACK_MESSAGES:
-	    case CDROM_CD_TEXT_PACK_DISC_ID:
-	    case CDROM_CD_TEXT_PACK_GENRE:
-	    case CDROM_CD_TEXT_PACK_UPC_EAN:
-		if (cdtext->Descriptors[iDescriptor].Unicode) {
-		    free(text);
-		}
-		break;
-	    default:
-		break;
-	    }
-	    
-	    if (szPrev != NULL) {
-		free(szPrev);
-	    }
-	    szPrev = szLeftOver;
-	    iPrev = iLeftOver;
 	}
     }
     
-    if (szPrev != NULL) {
-	free(szPrev);
+    for (i = 0; i < 8 * 16; i++) {
+	free(packData[i]);
     }
     return cdtextData;
 ParseCDTextError:
-    if (szPrev != NULL) {
-	free(szPrev);
+    for (i = 0; i < 8 * 16; i++) {
+	free(packData[i]);
     }
     FreeCDText(cdtextData);
     return NULL;
@@ -535,49 +571,44 @@ ParseCDTextError:
 
 void FreeCDText(struct CDText *cdtextData)
 {
-    int iTracks;
+    int i, j;
     
     if (cdtextData != NULL) {
-	if (cdtextData->tracks != NULL) {
-	    for (iTracks = 0; iTracks <= cdtextData->iTracks; iTracks++) {
-		struct CDTextTrack *track = &(cdtextData->tracks[iTracks]);
-		
-		if (track->title != NULL) {
-		    free(track->title);
+	for (i = 0; i < 8; i++) {
+	    for (j = 0; j < cdtextData->blocks[i].iTracks; j++) {
+		if (cdtextData->blocks[i].titles != NULL) {
+		    free(cdtextData->blocks[i].titles[j]);
 		}
-		if (track->performer != NULL) {
-		    free(track->performer);
+		if (cdtextData->blocks[i].performers != NULL) {
+		    free(cdtextData->blocks[i].performers[j]);
 		}
-		if (track->songwriter != NULL) {
-		    free(track->songwriter);
+		if (cdtextData->blocks[i].songwriters != NULL) {
+		    free(cdtextData->blocks[i].songwriters[j]);
 		}
-		if (track->composer != NULL) {
-		    free(track->composer);
+		if (cdtextData->blocks[i].composers != NULL) {
+		    free(cdtextData->blocks[i].composers[j]);
 		}
-		if (track->arranger != NULL) {
-		    free(track->arranger);
+		if (cdtextData->blocks[i].arrangers != NULL) {
+		    free(cdtextData->blocks[i].arrangers[j]);
 		}
-		if (track->discId != NULL) {
-		    free(track->discId);
+		if (cdtextData->blocks[i].messages != NULL) {
+		    free(cdtextData->blocks[i].messages[j]);
 		}
-		if (track->genre != NULL) {
-		    free(track->genre);
-		}
-		if (track->tocInfo != NULL) {
-		    free(track->tocInfo);
-		}
-		if (track->tocInfo2 != NULL) {
-		    free(track->tocInfo2);
-		}
-		if (track->upc_ean != NULL) {
-		    free(track->upc_ean);
-		}
-		if (track->sizeInfo != NULL) {
-		    free(track->sizeInfo);
+		if (cdtextData->blocks[i].upc_ean_isrcs != NULL) {
+		    free(cdtextData->blocks[i].upc_ean_isrcs[j]);
 		}
 	    }
-	    free(cdtextData->tracks);
+	    free(cdtextData->blocks[i].titles);
+	    free(cdtextData->blocks[i].performers);
+	    free(cdtextData->blocks[i].songwriters);
+	    free(cdtextData->blocks[i].composers);
+	    free(cdtextData->blocks[i].arrangers);
+	    free(cdtextData->blocks[i].messages);
+	    free(cdtextData->blocks[i].upc_ean_isrcs);
+	    free(cdtextData->blocks[i].disc_id);
+	    free(cdtextData->blocks[i].genreName);
 	}
+	free(cdtextData->tocInfo2.intervals);
 	free(cdtextData);
     }
 }
