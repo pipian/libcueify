@@ -52,6 +52,10 @@
 # was done given the close parallels of the sequence with ISO 8859-1,
 # which encodes the former rather than the latter.
 
+# We additionally add a mapping for 0x0909 to 0x0009 to correctly map
+# the TAB character used by CD-Text (which uses 0x0909 instead of
+# 0x0009 for double-byte character sets)
+
 # DASH SYMBOL or ANGER SYMBOL?
 
 # The first column contains the double-byte value in MS-JIS, the
@@ -109,6 +113,7 @@
 # We have chosen to map these directly to the Private-Use Area
 # according to the Shift-JIS mapping discussed above.
 
+0x0909  0x0009        # HORIZONTAL TABULATION
 0xF640  0x00A0+E01EF  # NO-BREAK SPACE [むかいぎょうすぺーす]
 0xF641  0x00A1+E01EF  # INVERTED EXCLAMATION MARK [ぎゃくかんたんふ]
 0xF642  0x00A2+E01EF  # CENT SIGN [せんと]

@@ -217,7 +217,7 @@ BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
     return FALSE;
 }
 
-/* TODO: Tab characters, Detect pre-gap */
+/* TODO: Detect pre-gap */
 struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 {
     int iDescriptor, i, j;
@@ -397,7 +397,12 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 			for (j = 0;
 			     j < cdtextData->blocks[i / 16].iTracks + 1;
 			     j++) {
-			    datum[j] = strdup(dataPtr);
+			    /* Handle the TAB character/repeating values. */
+			    if (strcmp(dataPtr, "\t") == 0 && j > 0) {
+				datum[j] = strdup(datum[j - 1]);
+			    } else {
+				datum[j] = strdup(dataPtr);
+			    }
 			    if (datum[j] == NULL) {
 				goto ParseCDTextError;
 			    }
