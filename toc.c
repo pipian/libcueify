@@ -217,6 +217,7 @@ BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
     return FALSE;
 }
 
+/* TODO: Tab characters, Detect pre-gap */
 struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 {
     int iDescriptor, i, j;
@@ -232,7 +233,8 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 	packSizes[i] = 0;
     }
     
-    if (((cdtext->Length[0] << 8) | cdtext->Length[1]) > 0) {
+    if (cdtext != NULL &&
+	((cdtext->Length[0] << 8) | cdtext->Length[1]) > 0) {
 	cdtextData = calloc(1, sizeof(struct CDText));
 	if (cdtextData == NULL) {
 	    goto ParseCDTextError;
@@ -281,6 +283,7 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 		continue;
 	    }
 	    
+	    cdtextData->blocks[i].bValid = 1;
 	    cdtextData->blocks[i].charset = packData[i * 16 + 15][0];
 	    cdtextData->blocks[i].language = packData[15][i + 28];
 	    cdtextData->blocks[i].iTracks = packData[i * 16 + 15][2];

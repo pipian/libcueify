@@ -38,8 +38,8 @@ char *ConvertLatin1(char *szLatin1, int iSize)
     if (iSize < 0) {
 	/* Count output size until we find a terminator/bad char. */
 	szOutput = szLatin1;
-	while (table[(int)*szOutput] != '\0') {
-	    iOutputSize += strlen(table[(int)*szOutput]);
+	while (table[(unsigned char)*szOutput] != '\0') {
+	    iOutputSize += strlen(table[(unsigned char)*szOutput]);
 	}
 	/* And also include the terminator. */
 	iOutputSize++;
@@ -47,10 +47,10 @@ char *ConvertLatin1(char *szLatin1, int iSize)
 	/* Convert exactly iSize characters. */
 	szOutput = szLatin1;
 	for (i = 0; i < iSize; i++) {
-	    if (szLatin1[i] == '\0') {
+	  if (table[(unsigned char)szLatin1[i]][0] == '\0') {
 		iOutputSize++;
 	    } else {
-		iOutputSize += strlen(table[(int)szLatin1[i]]);
+		iOutputSize += strlen(table[(unsigned char)szLatin1[i]]);
 	    }
 	}
 	/* And also add a terminator. */
@@ -58,15 +58,17 @@ char *ConvertLatin1(char *szLatin1, int iSize)
     }
     
     /* Allocate space for the conversion... */
-    szOutput = malloc(iOutputSize);
+    szOutput = calloc(iOutputSize, 1);
     if (szOutput == NULL) {
 	return NULL;
     }
+    /* Already set the terminator. */
+    szOutput[--iOutputSize] = '\0';
     
     /* Now do the conversion. */
     szOutputPtr = szOutput;
     while (iOutputSize > 0) {
-	szChar = table[(int)*szLatin1];
+	szChar = table[(unsigned char)*szLatin1++];
 	strcpy(szOutputPtr, szChar);
 	if (*szChar == '\0') {
 	    szOutputPtr++;

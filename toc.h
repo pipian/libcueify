@@ -365,6 +365,7 @@ enum {
  * subsequent indices contain track information.
  */
 struct CDTextBlock {
+    BOOL bValid;            /** TRUE if this block is a valid block. */
     unsigned char charset;  /** The character set used to encode this block. */
     unsigned char language; /** The language of the text in this block. */
     int iTracks;            /** The number of tracks in this block. */

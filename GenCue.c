@@ -63,60 +63,55 @@ const char * const genreNames[0x1D] = {
 };
 
 const char * const languageNames[] = {
-    "Unknown", /* 0x00 */
-    "Albanian",
-    "Breton",
-    "Catalan",
-    "Croatian",
-    "Welsh",
-    "Czech",
-    "Danish",
-    "German",
-    "English",
-    "Spanish",
-    "Esperanto",
-    "Estonian",
-    "Basque",
-    "Faroese",
-    "French",
-    "Frisian", /* 0x10 */
-    "Irish",
-    "Gaelic",
-    "Galician",
-    "Icelandic",
-    "Italian",
-    "Sami",
-    "Latin",
-    "Latvian",
-    "Luxembourgish",
-    "Lithuanian",
-    "Hungarian",
-    "Maltese",
-    "Dutch",
-    "Norwegian",
-    "Occitan",
-    "Polish", /* 0x20 */
-    "Portuguese",
-    "Romanian",
-    "Romansh",
-    "Serbian",
-    "Slovak",
-    "Slovenian",
-    "Finnish",
-    "Swedish",
-    "Turkish",
-    "Flemish",
-    "Walloon",
+    "UNKNOWN", /* 0X00 */
+    "ALBANIAN",
+    "BRETON",
+    "CATALAN",
+    "CROATIAN",
+    "WELSH",
+    "CZECH",
+    "DANISH",
+    "GERMAN",
+    "ENGLISH",
+    "SPANISH",
+    "ESPERANTO",
+    "ESTONIAN",
+    "BASQUE",
+    "FAROESE",
+    "FRENCH",
+    "FRISIAN", /* 0X10 */
+    "IRISH",
+    "GAELIC",
+    "GALICIAN",
+    "ICELANDIC",
+    "ITALIAN",
+    "SAMI",
+    "LATIN",
+    "LATVIAN",
+    "LUXEMBOURGISH",
+    "LITHUANIAN",
+    "HUNGARIAN",
+    "MALTESE",
+    "DUTCH",
+    "NORWEGIAN",
+    "OCCITAN",
+    "POLISH", /* 0X20 */
+    "PORTUGUESE",
+    "ROMANIAN",
+    "ROMANSH",
+    "SERBIAN",
+    "SLOVAK",
+    "SLOVENIAN",
+    "FINNISH",
+    "SWEDISH",
+    "TURKISH",
+    "FLEMISH",
+    "WALLOON",
     "",
     "",
     "",
     "",
-    "", /* 0x30 */
-    "",
-    "",
-    "",
-    "",
-    "",
+    "", /* 0X30 */
     "",
     "",
     "",
@@ -127,70 +122,75 @@ const char * const languageNames[] = {
     "",
     "",
     "",
-    "", /* 0x40 */
     "",
     "",
     "",
     "",
-    "Zulu",
-    "Vietnamese",
-    "Uzbek",
-    "Urdu",
-    "Ukrainian",
-    "Thai",
-    "Telugu",
-    "Tatar",
-    "Tamil",
-    "Tajik",
-    "Swahili",
-    "Sranan_Tongo",
-    "Somali",
-    "Sinhala",
-    "Shona",
-    "Serbocroat",
-    "Ruthenian",
-    "Russian",
-    "Quechua",
-    "Pushtu",
-    "Punjabi",
-    "Persian",
-    "Papiamento",
-    "Oriya",
-    "Nepali",
-    "Ndebele",
-    "Marathi",
-    "Moldavian",
-    "Malaysian",
-    "Malagasy",
-    "Macedonian",
-    "Lao",
-    "Korean",
-    "Khmer",
-    "Kazakh",
-    "Kannada",
-    "Japanese",
-    "Indonesian",
-    "Hindi",
-    "Hebrew",
-    "Hausa",
-    "Guarani",
-    "Gujarati",
-    "Greek",
-    "Georgian",
-    "Fulah",
-    "Dari",
-    "Chuvash",
-    "Chinese",
-    "Burmese",
-    "Bulgarian",
-    "Bengali",
-    "Belarusian",
-    "Bambara",
-    "Azerbaijani",
-    "Assamese",
-    "Armenian",
-    "Arabic",
-    "Amharic"
+    "",
+    "", /* 0X40 */
+    "",
+    "",
+    "",
+    "",
+    "ZULU",
+    "VIETNAMESE",
+    "UZBEK",
+    "URDU",
+    "UKRAINIAN",
+    "THAI",
+    "TELUGU",
+    "TATAR",
+    "TAMIL",
+    "TAJIK",
+    "SWAHILI",
+    "SRANAN_TONGO",
+    "SOMALI",
+    "SINHALA",
+    "SHONA",
+    "SERBOCROAT",
+    "RUTHENIAN",
+    "RUSSIAN",
+    "QUECHUA",
+    "PUSHTU",
+    "PUNJABI",
+    "PERSIAN",
+    "PAPIAMENTO",
+    "ORIYA",
+    "NEPALI",
+    "NDEBELE",
+    "MARATHI",
+    "MOLDAVIAN",
+    "MALAYSIAN",
+    "MALAGASY",
+    "MACEDONIAN",
+    "LAO",
+    "KOREAN",
+    "KHMER",
+    "KAZAKH",
+    "KANNADA",
+    "JAPANESE",
+    "INDONESIAN",
+    "HINDI",
+    "HEBREW",
+    "HAUSA",
+    "GUARANI",
+    "GUJARATI",
+    "GREEK",
+    "GEORGIAN",
+    "FULAH",
+    "DARI",
+    "CHUVASH",
+    "CHINESE",
+    "BURMESE",
+    "BULGARIAN",
+    "BENGALI",
+    "BELARUSIAN",
+    "BAMBARA",
+    "AZERBAIJANI",
+    "ASSAMESE",
+    "ARMENIAN",
+    "ARABIC",
+    "AMHARIC"
 };
 
 /** Subtract the 2-second disc pregap from the specified TrackIndex struct.
@@ -280,11 +280,6 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	if (log == NULL) {
 	    goto error;
 	}
-	
-	cdt = fopen(szCDTextFile, "wb");
-	if (cdt == NULL) {
-	    goto error;
-	}
     }
     
     time_t t = time(NULL);
@@ -322,11 +317,6 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	    
 	    log = fopen(szCuesheetFile, "w");
 	    if (log == NULL) {
-		goto error;
-	    }
-	    
-	    cdt = fopen(szCDTextFile, "wb");
-	    if (cdt == NULL) {
 		goto error;
 	    }
 	}
@@ -384,9 +374,19 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	cdtext = ReadCDText(hDevice);
 	
 	/* We can write out the CD-Text. */
-	fwrite(cdtext, 1, ((cdtext->Length[0] << 8) | cdtext->Length[1]) + 2,
-	       cdt);
-	fclose(cdt);
+	if (cdtext != NULL &&
+	    ((cdtext->Length[0] << 8) | cdtext->Length[1]) > 2) {
+	    cdt = fopen(szCDTextFile, "wb");
+	    if (cdt == NULL) {
+		fclose(cdt);
+		goto error;
+	    }
+	    
+	    fwrite(cdtext, 1, ((cdtext->Length[0] << 8) | cdtext->Length[1]) + 2,
+		   cdt);
+	    
+	    fclose(cdt);
+	}
 	
 	/* And actually parse the CD-Text. */
 	cdtextData = ParseCDText(cdtext);
@@ -502,7 +502,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		    }
 		}
 		/* We ARE, however, interested in the sizeInfo. */
-		if (iBlock == 0) {
+		if (iBlock == 0 && cdtextData->blocks[iBlock].bValid) {
 		    switch (cdtextData->blocks[iBlock].charset) {
 		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
 			fprintf(log, "REM CHARSET ISO-8859-1\n");
@@ -535,7 +535,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 			}
 			fprintf(log, "\n");
 		    }
-		} else {
+		} else if (cdtextData->blocks[iBlock].bValid) {
 		    switch (cdtextData->blocks[iBlock].charset) {
 		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
 			fprintf(log, "REM CHARSET_%d ISO-8859-1\n", iBlock);
@@ -570,24 +570,24 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		    }
 		}
 	    }
-	    for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != 0xA0 || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
-	    switch (fulltoc->Descriptors[iDescriptor].Msf[1]) {
-	    case 0x00:
-		fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD\n");
-		trackMode = 1;
-		break;
-	    case 0x10:
-		fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-I\n");
-		trackMode = 3;
-		break;
-	    case 0x20:
-		fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-XA\n");
-		trackMode = 2;
-		break;
-	    default:
-		fprintf(log, "REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
-		break;
-	    }
+	}
+	for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != 0xA0 || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
+	switch (fulltoc->Descriptors[iDescriptor].Msf[1]) {
+	case 0x00:
+	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD\n");
+	    trackMode = 1;
+	    break;
+	case 0x10:
+	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-I\n");
+	    trackMode = 3;
+	    break;
+	case 0x20:
+	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-XA\n");
+	    trackMode = 2;
+	    break;
+	default:
+	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
+	    break;
 	}
 	
 	/* And lastly the track stuff. */
@@ -655,70 +655,70 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		    if (cdtextData->blocks[iBlock].arrangers != NULL &&
 			cdtextData->blocks[iBlock].arrangers[iTrack] != NULL) {
 			if (iBlock == 0) {
-			    fprintf(log, "REM ARRANGER \"%s\"\n",
+			    fprintf(log, "      REM ARRANGER \"%s\"\n",
 				    cdtextData->blocks[iBlock].arrangers[iTrack]);
 			} else {
-			    fprintf(log, "REM ARRANGER_%d \"%s\"\n", iBlock,
+			    fprintf(log, "      REM ARRANGER_%d \"%s\"\n", iBlock,
 				    cdtextData->blocks[iBlock].arrangers[iTrack]);
 			}
 		    }
 		    if (cdtextData->blocks[iBlock].composers != NULL &&
 			cdtextData->blocks[iBlock].composers[iTrack] != NULL) {
 			if (iBlock == 0) {
-			    fprintf(log, "REM COMPOSER \"%s\"\n",
+			    fprintf(log, "      REM COMPOSER \"%s\"\n",
 				    cdtextData->blocks[iBlock].composers[iTrack]);
 			} else {
-			    fprintf(log, "REM COMPOSER_%d \"%s\"\n", iBlock,
+			    fprintf(log, "      REM COMPOSER_%d \"%s\"\n", iBlock,
 				    cdtextData->blocks[iBlock].composers[iTrack]);
 			}
 		    }
 		    if (cdtextData->blocks[iBlock].messages != NULL &&
 			cdtextData->blocks[iBlock].messages[iTrack] != NULL) {
 			if (iBlock == 0) {
-			    fprintf(log, "REM MESSAGE \"%s\"\n",
+			    fprintf(log, "      REM MESSAGE \"%s\"\n",
 				    cdtextData->blocks[iBlock].messages[iTrack]);
 			} else {
-			    fprintf(log, "REM MESSAGE_%d \"%s\"\n", iBlock,
+			    fprintf(log, "      REM MESSAGE_%d \"%s\"\n", iBlock,
 				    cdtextData->blocks[iBlock].messages[iTrack]);
 			}
 		    }
 		    if (cdtextData->blocks[iBlock].performers != NULL &&
 			cdtextData->blocks[iBlock].performers[iTrack] != NULL) {
 			if (iBlock == 0) {
-			    fprintf(log, "PERFORMER \"%s\"\n",
+			    fprintf(log, "      PERFORMER \"%s\"\n",
 				    cdtextData->blocks[iBlock].performers[iTrack]);
 			} else {
-			    fprintf(log, "REM PERFORMER_%d \"%s\"\n", iBlock,
+			    fprintf(log, "      REM PERFORMER_%d \"%s\"\n", iBlock,
 				    cdtextData->blocks[iBlock].performers[iTrack]);
 			}
 		    }
 		    if (cdtextData->blocks[iBlock].songwriters != NULL &&
 			cdtextData->blocks[iBlock].songwriters[iTrack] != NULL) {
 			if (iBlock == 0) {
-			    fprintf(log, "SONGWRITER \"%s\"\n",
+			    fprintf(log, "      SONGWRITER \"%s\"\n",
 				    cdtextData->blocks[iBlock].songwriters[iTrack]);
 			} else {
-			    fprintf(log, "REM SONGWRITER_%d \"%s\"\n", iBlock,
+			    fprintf(log, "      REM SONGWRITER_%d \"%s\"\n", iBlock,
 				    cdtextData->blocks[iBlock].songwriters[iTrack]);
 			}
 		    }
 		    if (cdtextData->blocks[iBlock].titles != NULL &&
 			cdtextData->blocks[iBlock].titles[iTrack] != NULL) {
 			if (iBlock == 0) {
-			    fprintf(log, "TITLE \"%s\"\n",
+			    fprintf(log, "      TITLE \"%s\"\n",
 				    cdtextData->blocks[iBlock].titles[iTrack]);
 			} else {
-			    fprintf(log, "REM TITLE_%d \"%s\"\n", iBlock,
+			    fprintf(log, "      REM TITLE_%d \"%s\"\n", iBlock,
 				    cdtextData->blocks[iBlock].titles[iTrack]);
 			}
 		    }
 		    if (cdtextData->blocks[iBlock].upc_ean_isrcs != NULL &&
 			cdtextData->blocks[iBlock].upc_ean_isrcs[iTrack] != NULL) {
 			if (iBlock == 0) {
-			    fprintf(log, "REM ISRC %s\n",
+			    fprintf(log, "      REM ISRC %s\n",
 				    cdtextData->blocks[iBlock].upc_ean_isrcs[iTrack]);
 			} else {
-			    fprintf(log, "REM ISRC_%d %s\n", iBlock,
+			    fprintf(log, "      REM ISRC_%d %s\n", iBlock,
 				    cdtextData->blocks[iBlock].upc_ean_isrcs[iTrack]);
 			}
 		    }
@@ -842,9 +842,6 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 error:
     if (log != NULL) {
 	fclose(log);
-    }
-    if (cdt != NULL) {
-	fclose(cdt);
     }
     
     /* We failed?? */

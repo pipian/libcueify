@@ -32,7 +32,7 @@
 char *ConvertMSJIS(char *szMSJIS, int iSize)
 {
     int iOutputSize = 0, i;
-    char cHi, cLo;
+    unsigned char cHi, cLo;
     const char * const *aszTable;
     const char *szChar;
     char *szOutput = NULL, *szOutputPtr;
@@ -43,14 +43,14 @@ char *ConvertMSJIS(char *szMSJIS, int iSize)
 	do {
 	    cHi = *szOutput++;
 	    cLo = *szOutput++;
-	    aszTable = masterTable[(int)cHi];
+	    aszTable = masterTable[(unsigned char)cHi];
 	    if (aszTable == NULL) {
 		/* Don't know this table! */
 		break;
-	    } else if (aszTable[(int)cLo] != '\0') {
-		iOutputSize += strlen(aszTable[(int)cLo]);
+	    } else if (aszTable[(unsigned char)cLo][0] != '\0') {
+		iOutputSize += strlen(aszTable[(unsigned char)cLo]);
 	    }
-	} while (aszTable[(int)cLo] != '\0');
+	} while (aszTable[(unsigned char)cLo] != '\0');
 	/* And also include the terminator. */
 	iOutputSize++;
     } else {
@@ -59,14 +59,14 @@ char *ConvertMSJIS(char *szMSJIS, int iSize)
 	for (i = 0; i < iSize; i++) {
 	    cHi = *szOutput++;
 	    cLo = *szOutput++;
-	    aszTable = masterTable[(int)cHi];
+	    aszTable = masterTable[(unsigned char)cHi];
 	    if (aszTable == NULL) {
 		/* Don't know this table! */
 		iOutputSize++;
-	    } else if (aszTable[(int)cLo] == '\0') {
+	    } else if (aszTable[(unsigned char)cLo][0] == '\0') {
 		iOutputSize++;
 	    } else {
-		iOutputSize += strlen(aszTable[(int)cLo]);
+		iOutputSize += strlen(aszTable[(unsigned char)cLo]);
 	    }
 	}
 	/* And also add a terminator. */
@@ -74,26 +74,27 @@ char *ConvertMSJIS(char *szMSJIS, int iSize)
     }
     
     /* Allocate space for the conversion... */
-    szOutput = malloc(iOutputSize);
+    szOutput = calloc(iOutputSize, 1);
     if (szOutput == NULL) {
 	return NULL;
     }
+    szOutput[--iOutputSize] = '\0';
     
     /* Now do the conversion. */
     szOutputPtr = szOutput;
     while (iOutputSize > 0) {
 	cHi = *szMSJIS++;
 	cLo = *szMSJIS++;
-	aszTable = masterTable[(int)cHi];
+	aszTable = masterTable[(unsigned char)cHi];
 	if (aszTable == NULL) {
 	    /* Don't know this table! */
 	    *szOutputPtr++ = '\0';
 	    iOutputSize--;
-	} else if (aszTable[(int)cLo] == '\0') {
+	} else if (aszTable[(unsigned char)cLo][0] == '\0') {
 	    *szOutputPtr++ = '\0';
 	    iOutputSize--;
 	} else {
-	    szChar = aszTable[(int)cLo];
+	    szChar = aszTable[(unsigned char)cLo];
 	    strcpy(szOutputPtr, szChar);
 	    szOutputPtr += strlen(szChar);
 	    iOutputSize -= strlen(szChar);
