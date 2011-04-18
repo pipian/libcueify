@@ -23,20 +23,23 @@
  * SOFTWARE.
  */
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "charsets.h"
 #include "latin1_tables.h"
 
 char *ConvertLatin1(char *szLatin1, int iSize)
 {
     int iOutputSize = 0, i;
-    char *szChar;
+    const char *szChar;
     char *szOutput = NULL, *szOutputPtr;
     
     if (iSize < 0) {
 	/* Count output size until we find a terminator/bad char. */
 	szOutput = szLatin1;
-	while (table[*szOutput] != '\0') {
-	    iOutputSize += strlen(table[*szOutput]);
+	while (table[(int)*szOutput] != '\0') {
+	    iOutputSize += strlen(table[(int)*szOutput]);
 	}
 	/* And also include the terminator. */
 	iOutputSize++;
@@ -47,7 +50,7 @@ char *ConvertLatin1(char *szLatin1, int iSize)
 	    if (szLatin1[i] == '\0') {
 		iOutputSize++;
 	    } else {
-		iOutputSize += strlen(table[szLatin1[i]]);
+		iOutputSize += strlen(table[(int)szLatin1[i]]);
 	    }
 	}
 	/* And also add a terminator. */
@@ -63,7 +66,7 @@ char *ConvertLatin1(char *szLatin1, int iSize)
     /* Now do the conversion. */
     szOutputPtr = szOutput;
     while (iOutputSize > 0) {
-	szChar = table[*szLatin1];
+	szChar = table[(int)*szLatin1];
 	strcpy(szOutputPtr, szChar);
 	if (*szChar == '\0') {
 	    szOutputPtr++;

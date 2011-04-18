@@ -30,6 +30,169 @@
 #include "cdrom.h"
 #include "toc.h"
 
+const char * const genreNames[0x1D] = {
+    "NULL",
+    "Unknown",
+    "Adult Contemporary",
+    "Alternative Rock",
+    "Childrens",
+    "Classical",
+    "Contemporary Christian",
+    "Country",
+    "Dance",
+    "Easy Listening",
+    "Erotic",
+    "Folk",
+    "Gospel",
+    "Hip Hop",
+    "Jazz",
+    "Latin",
+    "Musical",
+    "New Age",
+    "Opera",
+    "Operetta",
+    "Pop",
+    "Rap",
+    "Reggae",
+    "Rock",
+    "Rhythm and Blues",
+    "Sound Effects",
+    "Soundtrack",
+    "Spoken Word",
+    "World Music"
+};
+
+const char * const languageNames[] = {
+    "Unknown", /* 0x00 */
+    "Albanian",
+    "Breton",
+    "Catalan",
+    "Croatian",
+    "Welsh",
+    "Czech",
+    "Danish",
+    "German",
+    "English",
+    "Spanish",
+    "Esperanto",
+    "Estonian",
+    "Basque",
+    "Faroese",
+    "French",
+    "Frisian", /* 0x10 */
+    "Irish",
+    "Gaelic",
+    "Galician",
+    "Icelandic",
+    "Italian",
+    "Sami",
+    "Latin",
+    "Latvian",
+    "Luxembourgish",
+    "Lithuanian",
+    "Hungarian",
+    "Maltese",
+    "Dutch",
+    "Norwegian",
+    "Occitan",
+    "Polish", /* 0x20 */
+    "Portuguese",
+    "Romanian",
+    "Romansh",
+    "Serbian",
+    "Slovak",
+    "Slovenian",
+    "Finnish",
+    "Swedish",
+    "Turkish",
+    "Flemish",
+    "Walloon",
+    "",
+    "",
+    "",
+    "",
+    "", /* 0x30 */
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "", /* 0x40 */
+    "",
+    "",
+    "",
+    "",
+    "Zulu",
+    "Vietnamese",
+    "Uzbek",
+    "Urdu",
+    "Ukrainian",
+    "Thai",
+    "Telugu",
+    "Tatar",
+    "Tamil",
+    "Tajik",
+    "Swahili",
+    "Sranan_Tongo",
+    "Somali",
+    "Sinhala",
+    "Shona",
+    "Serbocroat",
+    "Ruthenian",
+    "Russian",
+    "Quechua",
+    "Pushtu",
+    "Punjabi",
+    "Persian",
+    "Papiamento",
+    "Oriya",
+    "Nepali",
+    "Ndebele",
+    "Marathi",
+    "Moldavian",
+    "Malaysian",
+    "Malagasy",
+    "Macedonian",
+    "Lao",
+    "Korean",
+    "Khmer",
+    "Kazakh",
+    "Kannada",
+    "Japanese",
+    "Indonesian",
+    "Hindi",
+    "Hebrew",
+    "Hausa",
+    "Guarani",
+    "Gujarati",
+    "Greek",
+    "Georgian",
+    "Fulah",
+    "Dari",
+    "Chuvash",
+    "Chinese",
+    "Burmese",
+    "Bulgarian",
+    "Bengali",
+    "Belarusian",
+    "Bambara",
+    "Azerbaijani",
+    "Assamese",
+    "Armenian",
+    "Arabic",
+    "Amharic"
+};
+
 /** Subtract the 2-second disc pregap from the specified TrackIndex struct.
  *
  * @param index The TrackIndex struct to subtract two seconds from.
@@ -259,30 +422,30 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 				cdtextData->blocks[iBlock].composers[0]);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].disc_id != NULL) {
+		if (cdtextData->blocks[iBlock].discID != NULL) {
 		    if (iBlock == 0) {
 			fprintf(log, "REM DISK_ID \"%s\"\n",
-				cdtextData->blocks[iBlock].disc_id);
+				cdtextData->blocks[iBlock].discID);
 		    } else {
 			fprintf(log, "REM DISK_ID_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].disc_id);
+				cdtextData->blocks[iBlock].discID);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].genreText != NULL) {
+		if (cdtextData->blocks[iBlock].genreName != NULL) {
 		    if (iBlock == 0) {
 			fprintf(log, "REM GENRE \"%s\"\n",
 				genreNames[cdtextData->blocks[iBlock].genreCode]);
-			if (cdtextData->blocks[iBlock].genreText[0] != '\0') {
+			if (cdtextData->blocks[iBlock].genreName[0] != '\0') {
 			    fprintf(log, "REM SUPPLEMENTAL_GENRE \"%s\"\n",
-				    cdtextData->blocks[iBlock].genreText);
+				    cdtextData->blocks[iBlock].genreName);
 			}
 		    } else {
 			fprintf(log, "REM GENRE_%d \"%s\"\n", iBlock,
 				genreNames[cdtextData->blocks[iBlock].genreCode]);
-			if (cdtextData->blocks[iBlock].genreText[0] != '\0') {
+			if (cdtextData->blocks[iBlock].genreName[0] != '\0') {
 			    fprintf(log, "REM SUPPLEMENTAL_GENRE_%d \"%s\"\n",
 				    iBlock,
-				    cdtextData->blocks[iBlock].genreText);
+				    cdtextData->blocks[iBlock].genreName);
 			}
 		    }
 		}
@@ -341,13 +504,13 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		/* We ARE, however, interested in the sizeInfo. */
 		if (iBlock == 0) {
 		    switch (cdtextData->blocks[iBlock].charset) {
-		    case CD_TEXT_CHARSET_ISO8859_1:
+		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
 			fprintf(log, "REM CHARSET ISO-8859-1\n");
 			break;
-		    case CD_TEXT_CHARSET_ASCII:
+		    case CDROM_CD_TEXT_CHARSET_ASCII:
 			fprintf(log, "REM CHARSET ASCII\n");
 			break;
-		    case CD_TEXT_CHARSET_MSJIS:
+		    case CDROM_CD_TEXT_CHARSET_MSJIS:
 			fprintf(log, "REM CHARSET MS-JIS\n");
 			break;
 		    default:
@@ -374,13 +537,13 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		    }
 		} else {
 		    switch (cdtextData->blocks[iBlock].charset) {
-		    case CD_TEXT_CHARSET_ISO8859_1:
+		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
 			fprintf(log, "REM CHARSET_%d ISO-8859-1\n", iBlock);
 			break;
-		    case CD_TEXT_CHARSET_ASCII:
+		    case CDROM_CD_TEXT_CHARSET_ASCII:
 			fprintf(log, "REM CHARSET_%d ASCII\n", iBlock);
 			break;
-		    case CD_TEXT_CHARSET_MSJIS:
+		    case CDROM_CD_TEXT_CHARSET_MSJIS:
 			fprintf(log, "REM CHARSET_%d MS-JIS\n", iBlock);
 			break;
 		    default:
@@ -648,21 +811,21 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	
 	/* And finally, we can dump out intervals from TOC_INFO2. */
 	if (cdtextData != NULL) {
-	    if (cdtextData.tocInfo2.iIntervals > 0) {
+	    if (cdtextData->tocInfo2.iIntervals > 0) {
 		fprintf(log, "REM INTERVALS:\n");
 	    }
 	    for (iBlock = 0;
-		 iBlock < cdtextData.tocInfo2.iIntervals;
+		 iBlock < cdtextData->tocInfo2.iIntervals;
 		 iBlock++) {
 		fprintf(log,
 			"  REM INTERVAL %d %02d:%02d:%02d-%02d:%02d:%02d\n",
-			cdtextData.tocInfo2.intervals[iBlock].priorityNumber,
-			cdtextData.tocInfo2.intervals[iBlock].start.M,
-			cdtextData.tocInfo2.intervals[iBlock].start.S,
-			cdtextData.tocInfo2.intervals[iBlock].start.F,
-			cdtextData.tocInfo2.intervals[iBlock].end.M,
-			cdtextData.tocInfo2.intervals[iBlock].end.S,
-			cdtextData.tocInfo2.intervals[iBlock].end.F);
+			cdtextData->tocInfo2.intervals[iBlock].priorityNumber,
+			cdtextData->tocInfo2.intervals[iBlock].start.M,
+			cdtextData->tocInfo2.intervals[iBlock].start.S,
+			cdtextData->tocInfo2.intervals[iBlock].start.F,
+			cdtextData->tocInfo2.intervals[iBlock].end.M,
+			cdtextData->tocInfo2.intervals[iBlock].end.S,
+			cdtextData->tocInfo2.intervals[iBlock].end.F);
 	    }
 	}
 	

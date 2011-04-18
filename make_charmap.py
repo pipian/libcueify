@@ -31,9 +31,9 @@ for file in sys.argv[1:]:
 
 def formatTable(lobytes, hibyte=None):
     if hibyte is None:
-        print "static const char *table[256] = {"
+        print "static const char * const table[256] = {"
     else:
-        print "static const char *table%02X[256] = {" % (hibyte)
+        print "static const char * const table%02X[256] = {" % (hibyte)
     line = '    '
     for byte in range(256):
         line += '"'
@@ -59,7 +59,7 @@ def formatTable(lobytes, hibyte=None):
     print
 
 def formatMasterTable(hibytes):
-    print "static const char **table[256] = {"
+    print "static const char * const * const masterTable[256] = {"
     line = '    '
     for byte in range(256):
         if byte in hibytes:

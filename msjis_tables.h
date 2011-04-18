@@ -1,4 +1,4 @@
-static const char *table00[256] = {
+static const char * const table00[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "\x20", "\x21", "\x22", "\x23", "\x24", "\x25", "\x26", "\x27", "\x28", "\x29", "\x2A", "\x2B", "\x2C", "\x2D", "\x2E", "\x2F",
@@ -17,7 +17,7 @@ static const char *table00[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
-static const char *table81[256] = {
+static const char * const table81[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -36,7 +36,7 @@ static const char *table81[256] = {
     "\xE2\x84\xAB", "\xE2\x80\xB0", "\xE2\x99\xAF", "\xE2\x99\xAD", "\xE2\x99\xAA", "\xE2\x80\xA0", "\xE2\x80\xA1", "\xC2\xB6", "", "", "", "", "\xE2\x97\xAF", "", "", ""
 };
 
-static const char *table82[256] = {
+static const char * const table82[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -55,7 +55,7 @@ static const char *table82[256] = {
     "\xE3\x82\x92", "\xE3\x82\x93", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
-static const char *table83[256] = {
+static const char * const table83[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -74,7 +74,7 @@ static const char *table83[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
-static const char *table84[256] = {
+static const char * const table84[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -93,7 +93,7 @@ static const char *table84[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
-static const char *table88[256] = {
+static const char * const table88[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -112,7 +112,7 @@ static const char *table88[256] = {
     "\xE8\x8A\x8B", "\xE9\xB0\xAF", "\xE5\x85\x81", "\xE5\x8D\xB0", "\xE5\x92\xBD", "\xE5\x93\xA1", "\xE5\x9B\xA0", "\xE5\xA7\xBB", "\xE5\xBC\x95", "\xE9\xA3\xB2", "\xE6\xB7\xAB", "\xE8\x83\xA4", "\xE8\x94\xAD", "", "", ""
 };
 
-static const char *table89[256] = {
+static const char * const table89[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -131,7 +131,7 @@ static const char *table89[256] = {
     "\xE8\xA7\xA3", "\xE5\x9B\x9E", "\xE5\xA1\x8A", "\xE5\xA3\x8A", "\xE5\xBB\xBB", "\xE5\xBF\xAB", "\xE6\x80\xAA", "\xE6\x82\x94", "\xE6\x81\xA2", "\xE6\x87\x90", "\xE6\x88\x92", "\xE6\x8B\x90", "\xE6\x94\xB9", "", "", ""
 };
 
-static const char *table8A[256] = {
+static const char * const table8A[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -150,7 +150,7 @@ static const char *table8A[256] = {
     "\xE5\xAC\x89", "\xE5\xAF\x84", "\xE5\xB2\x90", "\xE5\xB8\x8C", "\xE5\xB9\xBE", "\xE5\xBF\x8C", "\xE6\x8F\xAE", "\xE6\x9C\xBA", "\xE6\x97\x97", "\xE6\x97\xA2", "\xE6\x9C\x9F", "\xE6\xA3\x8B", "\xE6\xA3\x84", "", "", ""
 };
 
-static const char *table8B[256] = {
+static const char * const table8B[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -169,7 +169,7 @@ static const char *table8B[256] = {
     "\xE6\x84\x9A", "\xE8\x99\x9E", "\xE5\x96\xB0", "\xE7\xA9\xBA", "\xE5\x81\xB6", "\xE5\xAF\x93", "\xE9\x81\x87", "\xE9\x9A\x85", "\xE4\xB8\xB2", "\xE6\xAB\x9B", "\xE9\x87\xA7", "\xE5\xB1\x91", "\xE5\xB1\x88", "", "", ""
 };
 
-static const char *table8C[256] = {
+static const char * const table8C[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -188,7 +188,7 @@ static const char *table8C[256] = {
     "\xE4\xBA\xA4", "\xE4\xBD\xBC", "\xE4\xBE\xAF", "\xE5\x80\x99", "\xE5\x80\x96", "\xE5\x85\x89", "\xE5\x85\xAC", "\xE5\x8A\x9F", "\xE5\x8A\xB9", "\xE5\x8B\xBE", "\xE5\x8E\x9A", "\xE5\x8F\xA3", "\xE5\x90\x91", "", "", ""
 };
 
-static const char *table8D[256] = {
+static const char * const table8D[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -207,7 +207,7 @@ static const char *table8D[256] = {
     "\xE6\x98\xA8", "\xE6\x9C\x94", "\xE6\x9F\xB5", "\xE7\xAA\x84", "\xE7\xAD\x96", "\xE7\xB4\xA2", "\xE9\x8C\xAF", "\xE6\xA1\x9C", "\xE9\xAE\xAD", "\xE7\xAC\xB9", "\xE5\x8C\x99", "\xE5\x86\x8A", "\xE5\x88\xB7", "", "", ""
 };
 
-static const char *table8E[256] = {
+static const char * const table8E[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -226,7 +226,7 @@ static const char *table8E[256] = {
     "\xE9\x85\x92", "\xE9\xA6\x96", "\xE5\x84\x92", "\xE5\x8F\x97", "\xE5\x91\xAA", "\xE5\xAF\xBF", "\xE6\x8E\x88", "\xE6\xA8\xB9", "\xE7\xB6\xAC", "\xE9\x9C\x80", "\xE5\x9B\x9A", "\xE5\x8F\x8E", "\xE5\x91\xA8", "", "", ""
 };
 
-static const char *table8F[256] = {
+static const char * const table8F[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -245,7 +245,7 @@ static const char *table8F[256] = {
     "\xE6\x9D\xA1", "\xE6\x9D\x96", "\xE6\xB5\x84", "\xE7\x8A\xB6", "\xE7\x95\xB3", "\xE7\xA9\xA3", "\xE8\x92\xB8", "\xE8\xAD\xB2", "\xE9\x86\xB8", "\xE9\x8C\xA0", "\xE5\x98\xB1", "\xE5\x9F\xB4", "\xE9\xA3\xBE", "", "", ""
 };
 
-static const char *table90[256] = {
+static const char * const table90[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -264,7 +264,7 @@ static const char *table90[256] = {
     "\xE6\xA0\x93", "\xE6\xA0\xB4", "\xE6\xB3\x89", "\xE6\xB5\x85", "\xE6\xB4\x97", "\xE6\x9F\x93", "\xE6\xBD\x9C", "\xE7\x85\x8E", "\xE7\x85\xBD", "\xE6\x97\x8B", "\xE7\xA9\xBF", "\xE7\xAE\xAD", "\xE7\xB7\x9A", "", "", ""
 };
 
-static const char *table91[256] = {
+static const char * const table91[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -283,7 +283,7 @@ static const char *table91[256] = {
     "\xE6\x8A\x9E", "\xE6\x8B\x93", "\xE6\xB2\xA2", "\xE6\xBF\xAF", "\xE7\x90\xA2", "\xE8\xA8\x97", "\xE9\x90\xB8", "\xE6\xBF\x81", "\xE8\xAB\xBE", "\xE8\x8C\xB8", "\xE5\x87\xA7", "\xE8\x9B\xB8", "\xE5\x8F\xAA", "", "", ""
 };
 
-static const char *table92[256] = {
+static const char * const table92[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -302,7 +302,7 @@ static const char *table92[256] = {
     "\xE6\x8C\xBA", "\xE6\x8F\x90", "\xE6\xA2\xAF", "\xE6\xB1\x80", "\xE7\xA2\x87", "\xE7\xA6\x8E", "\xE7\xA8\x8B", "\xE7\xB7\xA0", "\xE8\x89\x87", "\xE8\xA8\x82", "\xE8\xAB\xA6", "\xE8\xB9\x84", "\xE9\x80\x93", "", "", ""
 };
 
-static const char *table93[256] = {
+static const char * const table93[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -321,7 +321,7 @@ static const char *table93[256] = {
     "\xE6\xB1\x9D", "\xE4\xBA\x8C", "\xE5\xB0\xBC", "\xE5\xBC\x90", "\xE8\xBF\xA9", "\xE5\x8C\x82", "\xE8\xB3\x91", "\xE8\x82\x89", "\xE8\x99\xB9", "\xE5\xBB\xBF", "\xE6\x97\xA5", "\xE4\xB9\xB3", "\xE5\x85\xA5", "", "", ""
 };
 
-static const char *table94[256] = {
+static const char * const table94[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -340,7 +340,7 @@ static const char *table94[256] = {
     "\xE9\x81\xBF", "\xE9\x9D\x9E", "\xE9\xA3\x9B", "\xE6\xA8\x8B", "\xE7\xB0\xB8", "\xE5\x82\x99", "\xE5\xB0\xBE", "\xE5\xBE\xAE", "\xE6\x9E\x87", "\xE6\xAF\x98", "\xE7\x90\xB5", "\xE7\x9C\x89", "\xE7\xBE\x8E", "", "", ""
 };
 
-static const char *table95[256] = {
+static const char * const table95[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -359,7 +359,7 @@ static const char *table95[256] = {
     "\xE5\x91\x86", "\xE5\xA0\xB1", "\xE5\xA5\x89", "\xE5\xAE\x9D", "\xE5\xB3\xB0", "\xE5\xB3\xAF", "\xE5\xB4\xA9", "\xE5\xBA\x96", "\xE6\x8A\xB1", "\xE6\x8D\xA7", "\xE6\x94\xBE", "\xE6\x96\xB9", "\xE6\x9C\x8B", "", "", ""
 };
 
-static const char *table96[256] = {
+static const char * const table96[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -378,7 +378,7 @@ static const char *table96[256] = {
     "\xE5\xBD\xB9", "\xE7\xB4\x84", "\xE8\x96\xAC", "\xE8\xA8\xB3", "\xE8\xBA\x8D", "\xE9\x9D\x96", "\xE6\x9F\xB3", "\xE8\x96\xAE", "\xE9\x91\x93", "\xE6\x84\x89", "\xE6\x84\x88", "\xE6\xB2\xB9", "\xE7\x99\x92", "", "", ""
 };
 
-static const char *table97[256] = {
+static const char * const table97[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -397,7 +397,7 @@ static const char *table97[256] = {
     "\xE6\xAD\xB4", "\xE5\x88\x97", "\xE5\x8A\xA3", "\xE7\x83\x88", "\xE8\xA3\x82", "\xE5\xBB\x89", "\xE6\x81\x8B", "\xE6\x86\x90", "\xE6\xBC\xA3", "\xE7\x85\x89", "\xE7\xB0\xBE", "\xE7\xB7\xB4", "\xE8\x81\xAF", "", "", ""
 };
 
-static const char *table98[256] = {
+static const char * const table98[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -416,7 +416,7 @@ static const char *table98[256] = {
     "\xE6\x9C\x83", "\xE5\x81\x95", "\xE5\x81\x90", "\xE5\x81\x88", "\xE5\x81\x9A", "\xE5\x81\x96", "\xE5\x81\xAC", "\xE5\x81\xB8", "\xE5\x82\x80", "\xE5\x82\x9A", "\xE5\x82\x85", "\xE5\x82\xB4", "\xE5\x82\xB2", "", "", ""
 };
 
-static const char *table99[256] = {
+static const char * const table99[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -435,7 +435,7 @@ static const char *table99[256] = {
     "\xE5\x92\x80", "\xE5\x91\xB6", "\xE5\x92\x84", "\xE5\x92\x90", "\xE5\x92\x86", "\xE5\x93\x87", "\xE5\x92\xA2", "\xE5\x92\xB8", "\xE5\x92\xA5", "\xE5\x92\xAC", "\xE5\x93\x84", "\xE5\x93\x88", "\xE5\x92\xA8", "", "", ""
 };
 
-static const char *table9A[256] = {
+static const char * const table9A[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -454,7 +454,7 @@ static const char *table9A[256] = {
     "\xE5\xA4\xB8", "\xE5\xA4\xBE", "\xE7\xAB\x92", "\xE5\xA5\x95", "\xE5\xA5\x90", "\xE5\xA5\x8E", "\xE5\xA5\x9A", "\xE5\xA5\x98", "\xE5\xA5\xA2", "\xE5\xA5\xA0", "\xE5\xA5\xA7", "\xE5\xA5\xAC", "\xE5\xA5\xA9", "", "", ""
 };
 
-static const char *table9B[256] = {
+static const char * const table9B[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -473,7 +473,7 @@ static const char *table9B[256] = {
     "\xE5\xB9\xA4", "\xE5\xB9\x87", "\xE5\xB9\xB5", "\xE5\xB9\xB6", "\xE5\xB9\xBA", "\xE9\xBA\xBC", "\xE5\xB9\xBF", "\xE5\xBA\xA0", "\xE5\xBB\x81", "\xE5\xBB\x82", "\xE5\xBB\x88", "\xE5\xBB\x90", "\xE5\xBB\x8F", "", "", ""
 };
 
-static const char *table9C[256] = {
+static const char * const table9C[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -492,7 +492,7 @@ static const char *table9C[256] = {
     "\xE6\x87\xBA", "\xE6\x87\xB4", "\xE6\x87\xBF", "\xE6\x87\xBD", "\xE6\x87\xBC", "\xE6\x87\xBE", "\xE6\x88\x80", "\xE6\x88\x88", "\xE6\x88\x89", "\xE6\x88\x8D", "\xE6\x88\x8C", "\xE6\x88\x94", "\xE6\x88\x9B", "", "", ""
 };
 
-static const char *table9D[256] = {
+static const char * const table9D[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -511,7 +511,7 @@ static const char *table9D[256] = {
     "\xE6\x99\xB0", "\xE6\x9A\x83", "\xE6\x9A\x88", "\xE6\x9A\x8E", "\xE6\x9A\x89", "\xE6\x9A\x84", "\xE6\x9A\x98", "\xE6\x9A\x9D", "\xE6\x9B\x81", "\xE6\x9A\xB9", "\xE6\x9B\x89", "\xE6\x9A\xBE", "\xE6\x9A\xBC", "", "", ""
 };
 
-static const char *table9E[256] = {
+static const char * const table9E[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -530,7 +530,7 @@ static const char *table9E[256] = {
     "\xE6\xA9\x87", "\xE6\xA9\xA2", "\xE6\xA9\x99", "\xE6\xA9\xA6", "\xE6\xA9\x88", "\xE6\xA8\xB8", "\xE6\xA8\xA2", "\xE6\xAA\x90", "\xE6\xAA\x8D", "\xE6\xAA\xA0", "\xE6\xAA\x84", "\xE6\xAA\xA2", "\xE6\xAA\xA3", "", "", ""
 };
 
-static const char *table9F[256] = {
+static const char * const table9F[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -549,7 +549,7 @@ static const char *table9F[256] = {
     "\xE6\xBA\x9F", "\xE6\xBD\x81", "\xE6\xBC\x91", "\xE7\x81\x8C", "\xE6\xBB\xAC", "\xE6\xBB\xB8", "\xE6\xBB\xBE", "\xE6\xBC\xBF", "\xE6\xBB\xB2", "\xE6\xBC\xB1", "\xE6\xBB\xAF", "\xE6\xBC\xB2", "\xE6\xBB\x8C", "", "", ""
 };
 
-static const char *tableE0[256] = {
+static const char * const tableE0[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -568,7 +568,7 @@ static const char *tableE0[256] = {
     "\xE7\x91\xA9", "\xE7\x91\xB0", "\xE7\x91\xA3", "\xE7\x91\xAA", "\xE7\x91\xB6", "\xE7\x91\xBE", "\xE7\x92\x8B", "\xE7\x92\x9E", "\xE7\x92\xA7", "\xE7\x93\x8A", "\xE7\x93\x8F", "\xE7\x93\x94", "\xE7\x8F\xB1", "", "", ""
 };
 
-static const char *tableE1[256] = {
+static const char * const tableE1[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -587,7 +587,7 @@ static const char *tableE1[256] = {
     "\xE7\xA2\xA3", "\xE7\xA2\xB5", "\xE7\xA2\xAA", "\xE7\xA2\xAF", "\xE7\xA3\x91", "\xE7\xA3\x86", "\xE7\xA3\x8B", "\xE7\xA3\x94", "\xE7\xA2\xBE", "\xE7\xA2\xBC", "\xE7\xA3\x85", "\xE7\xA3\x8A", "\xE7\xA3\xAC", "", "", ""
 };
 
-static const char *tableE2[256] = {
+static const char * const tableE2[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -606,7 +606,7 @@ static const char *tableE2[256] = {
     "\xE7\xB3\x85", "\xE7\xB3\x82", "\xE7\xB3\x98", "\xE7\xB3\x92", "\xE7\xB3\x9C", "\xE7\xB3\xA2", "\xE9\xAC\xBB", "\xE7\xB3\xAF", "\xE7\xB3\xB2", "\xE7\xB3\xB4", "\xE7\xB3\xB6", "\xE7\xB3\xBA", "\xE7\xB4\x86", "", "", ""
 };
 
-static const char *tableE3[256] = {
+static const char * const tableE3[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -625,7 +625,7 @@ static const char *tableE3[256] = {
     "\xE8\x83\x99", "\xE8\x83\x9D", "\xE8\x83\x84", "\xE8\x83\x9A", "\xE8\x83\x96", "\xE8\x84\x89", "\xE8\x83\xAF", "\xE8\x83\xB1", "\xE8\x84\x9B", "\xE8\x84\xA9", "\xE8\x84\xA3", "\xE8\x84\xAF", "\xE8\x85\x8B", "", "", ""
 };
 
-static const char *tableE4[256] = {
+static const char * const tableE4[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -644,7 +644,7 @@ static const char *tableE4[256] = {
     "\xE8\x93\xBF", "\xE8\x93\xB4", "\xE8\x94\x97", "\xE8\x94\x98", "\xE8\x94\xAC", "\xE8\x94\x9F", "\xE8\x94\x95", "\xE8\x94\x94", "\xE8\x93\xBC", "\xE8\x95\x80", "\xE8\x95\xA3", "\xE8\x95\x98", "\xE8\x95\x88", "", "", ""
 };
 
-static const char *tableE5[256] = {
+static const char * const tableE5[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -663,7 +663,7 @@ static const char *tableE5[256] = {
     "\xE8\xA4\x9E", "\xE8\xA4\xA5", "\xE8\xA4\xAA", "\xE8\xA4\xAB", "\xE8\xA5\x81", "\xE8\xA5\x84", "\xE8\xA4\xBB", "\xE8\xA4\xB6", "\xE8\xA4\xB8", "\xE8\xA5\x8C", "\xE8\xA4\x9D", "\xE8\xA5\xA0", "\xE8\xA5\x9E", "", "", ""
 };
 
-static const char *tableE6[256] = {
+static const char * const tableE6[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -682,7 +682,7 @@ static const char *tableE6[256] = {
     "\xE8\xB7\xBC", "\xE8\xB8\x88", "\xE8\xB8\x89", "\xE8\xB7\xBF", "\xE8\xB8\x9D", "\xE8\xB8\x9E", "\xE8\xB8\x90", "\xE8\xB8\x9F", "\xE8\xB9\x82", "\xE8\xB8\xB5", "\xE8\xB8\xB0", "\xE8\xB8\xB4", "\xE8\xB9\x8A", "", "", ""
 };
 
-static const char *tableE7[256] = {
+static const char * const tableE7[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -701,7 +701,7 @@ static const char *tableE7[256] = {
     "\xE9\x8A\x9C", "\xE9\x8A\x96", "\xE9\x8A\x93", "\xE9\x8A\x9B", "\xE9\x89\x9A", "\xE9\x8B\x8F", "\xE9\x8A\xB9", "\xE9\x8A\xB7", "\xE9\x8B\xA9", "\xE9\x8C\x8F", "\xE9\x8B\xBA", "\xE9\x8D\x84", "\xE9\x8C\xAE", "", "", ""
 };
 
-static const char *tableE8[256] = {
+static const char * const tableE8[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -720,7 +720,7 @@ static const char *tableE8[256] = {
     "\xE9\xA0\x8F", "\xE9\xA0\x8C", "\xE9\xA0\xB8", "\xE9\xA0\xA4", "\xE9\xA0\xA1", "\xE9\xA0\xB7", "\xE9\xA0\xBD", "\xE9\xA1\x86", "\xE9\xA1\x8F", "\xE9\xA1\x8B", "\xE9\xA1\xAB", "\xE9\xA1\xAF", "\xE9\xA1\xB0", "", "", ""
 };
 
-static const char *tableE9[256] = {
+static const char * const tableE9[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -739,7 +739,7 @@ static const char *tableE9[256] = {
     "\xE9\xB4\xAA", "\xE9\xB4\xA6", "\xE9\xB6\xAF", "\xE9\xB4\xA3", "\xE9\xB4\x9F", "\xE9\xB5\x84", "\xE9\xB4\x95", "\xE9\xB4\x92", "\xE9\xB5\x81", "\xE9\xB4\xBF", "\xE9\xB4\xBE", "\xE9\xB5\x86", "\xE9\xB5\x88", "", "", ""
 };
 
-static const char *tableEA[256] = {
+static const char * const tableEA[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -758,7 +758,7 @@ static const char *tableEA[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
-static const char *tableF6[256] = {
+static const char * const tableF6[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -777,7 +777,7 @@ static const char *tableF6[256] = {
     "\xE5\x86\x8D\xE2\x83\x9D", "\xE7\xA6\x81\xE2\x83\x9D", "\xE2\x87\x84", "\xE2\x86\x94", "\xE2\x86\x97", "\xE2\x86\x99", "\xE2\x86\x98", "\xE2\x86\x96", "\xE2\x98\x9E", "\xE2\x98\x9C", "\xE2\x98\x9D", "\xE2\x98\x9F", "", "", "", ""
 };
 
-static const char *tableF7[256] = {
+static const char * const tableF7[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -796,7 +796,7 @@ static const char *tableF7[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
-static const char *tableF8[256] = {
+static const char * const tableF8[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -815,7 +815,7 @@ static const char *tableF8[256] = {
     "\xC3\xB0", "\xC3\xB1", "\xC3\xB2", "\xC3\xB3", "\xC3\xB4", "\xC3\xB5", "\xC3\xB6", "\xC3\xB7", "\xC3\xB8", "\xC3\xB9", "\xC3\xBA", "\xC3\xBB", "\xC3\xBC", "", "", ""
 };
 
-static const char *tableF9[256] = {
+static const char * const tableF9[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
@@ -834,7 +834,7 @@ static const char *tableF9[256] = {
     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 };
 
-static const char **table[256] = {
+static const char * const * const masterTable[256] = {
     table00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,

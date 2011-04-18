@@ -217,102 +217,15 @@ BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
     return FALSE;
 }
 
-/** Allocate a character string containing the UTF-8 conversion of the given
- *  wide-character string.
- *
- * @param wchar The wide-character string to convert.
- * @param memsize The length of the wide-character string.
- * @return An allocated character string containing the UTF-8 conversion of
- *         wchar, or NULL if an error occurred.
- */
-static unsigned char *wchar_to_utf8(wchar_t *wchar, size_t memsize,
-				    size_t *buflen)
-{
-    int i, hasSurrogate = 0;
-    unsigned long surrogate;
-    unsigned char *mem, *ptr;
-    
-    mem = calloc(memsize * 6 + 1, 1);
-    ptr = mem;
-    
-    for(i = 0; i < memsize; i++)
-    {
-	if(wchar[i] < 0x80)
-	{
-	    *ptr++ = wchar[i] & 0x7F;
-	}
-	else if(wchar[i] < 0x800)
-	{
-	    *ptr++ = 0xC0 | ((wchar[i] >> 6) & 0x1F);
-	    *ptr++ = 0x80 | (wchar[i] & 0x3F);
-	}
-	else
-	{
-	    if (wchar[i] >= 0xD800 && wchar[i] <= 0xDBFF)
-	    {
-		surrogate = (wchar[i] & 0x3FF) << 10;
-		hasSurrogate = 1;
-	    }
-	    else if (hasSurrogate && wchar[i] >= 0xDC00 && wchar[i] <= 0xDFFF)
-	    {
-		surrogate |= wchar[i] & 0x3FF;
-		hasSurrogate = 0;
-		if (surrogate < 0x200000)
-		{
-		    *ptr++ = 0xF0 | ((surrogate >> 18) & 0x07);
-		    *ptr++ = 0x80 | ((surrogate >> 12) & 0x3F);
-		    *ptr++ = 0x80 | ((surrogate >> 6) & 0x3F);
-		    *ptr++ = 0x80 | (surrogate & 0x3F);
-		}
-		else if(surrogate < 0x4000000)
-		{
-		    *ptr++ = 0xF8 | ((surrogate >> 24) & 0x03);
-		    *ptr++ = 0x80 | ((surrogate >> 18) & 0x3F);
-		    *ptr++ = 0x80 | ((surrogate >> 12) & 0x3F);
-		    *ptr++ = 0x80 | ((surrogate >> 6) & 0x3F);
-		    *ptr++ = 0x80 | (surrogate & 0x3F);
-		}
-		else if(surrogate < 0x80000000)
-		{
-		    *ptr++ = 0xFC | ((surrogate >> 30) & 0x01);
-		    *ptr++ = 0x80 | ((surrogate >> 24) & 0x3F);
-		    *ptr++ = 0x80 | ((surrogate >> 18) & 0x3F);
-		    *ptr++ = 0x80 | ((surrogate >> 12) & 0x3F);
-		    *ptr++ = 0x80 | ((surrogate >> 6) & 0x3F);
-		    *ptr++ = 0x80 | (surrogate & 0x3F);
-		}
-	    }
-	    else
-	    {
-		if (hasSurrogate)
-		{
-		    surrogate >>= 10;
-		    *ptr++ = 0xE0 | ((surrogate >> 12) & 0x0F);
-		    *ptr++ = 0x80 | ((surrogate >> 6) & 0x3F);
-		    *ptr++ = 0x80 | (surrogate & 0x3F);
-		    hasSurrogate = 0;
-		}
-		*ptr++ = 0xE0 | ((wchar[i] >> 12) & 0x0F);
-		*ptr++ = 0x80 | ((wchar[i] >> 6) & 0x3F);
-		*ptr++ = 0x80 | (wchar[i] & 0x3F);
-	    }
-	}
-    }
-    
-    mem = realloc(mem, ptr - mem + 1);
-    *buflen = ptr - mem;
-    
-    return mem;
-}
-
 struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 {
-    int iDescriptor, i;
+    int iDescriptor, i, j;
     unsigned char *packData[8 * 16];
     unsigned char *pack;
     size_t packSizes[8 * 16];
+    size_t packSize;
     struct CDText *cdtextData = NULL;
-    struct CDROM_TOC_CD_TEXT_DATA_BLOCK *descriptor = NULL;
+    CDROM_TOC_CD_TEXT_DATA_BLOCK *descriptor = NULL;
     
     for (i = 0; i < 8 * 16; i++) {
 	packData[i] = NULL;
@@ -352,7 +265,7 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 	    packSize += 12;
 	    
 	    packData[descriptor->BlockNumber * 16 +
-		     descriptor->PackType - 0x80] = data;
+		     descriptor->PackType - 0x80] = pack;
 	    packSizes[descriptor->BlockNumber * 16 +
 		      descriptor->PackType - 0x80] = packSize;
 	}
@@ -418,6 +331,7 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 	for (i = 0; i < 8 * 16; i++) {
 	    if (packSizes[i] > 0) {
 		unsigned char packType = i % 16 + 0x80;
+		char **datum;
 		char *data = NULL, *dataPtr = NULL;
 		
 		switch (packType) {
@@ -427,7 +341,7 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 		case CDROM_CD_TEXT_PACK_COMPOSER:
 		case CDROM_CD_TEXT_PACK_ARRANGER:
 		case CDROM_CD_TEXT_PACK_MESSAGES:
-		case CDROM_CD_TEXT_PACK_UPCEAN:
+		case CDROM_CD_TEXT_PACK_UPC_EAN:
 		    data = NULL;
 		    switch (cdtextData->blocks[i / 16].charset) {
 		    case CDROM_CD_TEXT_CHARSET_ASCII:
@@ -468,7 +382,7 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 		    case CDROM_CD_TEXT_PACK_MESSAGES:
 			datum = cdtextData->blocks[i / 16].messages;
 			break;
-		    case CDROM_CD_TEXT_PACK_UPCEAN:
+		    case CDROM_CD_TEXT_PACK_UPC_EAN:
 			datum = cdtextData->blocks[i / 16].upc_ean_isrcs;
 			break;
 		    default:
@@ -523,11 +437,11 @@ struct CDText *ParseCDText(CDROM_TOC_CD_TEXT_DATA *cdtext)
 		    cdtextData->tocInfo2.intervals =
 			realloc(cdtextData->tocInfo2.intervals,
 				cdtextData->tocInfo2.iIntervals *
-				sizeof(CDTextTOCInterval));
+				sizeof(struct CDTextTOCInterval));
 		    if (cdtextData->tocInfo2.intervals != NULL) {
 			memset(&(cdtextData->tocInfo2.intervals), 0,
 			       cdtextData->tocInfo2.iIntervals *
-			       sizeof(CDTextTOCInterval));
+			       sizeof(struct CDTextTOCInterval));
 			for (j = 0; j < cdtextData->tocInfo2.iIntervals; j++) {
 			    cdtextData->tocInfo2.intervals[j].priorityNumber =
 				packData[i][j * 12];
@@ -605,7 +519,7 @@ void FreeCDText(struct CDText *cdtextData)
 	    free(cdtextData->blocks[i].arrangers);
 	    free(cdtextData->blocks[i].messages);
 	    free(cdtextData->blocks[i].upc_ean_isrcs);
-	    free(cdtextData->blocks[i].disc_id);
+	    free(cdtextData->blocks[i].discID);
 	    free(cdtextData->blocks[i].genreName);
 	}
 	free(cdtextData->tocInfo2.intervals);

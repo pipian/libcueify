@@ -23,6 +23,9 @@
  * SOFTWARE.
  */
 
+#include <string.h>
+#include <stdlib.h>
+
 #include "charsets.h"
 #include "msjis_tables.h"
 
@@ -30,8 +33,8 @@ char *ConvertMSJIS(char *szMSJIS, int iSize)
 {
     int iOutputSize = 0, i;
     char cHi, cLo;
-    char *aszTable;
-    char *szChar;
+    const char * const *aszTable;
+    const char *szChar;
     char *szOutput = NULL, *szOutputPtr;
     
     if (iSize < 0) {
@@ -40,14 +43,14 @@ char *ConvertMSJIS(char *szMSJIS, int iSize)
 	do {
 	    cHi = *szOutput++;
 	    cLo = *szOutput++;
-	    aszTable = masterTable[cHi];
+	    aszTable = masterTable[(int)cHi];
 	    if (aszTable == NULL) {
 		/* Don't know this table! */
 		break;
-	    } else if (aszTable[cLo] != '\0') {
-		iOutputSize += strlen(aszTable[cLo]);
+	    } else if (aszTable[(int)cLo] != '\0') {
+		iOutputSize += strlen(aszTable[(int)cLo]);
 	    }
-	} while (aszTable[cLo] != '\0');
+	} while (aszTable[(int)cLo] != '\0');
 	/* And also include the terminator. */
 	iOutputSize++;
     } else {
@@ -56,14 +59,14 @@ char *ConvertMSJIS(char *szMSJIS, int iSize)
 	for (i = 0; i < iSize; i++) {
 	    cHi = *szOutput++;
 	    cLo = *szOutput++;
-	    aszTable = masterTable[cHi];
+	    aszTable = masterTable[(int)cHi];
 	    if (aszTable == NULL) {
 		/* Don't know this table! */
 		iOutputSize++;
-	    } else if (aszTable[cLo] == '\0') {
+	    } else if (aszTable[(int)cLo] == '\0') {
 		iOutputSize++;
 	    } else {
-		iOutputSize += strlen(aszTable[cLo]);
+		iOutputSize += strlen(aszTable[(int)cLo]);
 	    }
 	}
 	/* And also add a terminator. */
@@ -81,16 +84,16 @@ char *ConvertMSJIS(char *szMSJIS, int iSize)
     while (iOutputSize > 0) {
 	cHi = *szMSJIS++;
 	cLo = *szMSJIS++;
-	aszTable = masterTable[cHi];
+	aszTable = masterTable[(int)cHi];
 	if (aszTable == NULL) {
 	    /* Don't know this table! */
 	    *szOutputPtr++ = '\0';
 	    iOutputSize--;
-	} else if (aszTable[cLo] == '\0') {
+	} else if (aszTable[(int)cLo] == '\0') {
 	    *szOutputPtr++ = '\0';
 	    iOutputSize--;
 	} else {
-	    szChar = aszTable[cLo];
+	    szChar = aszTable[(int)cLo];
 	    strcpy(szOutputPtr, szChar);
 	    szOutputPtr += strlen(szChar);
 	    iOutputSize -= strlen(szChar);
