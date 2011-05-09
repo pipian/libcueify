@@ -1,7 +1,7 @@
 /* toc.h - Header for advanced TOC-based CD-ROM functions.
  *
- * Copyright (c) 2010 Ian Jacobi, except typedefs and defines, which are
- *     in the public domain courtesy of Caspar S. Hornstrup,
+ * Copyright (c) 2010, 2011 Ian Jacobi, except typedefs and defines,
+ *     which are in the public domain courtesy of Caspar S. Hornstrup,
  *     <chorns@users.sourceforge.net>
  * 
  * Permission is hereby granted, free of charge, to any person
@@ -36,6 +36,7 @@
 #define FILE_DEVICE_CD_ROM                0x00000002
 #define FILE_READ_ACCESS                  0x00000001
 #define METHOD_BUFFERED                   0
+#define METHOD_OUT_DIRECT                 2
 
 #define IOCTL_CDROM_BASE                  FILE_DEVICE_CD_ROM
 
@@ -45,6 +46,8 @@
     CTL_CODE(IOCTL_CDROM_BASE, 0x0015, METHOD_BUFFERED, FILE_READ_ACCESS)
 #define IOCTL_CDROM_SEEK_AUDIO_MSF \
     CTL_CODE(IOCTL_CDROM_BASE, 0x0001, METHOD_BUFFERED, FILE_READ_ACCESS)
+#define IOCTL_CDROM_RAW_READ \
+    CTL_CODE(IOCTL_CDROM_BASE, 0x000F, METHOD_OUT_DIRECT, FILE_READ_ACCESS)
 
 #define MAXIMUM_NUMBER_TRACKS             100
 
@@ -216,6 +219,20 @@ typedef union _SUB_Q_CHANNEL_DATA {
 #define DIGITAL_COPY_PERMITTED            0x2
 #define AUDIO_DATA_TRACK                  0x4
 #define TWO_FOUR_CHANNEL_AUDIO            0x8
+
+typedef enum _TRACK_MODE_TYPE {
+    YellowMode2,
+    XAForm2,
+    CDDA
+} TRACK_MODE_TYPE, *PTRACK_MODE_TYPE;
+
+typedef struct __RAW_READ_INFO {
+    LARGE_INTEGER DiskOffset;
+    ULONG SectorCount;
+    TRACK_MODE_TYPE TrackMode;
+} RAW_READ_INFO, *PRAW_READ_INFO;
+
+#define RAW_SECTOR_SIZE 2352
 
 struct TrackIndex {
     UCHAR M;
@@ -490,5 +507,15 @@ void FreeCDText(struct CDText *cdtextData);
  */
 BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
 			struct TrackIndices *indices);
+
+/** Read a raw sector at the given LBA offset.
+ *
+ * @param hDevice A handle to the drive to perform the raw read from.
+ * @param lba The Logical Block Address of the sector to read.
+ * @param trackMode The mode of the disc (0x00 - CD, 0x10 - CD-XA, 0x20 - CD-I)
+ * @return An allocated buffer of 2352 bytes containing the raw sector
+ *         read, or NULL if there was an error.  The buffer must be freed.
+ */
+unsigned char *ReadRawSector(HANDLE hDevice, unsigned int lba, UCHAR trackMode);
 
 #endif

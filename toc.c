@@ -1,6 +1,6 @@
 /* toc.c - Advanced TOC-based CD-ROM functions.
  *
- * Copyright (c) 2010 Ian Jacobi
+ * Copyright (c) 2010, 2011 Ian Jacobi
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -700,4 +700,42 @@ BOOL DetectTrackIndices(HANDLE hDevice, CDROM_TOC *toc, int iTrack,
     } else {
 	return FALSE;
     }
+}
+
+unsigned char *ReadRawSector(HANDLE hDevice, unsigned int lba, UCHAR trackMode)
+{
+    DWORD dwReturned;
+    RAW_READ_INFO readInfo;
+    unsigned char *sector = NULL;
+    
+    sector = malloc(RAW_SECTOR_SIZE);
+    if (sector == NULL) {
+	return NULL;
+    }
+    
+    readInfo.DiskOffset.QuadPart = lba * 2048;
+    readInfo.SectorCount = 1;
+    switch (trackMode) {
+    case 0x00: /* CD */
+	readInfo.TrackMode = YellowMode2;
+	break;
+    case 0x10: /* CD-I */
+    case 0x20: /* CD-XA */
+	readInfo.TrackMode = XAForm2;
+	break;
+    default:
+	readInfo.TrackMode = YellowMode2;
+	break;
+    }
+
+    if (!DeviceIoControl(hDevice,
+			 IOCTL_CDROM_RAW_READ,
+			 &readInfo, sizeof(readInfo),
+			 sector, RAW_SECTOR_SIZE,
+			 &dwReturned, NULL)) {
+	free(sector);
+	sector = NULL;
+    }
+    
+    return sector;
 }

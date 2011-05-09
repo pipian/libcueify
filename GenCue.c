@@ -291,13 +291,15 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
     unsigned char cdtextBacking[4096];
     CDROM_TOC_CD_TEXT_DATA *cdtext = (CDROM_TOC_CD_TEXT_DATA *)cdtextBacking;
     SUB_Q_CHANNEL_DATA data;
+    unsigned char *raw;
     int iTrack, iIndex, iDescriptor, iBlock;
     struct CDText *cdtextData;
     struct TrackIndices indices;
     BOOL bHasPregap = FALSE;
     struct TrackIndex pregap;
     struct TrackIndex offset;
-    UCHAR curSession = 0, trackMode = 1;
+    UCHAR curSession = 0;
+    UCHAR trackMode = 0;
     
     hDevice = OpenVolume(cDriveLetter);
     if (hDevice != INVALID_HANDLE_VALUE) {
@@ -572,18 +574,16 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	    }
 	}
 	for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != 0xA0 || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
-	switch (fulltoc->Descriptors[iDescriptor].Msf[1]) {
+	trackMode = fulltoc->Descriptors[iDescriptor].Msf[1];
+	switch (trackMode) {
 	case 0x00:
 	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD\n");
-	    trackMode = 1;
 	    break;
 	case 0x10:
 	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-I\n");
-	    trackMode = 3;
 	    break;
 	case 0x20:
 	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-XA\n");
-	    trackMode = 2;
 	    break;
 	default:
 	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
@@ -618,27 +618,47 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 			curSession);
 	    }
 	    if (toc.TrackData[iTrack - 1].Control & AUDIO_DATA_TRACK) {
-		switch (trackMode) {
-		case 1:
-		    fprintf(log,
-			    "    TRACK %02d MODE1/2352\n",
-			    iTrack);
-		    break;
-		case 2:
-		    fprintf(log,
-			    "    TRACK %02d MODE2/2352\n",
-			    iTrack);
-		    break;
-		case 3:
+		if (trackMode == 0x10) {
+		    /* CD-I...  We special case. */
 		    fprintf(log,
 			    "    TRACK %02d CDI/2352\n",
 			    iTrack);
-		    break;
-		default:
-		    fprintf(log,
-			    "    TRACK %02d MODE1/2352\n",
-			    iTrack);
-		    break;
+		} else {
+		    /* Best way to detect the data mode is a raw read. */
+		    raw = ReadRawSector(
+			hDevice,
+			toc.TrackData[iTrack - 1].Address[1] * 60 * 75 +
+			toc.TrackData[iTrack - 1].Address[2] * 75 +
+			toc.TrackData[iTrack - 1].Address[3],
+			trackMode);
+		    if (raw != NULL) {
+			switch (raw[15]) {
+			case 0x01:
+			    fprintf(log,
+				    "    TRACK %02d MODE1/2352\n",
+				    iTrack);
+			    break;
+			case 0x02:
+			    fprintf(log,
+				    "    TRACK %02d MODE2/2352\n",
+				    iTrack);
+			    break;
+			case 0x0F:
+			    /* Unknown */
+			default:
+			    fprintf(log,
+				    "    TRACK %02d MODE1/2352\n",
+				    iTrack);
+			    break;
+			}
+			free(raw);
+			raw = NULL;
+		    } else {
+			/* Dunno :-/ */
+			fprintf(log,
+				"    TRACK %02d MODE1/2352\n",
+				iTrack);
+		    }
 		}
 	    } else {
 		fprintf(log,
