@@ -9,16 +9,18 @@ SET(PROJECT_VERSION 0.1.0)
 # 2. If any interfaces have been added, removed, or changed since the last update, increment current, and set revision to 0.
 # 3. If any interfaces have been added since the last public release, then increment age.
 # 4. If any interfaces have been removed since the last public release, then set age to 0.
-SET(cueify_SOVERSION_CURRENT  0)
-SET(cueify_SOVERSION_REVISION 0)
-SET(cueify_SOVERSION_AGE      0)
+SET(libcueify_SOVERSION_CURRENT  0)
+SET(libcueify_SOVERSION_REVISION 0)
+SET(libcueify_SOVERSION_AGE      0)
 
-MATH(EXPR cueify_SOVERSION_MAJOR "${cueify_SOVERSION_CURRENT} - ${cueify_SOVERSION_AGE}")
-MATH(EXPR cueify_SOVERSION_MINOR "${cueify_SOVERSION_AGE}")
-MATH(EXPR cueify_SOVERSION_PATCH "${cueify_SOVERSION_REVISION}")
+MATH(EXPR libcueify_SOVERSION_MAJOR "${libcueify_SOVERSION_CURRENT} - ${libcueify_SOVERSION_AGE}")
+MATH(EXPR libcueify_SOVERSION_MINOR "${libcueify_SOVERSION_AGE}")
+MATH(EXPR libcueify_SOVERSION_PATCH "${libcueify_SOVERSION_REVISION}")
 
-SET(cueify_VERSION ${cueify_SOVERSION_MAJOR}.${cueify_SOVERSION_MINOR}.${cueify_SOVERSION_PATCH})
-SET(cueify_SOVERSION ${cueify_SOVERSION_MAJOR})
+SET(libcueify_VERSION ${libcueify_SOVERSION_MAJOR}.${libcueify_SOVERSION_MINOR}.${libcueify_SOVERSION_PATCH})
+SET(libcueify_SOVERSION ${libcueify_SOVERSION_MAJOR})
+
+SET(LIB_INSTALL_DIR ${EXEC_INSTALL_PREFIX}/lib${LIB_SUFFIX} CACHE PATH "Installation prefix for object code libraries" FORCE)
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
