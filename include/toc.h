@@ -1,4 +1,5 @@
-/* toc.h - Header for CD-ROM functions which read the TOC of a disc.
+/* toc.h - Header for CD-ROM functions which read the (basic) TOC of a
+ * disc.
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -29,207 +30,263 @@
 /**
  * A transparent handle for the table of contents (TOC) of an audio CD.
  *
- * This is returned by cueify_device_read_toc() and is passed as the first
+ * This is returned by cueify_toc_new() and is passed as the first
  * parameter to all cueify_toc_*() functions.
  */
 typedef void *cueify_toc;
 
 
 /**
- * This function reads the disc in the drive specified by the given
- * cueify_device object and returns a cueify_toc object for that disc.
+ * Create a new TOC instance. The instance is created with no tracks,
+ * and should be populated using cueify_device_read_toc(),
+ * cueify_toc_deserialize(), or the various cueify_toc_set_*()
+ * functions.
  *
- * On error, this function returns NULL and sets an error message on
- * the cueify_device object which may be accessed using
- * cueify_device_get_error().
- *
- * The cueify_toc object returned by this function should be freed
- * using cueify_toc_free() when you are finished using it.
- *
- * @param d a cueify_device object representing the device from which
- *          the cueify_toc object should be read
- * @return a cueify_toc object, or NULL.
+ * @return NULL if there was an error allocating memory, else the new TOC
  */
-cueify_toc *cueify_device_read_toc(cueify_device *device);
+cueify_toc *cueify_toc_new();
 
 
 /**
- * This function returns a cueify_toc object corresponding to the data
- * in the binary representation of a TOC in a buffer. The binary
- * representation is assumed to be in the format output by
- * cueify_toc_get_binary_blob().
+ * Read the TOC of the disc in the optical disc device associated with
+ * a device handle.
  *
- * On error, this function returns NULL.
- *
- * The cueify_toc object returned by this function should be freed
- * using cueify_toc_free() when you are finished using it.
- *
- * @param buf a buffer containing a binary representation of a TOC
- * @param len the size of the buffer
- * @return a cueify_toc object, or NULL.
+ * @pre { d != NULL, t != NULL }
+ * @param d an opened device handle
+ * @param t a TOC instance to populate
+ * @return CUEIFY_OK if the TOC was successfully read; otherwise an error code is
+ *         returned
  */
-cueify_toc *cueify_toc_from_binary_blob(uint8_t *buf, size_t len);
+int cueify_device_read_toc(cueify_device *d, cueify_toc *t);
 
 
 /**
- * This function returns a cueify_toc object populated with the
- * specified track numbers and offsets.
+ * Deserialize a TOC instance previously serialized with
+ * cueify_toc_serialize().
  *
- * This function is sufficient for calculating discids; the first item
- * in the array of track offsets (offsets[0]) should be used to
- * specify the offset of the lead-out (total number of sectors) of
- * this disc.
+ * @note This serialization is, in principle, the same as that
+ *       returned by the MMC READ TOC/PMA/ATIP command with format
+ *       0000b, and is compatible with the (poorly defined) definition
+ *       of the MCI/MCDI frame in ID3v2.
  *
- * On error, this function returns NULL.
- *
- * The cueify_toc object returned by this function should be freed
- * using cueify_toc_free() when you are finished using it.
- *
- * @param first the first track number of the disc
- * @param last the last track number of the disc
- * @param offsets a pointer to an array of 100 track (LBA) offsets
- * @return a cueify_toc object, or NULL.
+ * @pre { t != NULL, buffer != NULL }
+ * @param t a TOC instance to populate
+ * @param buffer a pointer to the serialized TOC data
+ * @param size the size of the buffer
+ * @return CUEIFY_OK if the TOC was successfully deserialized;
+ *         otherwise an error code is returned
  */
-cueify_toc *cueify_toc_from_track_data(uint8_t first, uint8_t last,
-				       uint32_t *offsets);
+int cueify_toc_deserialize(cueify_toc *t, uint8_t *buffer, size_t size);
 
 
 /**
- * Release the memory allocated for a cueify_toc object.
+ * Serialize a TOC instance for later deserialization with
+ * cueify_toc_deserialize().
+ * @note This serialization is, in principle, the same as that
+ *       returned by the MMC READ TOC/PMA/ATIP command with format
+ *       0000b, and is compatible with the (poorly defined) definition
+ *       of the MCI/MCDI frame in ID3v2.
  *
- * @param t a cueify_toc object returned by cueify_device_read_toc()
+ * @pre { t != NULL, size != NULL }
+ * @param t a TOC instance to serialize
+ * @param buffer a pointer to a location to serialize data to, or NULL
+ *               to determine the optimal size of such a buffer
+ * @param size a pointer to the size of the buffer. When called, the
+ *             size must contain the maximum number of bytes that may
+ *             be stored in buffer. When this function is complete,
+ *             the pointer will contain the actual number of bytes
+ *             serialized, or if buffer is NULL, the number of bytes
+ *             needed to fully serialize the TOC instance.
+ * @return CUEIFY_OK if the TOC was successfully serialized; otherwise
+ *         an error code is returned
+ */
+int cueify_toc_serialize(cueify_toc *t, uint8_t *buffer, size_t *size);
+
+
+/**
+ * Free a TOC instance. Deletes the object pointed to by t.
+ *
+ * @pre { t != NULL }
+ * @param t a cueify_toc object created by cueify_toc_new()
  */
 void cueify_toc_free(cueify_toc *t);
 
 
-#define CUEIFY_LEAD_OUT_TRACK  0xAA  /** track number of the lead-out of a disc in the TOC */
+#define CUEIFY_LEAD_OUT_TRACK  0xAA  /** Track number of the lead-out of a disc. */
 
 
 /**
- * Return the number of the first track in the TOC.
+ * Get the number of the first track in a TOC instance.
  *
- * @param t a cueify_toc object
- * @return the number of the first track in the TOC
+ * @pre { t != NULL }
+ * @param t a TOC instance
+ * @return the number of the first track in t
  */
 uint8_t cueify_toc_get_first_track(cueify_toc *t);
 
 
 /**
- * Return the number of the last track in the TOC.
+ * Get the number of the last track in a TOC instance.
  *
- * @param t a cueify_toc object
- * @return the number of the last track in the TOC
+ * @pre { t != NULL }
+ * @param t a TOC instance
+ * @return the number of the last track in t
  */
 uint8_t cueify_toc_get_last_track(cueify_toc *t);
 
 
-#define CUEIFY_TOC_TRACK_HAS_PREEMPHASIS  0x1  /** the audio track has had preemphasis applied */
-#define CUEIFY_TOC_TRACK_PERMITS_COPYING  0x2  /** the Digital Copy Permissions bit has been set on the audio track */
-#define CUEIFY_TOC_TRACK_IS_DATA          0x4  /** the track is a data track */
-#define CUEIFY_TOC_TRACK_IS_QUADRAPHONIC  0x8  /** the track contains quadraphonic (four channel) audio */
+#define CUEIFY_TOC_TRACK_HAS_PREEMPHASIS  0x1  /** The audio track has
+						   had preemphasis
+						   applied. */
+#define CUEIFY_TOC_TRACK_PERMITS_COPYING  0x2  /** The Digital Copy
+						   Permissions bit has
+						   been set on the
+						   audio track. */
+#define CUEIFY_TOC_TRACK_IS_DATA          0x4  /** The track is a data
+						   track. */
+#define CUEIFY_TOC_TRACK_IS_QUADRAPHONIC  0x8  /** The track contains
+						   quadraphonic (four
+						   channel) audio. */
 
 
 /**
- * Return the track control flags for a track in the TOC.
+ * Get the track control flags for a track in a TOC instance.
  *
- * trknum must be between the values of cueify_toc_get_first_track()
- * and cueify_toc_get_last_track(), inclusive or be
- * CUEIFY_LEAD_OUT_TRACK.  If trknum is outside these bounds, the
- * return value is undefined.
- *
- * @param t a cueify_toc object
- * @param trknum the number of the track for which flags should be returned
- * @return the track control flags for the track in the TOC
+ * @pre { t != NULL,
+ *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) OR
+ *        track == CUEIFY_LEAD_OUT_TRACK }
+ * @param t a TOC instance
+ * @param track the number of the track for which control flags should be returned
+ * @return the control flags for track number track in t
  */
-uint8_t cueify_toc_get_track_control_flags(cueify_toc *t, uint8_t trknum);
+uint8_t cueify_toc_get_track_control_flags(cueify_toc *t, uint8_t track);
 
 
-#define CUEIFY_SUB_Q_NOTHING   0x00  /** sub-Q-channel contains nothing */
-#define CUEIFY_SUB_Q_POSITION  0x01  /** sub-Q-channel contains the current position */
-#define CUEIFY_SUB_Q_MCN       0x02  /** sub-Q-channel contains the media catalog number */
-#define CUEIFY_SUB_Q_ISRC      0x03  /** sub-Q-channel contains an International Standard Recording Code (ISRC) */
+#define CUEIFY_SUB_Q_NOTHING   0x00  /** Sub-Q-channel contains
+					 nothing. */
+#define CUEIFY_SUB_Q_POSITION  0x01  /** Sub-Q-channel contains the
+					 current position. */
+#define CUEIFY_SUB_Q_MCN       0x02  /** Sub-Q-channel contains the
+					 media catalog number. */
+#define CUEIFY_SUB_Q_ISRC      0x03  /** Sub-Q-channel contains an
+					 International Standard
+					 Recording Code (ISRC). */
 
 
 /**
- * Return the format of the sub-Q-channel for a track in the TOC.
+ * Get the format of the sub-Q-channel for a track in a TOC instance.
  *
- * trknum must be between the values of cueify_toc_get_first_track()
- * and cueify_toc_get_last_track(), inclusive, or be
- * CUEIFY_LEAD_OUT_TRACK.  If trknum is outside these bounds, the
- * return value is undefined.
+ * @note In most cases, this function will return
+ *       CUEIFY_SUB_Q_NOTHING, however it is provided for completeness.
  *
- * NOTE: In most cases, this function will return
- * CUEIFY_SUB_Q_NOTHING, however it is provided for completeness.
- *
- * @param t a cueify_toc object
- * @param trknum the number of the track for which the sub-Q-channel format should be returned
- * @return the contents of the sub-Q-channel for the track in the TOC
+ * @pre { t != NULL,
+ *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) OR
+ *        track == CUEIFY_LEAD_OUT_TRACK }
+ * @param t a TOC instance
+ * @param track the number of the track for which the sub-Q-channel
+ *              format should be returned
+ * @return the contents of the sub-Q-channel for track number track in t
  */
-uint8_t cueify_toc_get_sub_q_channel_contents(cueify_toc *t, uint8_t trknum);
+uint8_t cueify_toc_get_track_sub_q_channel_contents(cueify_toc *t, uint8_t track);
 
 
 /**
- * Return the starting offset of a track in the TOC.
+ * Get the absolute CD-frame address (LBA) of the start of a track in
+ * a TOC instance.
  *
- * This offset is the number of frames from the start of the disc
- * which this track starts at (the LBA offset of the track)
- *
- * trknum must be between the values of cueify_toc_get_first_track()
- * and cueify_toc_get_last_track(), inclusive, or be
- * CUEIFY_LEAD_OUT_TRACK.  If trknum is outside these bounds, the
- * return value is undefined.
- *
- * @param t a cueify_toc object
- * @param trknum the number of the track for which the offset should be returned
- * @return the offset of the start of the track in the TOC
+ * @pre { t != NULL,
+ *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) OR
+ *        track == CUEIFY_LEAD_OUT_TRACK }
+ * @param t a TOC instance
+ * @param track the number of the track for which the address should
+ *              be returned
+ * @return the address of the start of track number track in t
  */
-uint32_t cueify_toc_get_track_offset(cueify_toc *t, uint8_t trknum);
+uint32_t cueify_toc_get_track_address(cueify_toc *t, uint8_t track);
 
 
 /**
- * Return the total number of sectors in a TOC.
+ * Get the total number of CD-frames in a TOC instance.
  *
- * NOTE: This macro is identical to
- * cueify_toc_get_track_offset(t, CUEIFY_LEAD_OUT_TRACK)
+ * @note Shorthand for cueify_toc_get_track_address(t, CUEIFY_LEAD_OUT_TRACK).
  *
- * @param t a cueify_toc object
- * @return the length of the disc represented by the toc
+ * @pre { t != NULL }
+ * @param t a TOC instance
+ * @return the total number of CD-frames in t
  */
-#define cueify_toc_get_sectors(t)  \
-  cueify_toc_get_track_offset(t, CUEIFY_LEAD_OUT_TRACK)
+#define cueify_toc_get_disc_length(t)  \
+    cueify_toc_get_track_offset(t, CUEIFY_LEAD_OUT_TRACK)
 
 
 /**
- * Return the length of a track in the TOC.
+ * Get the total number of CD-frames in a track in a TOC instance.
  *
- * This length is the number of frames from the start of the track
- * to the start of the next track.
- *
- * trknum must be between the values of cueify_toc_get_first_track()
- * and cueify_toc_get_last_track(), inclusive.  If trknum is outside
- * these bounds, the return value is undefined.
- *
- * @param t a cueify_toc object
- * @param trknum the number of the track for which the offset should be returned
- * @return the length of the track in the TOC
+ * @pre { t != NULL,
+ *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) }
+ * @param t a TOC instance
+ * @param track the number of the track for which the total number of
+ *              CD-frames be returned
+ * @return the total number of CD-frames in track number track in t
  */
-uint32_t cueify_toc_get_track_length(cueify_toc *t, uint8_t trknum);
+uint32_t cueify_toc_get_track_length(cueify_toc *t, uint8_t track);
 
 
 /**
- * Populate a buffer with the binary representation of a TOC.
+ * Append a track to a TOC instance.
  *
- * The binary representation of the TOC is that as would be read in
- * the CD-ROM bytestream. In principle, this is compatible with the
- * ID3v2 MCDI tag, although the specification is under-defined, and
- * rarely used.
- *
- * @param t a cueify_toc object
- * @param buf the buffer to populate with binary data (may be NULL)
- * @param len the size of the buffer
- * @return the number of bytes needed to contain the complete binary
- *         representation of the TOC
+ * @pre { t != NULL, cueify_toc_is_immutable(t) == FALSE,
+ *        offset > any previous value of offset specified in a call to
+ *        cueify_toc_add_track() with this t }
+ * @param t a TOC instance
+ * @param control the track control flags for the new track; these
+ *                flags must be valid
+ * @param sub_q the format of the sub-Q-channel for the new track; the
+ *              format must be valid
+ * @param offset the absolute CD-frame address (LBA) of the start of
+ *               the new track
+ * @return CUEIFY_OK if the track was successfully added; otherwise an
+ *         error code is returned
  */
-size_t cueify_toc_get_binary_blob(cueify_toc *t, uint8_t *buf, size_t len)
+int cueify_toc_append_track(cueify_toc *t, uint8_t control, uint8_t sub_q,
+			    uint32_t offset);
+
+
+/**
+ * Add a lead-out to a TOC instance.
+ *
+ * @pre { t != NULL, cueify_toc_is_immutable(t) == FALSE,
+ *        cueify_toc_add_track() has been called successfully with this t exactly
+ *        (last - first + 1) times,
+ *        offset > any previous value of offset specified in a call to
+ *        cueify_toc_add_track() with this t,
+ *        1 <= first <= last <= 99 }
+ * @param t a TOC instance
+ * @param control the track control flags for the lead-out; these
+ *                flags must be valid
+ * @param sub_q the format of the sub-Q-channel for the lead-out; the
+ *              format must be valid
+ * @param offset the absolute CD-frame address (LBA) of the start of
+ *               the lead-out
+ * @param first the number of the first track in the TOC instance
+ * @param last the number of the last track in the TOC instance
+ * @return CUEIFY_OK if the lead-out was successfully added; otherwise an
+ *         error code is returned
+ */
+int cueify_toc_add_lead_out(cueify_toc *t, uint8_t control, uint8_t sub_q,
+			    uint32_t offset, uint8_t first, uint8_t last);
+
+/**
+ * Get the immutability state of a TOC instance.
+ *
+ * @note This will always return FALSE on a TOC instance populated
+ *       with cueify_device_read_toc() or cueify_toc_deserialize().
+ *       It will also return FALSE if cueify_toc_add_lead_out() has
+ *       been successfully called on t.
+ *
+ * @pre { t != NULL }
+ * @param t a TOC instance
+ * @return TRUE if a lead-out track is present in t, else FALSE
+ */
+int cueify_toc_is_immutable(cueify_toc *t);
 
 #endif /* _LIBCUEIFY_TOC_H */
