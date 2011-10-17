@@ -54,6 +54,47 @@ cueify_toc *cueify_device_read_toc(cueify_device *device);
 
 
 /**
+ * This function returns a cueify_toc object corresponding to the data
+ * in the binary representation of a TOC in a buffer. The binary
+ * representation is assumed to be in the format output by
+ * cueify_toc_get_binary_blob().
+ *
+ * On error, this function returns NULL.
+ *
+ * The cueify_toc object returned by this function should be freed
+ * using cueify_toc_free() when you are finished using it.
+ *
+ * @param buf a buffer containing a binary representation of a TOC
+ * @param len the size of the buffer
+ * @return a cueify_toc object, or NULL.
+ */
+cueify_toc *cueify_toc_from_binary_blob(uint8_t *buf, size_t len);
+
+
+/**
+ * This function returns a cueify_toc object populated with the
+ * specified track numbers and offsets.
+ *
+ * This function is sufficient for calculating discids; the first item
+ * in the array of track offsets (offsets[0]) should be used to
+ * specify the offset of the lead-out (total number of sectors) of
+ * this disc.
+ *
+ * On error, this function returns NULL.
+ *
+ * The cueify_toc object returned by this function should be freed
+ * using cueify_toc_free() when you are finished using it.
+ *
+ * @param first the first track number of the disc
+ * @param last the last track number of the disc
+ * @param offsets a pointer to an array of 100 track (LBA) offsets
+ * @return a cueify_toc object, or NULL.
+ */
+cueify_toc *cueify_toc_from_track_data(uint8_t first, uint8_t last,
+				       uint32_t *offsets);
+
+
+/**
  * Release the memory allocated for a cueify_toc object.
  *
  * @param t a cueify_toc object returned by cueify_device_read_toc()
@@ -173,5 +214,22 @@ uint32_t cueify_toc_get_track_offset(cueify_toc *t, uint8_t trknum);
  * @return the length of the track in the TOC
  */
 uint32_t cueify_toc_get_track_length(cueify_toc *t, uint8_t trknum);
+
+
+/**
+ * Populate a buffer with the binary representation of a TOC.
+ *
+ * The binary representation of the TOC is that as would be read in
+ * the CD-ROM bytestream. In principle, this is compatible with the
+ * ID3v2 MCDI tag, although the specification is under-defined, and
+ * rarely used.
+ *
+ * @param t a cueify_toc object
+ * @param buf the buffer to populate with binary data (may be NULL)
+ * @param len the size of the buffer
+ * @return the number of bytes needed to contain the complete binary
+ *         representation of the TOC
+ */
+size_t cueify_toc_get_binary_blob(cueify_toc *t, uint8_t *buf, size_t len)
 
 #endif /* _LIBCUEIFY_TOC_H */
