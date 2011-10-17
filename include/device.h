@@ -36,37 +36,61 @@ typedef void *cueify_device;
 
 
 /**
- * Return a handle for a new cueify_device object.
+ * Create a new handle for an optical disc (CD-ROM) device.
  *
- * If no memory could be allocated, NULL is returned.
- *
- * @param device an operating system specific device identifier, or NULL
- * @return a cueify_device object, or NULL.
+ * @return NULL if there was an error allocating memory, else the new handle
  */
-cueify_device *cueify_device_new(const char *device);
+cueify_device *cueify_device_new();
 
 
 /**
- * Release the memory allocated for the cueify_device object.
+ * Open an optical disc (CD-ROM) device and associate it with a device handle.
  *
+ * This function should be called after cueify_device_new() but before
+ * any other cueify_device_*() functions.
+ *
+ * @pre { d != NULL }
+ * @param d an unopened device handle
+ * @param device an operating-system-specific device identifier of the device to open,
+ *               or NULL to open the default device returned by
+ *               cueify_device_get_default_device()
+ * @return CUEIFY_OK if the device was successfully opened; otherwise an error code is
+ *         returned
+ */
+int cueify_device_open(cueify_device *d, const char *device);
+
+
+/**
+ * Close the optical disc device associated with a device handle.
+ *
+ * @note The device handle may be reused with cueify_device_open()
+ *       once it has been closed successfully.
+ *
+ * @pre { d != NULL, cueify_device_open(d) last returned CUEIFY_OK }
+ * @param d an opened device handle
+ * @return CUEIFY_OK if the device was successfully closed; otherwise an error code is
+ *         returned
+ */
+int cueify_device_close(cueify_device *d);
+
+
+/**
+ * Free a handle for an optical disc (CD-ROM) device. Deletes the
+ * object pointed to by d.
+ *
+ * @pre { d != NULL }
  * @param d a cueify_device object created by cueify_device_new()
  */
 void cueify_device_free(cueify_device *d);
 
 
 /**
- * Return a human-readable error message.
+ * Get an operating-system-specific device identifier for the default
+ * optical disc (CD-ROM) device in this system.
  *
- * This function will return a human-readable error message describing
- * any error encountered in the most recent cueify_device_*() function
- * which used the given cueify_device object. If there were no errors
- * in the most recent cueify_device_*() call with the object, this
- * function will return the empty string.
- *
- * @param p a cueify_device object for which an error string is requested
- * @return a string containing a human-readable description of the most
- *         recent error, or the empty string if no error occurred
+ * @return NULL if there is no default optical disc (CD-ROM) device in
+ *         this system, else the identifier of the default device
  */
-const char *cueify_device_get_error(cueify_device *d);
+const char *cueify_device_get_default_device();
 
 #endif /* _LIBCUEIFY_DEVICE_H */
