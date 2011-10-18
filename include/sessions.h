@@ -38,9 +38,8 @@ typedef void *cueify_sessions;
 
 /**
  * Create a new multisession instance. The instance is created with no
- * data, and should be populated using cueify_device_read_sessions(),
- * cueify_sessions_deserialize(), or the various
- * cueify_sessions_set_*() functions.
+ * data, and should be populated using cueify_device_read_sessions() or
+ * cueify_sessions_deserialize().
  *
  * @return NULL if there was an error allocating memory, else the new
  *         multisession data
@@ -62,7 +61,7 @@ int cueify_device_read_sessions(cueify_device *d, cueify_sessions *s);
 
 
 /**
- * Deserialize a TOC instance previously serialized with
+ * Deserialize a multisession instance previously serialized with
  * cueify_sessions_serialize().
  *
  * @note This serialization is, in principle, the same as that
@@ -83,6 +82,7 @@ int cueify_sessions_deserialize(cueify_sessions *s, uint8_t *buffer,
 /**
  * Serialize a multisession instance for later deserialization with
  * cueify_sessions_deserialize().
+ *
  * @note This serialization is, in principle, the same as that
  *       returned by the MMC READ TOC/PMA/ATIP command with format
  *       0001b.
@@ -123,18 +123,6 @@ uint8_t cueify_sessions_get_first_session(cueify_sessions *s);
 
 
 /**
- * Set the number of the first session in a multisession instance.
- *
- * @pre { s != NULL }
- * @param s a multisession instance
- * @param first the new number of the first session
- * @return CUEIFY_OK if the value was successfully set; otherwise an error code
- *         is returned
- */
-int cueify_sessions_set_first_session(cueify_sessions *s, uint8_t first);
-
-
-/**
  * Get the number of the last session in a multisession instance.
  *
  * @pre { s != NULL }
@@ -145,18 +133,6 @@ uint8_t cueify_sessions_get_last_session(cueify_sessions *s);
 
 
 /**
- * Set the number of the last session in a multisession instance.
- *
- * @pre { s != NULL }
- * @param s a multisession instance
- * @param last the new number of the last session
- * @return CUEIFY_OK if the value was successfully set; otherwise an error code
- *         is returned
- */
-int cueify_sessions_set_last_session(cueify_sessions *s, uint8_t last);
-
-
-/**
  * Get the track control flags for the first track in the last
  * complete session.
  *
@@ -178,21 +154,6 @@ uint8_t cueify_sessions_get_last_session_control_flags(cueify_sessions *s);
  *         session in s
  */
 uint8_t cueify_sessions_get_last_session_control_flags(cueify_sessions *s);
-
-
-/**
- * Set the track control flags for the first track in the last
- * complete session.
- *
- * @pre { s != NULL }
- * @param s a multisession instance
- * @param flags the new control flags for the first track in the last complete
- *              session in s
- * @return CUEIFY_OK if the value was successfully set; otherwise an error code
- *         is returned
- */
-int cueify_sessions_set_last_session_control_flags(cueify_sessions *s,
-						   uint8_t flags);
 
 
 /**
@@ -212,21 +173,6 @@ uint8_t cueify_sessions_get_last_session_sub_q_channel_contents(
 
 
 /**
- * Set the format of the sub-Q-channel for the first track in the last
- * complete session in a multisession instance.
- *
- * @pre { s != NULL }
- * @param s a multisession instance
- * @param sub_q the new contents of the sub-Q-channel for first track in the
- *              last complete session in s
- * @return CUEIFY_OK if the value was successfully set; otherwise an error code
- *         is returned
- */
-int cueify_sessions_set_last_session_sub_q_channel_contents(cueify_sessions *s,
-							    uint8_t sub_q);
-
-
-/**
  * Get the track number of the first track in the last complete
  * session.
  *
@@ -239,21 +185,6 @@ uint8_t cueify_sessions_get_last_session_track_number(cueify_sessions *s);
 
 
 /**
- * Set the track number of the first track in the last complete
- * session.
- *
- * @pre { s != NULL }
- * @param s a multisession instance
- * @param track the new track number of the first track in the last complete
- *              session of s
- * @return CUEIFY_OK if the value was successfully set; otherwise an error code
- *         is returned
- */
-int cueify_sessions_set_last_session_track_number(cueify_sessions *s,
-						  uint8_t track);
-
-
-/**
  * Get the absolute CD-frame address (LBA) of the start of the first track in
  * the last complete session.
  *
@@ -263,20 +194,5 @@ int cueify_sessions_set_last_session_track_number(cueify_sessions *s,
  *         complete session of s
  */
 uint32_t cueify_sessions_get_last_session_address(cueify_sessions *s);
-
-
-/**
- * Set the absolute CD-frame address (LBA) of the start of the first track in
- * the last complete session.
- *
- * @pre { s != NULL }
- * @param s a multisession instance
- * @param start the address of the start of the first track in the last
- *              complete session of s
- * @return CUEIFY_OK if the value was successfully set; otherwise an error code
- *         is returned
- */
-int cueify_sessions_set_last_session_address(cueify_sessions *s,
-					     uint32_t start);
 
 #endif /* _LIBCUEIFY_SESSIONS_H */
