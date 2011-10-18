@@ -234,7 +234,7 @@ uint32_t cueify_toc_get_track_length(cueify_toc *t, uint8_t track);
 /**
  * Append a track to a TOC instance.
  *
- * @pre { t != NULL, cueify_toc_is_immutable(t) == FALSE,
+ * @pre { t != NULL, cueify_toc_is_mutable(t) == TRUE,
  *        offset > any previous value of offset specified in a call to
  *        cueify_toc_add_track() with this t }
  * @param t a TOC instance
@@ -254,7 +254,7 @@ int cueify_toc_append_track(cueify_toc *t, uint8_t control, uint8_t sub_q,
 /**
  * Add a lead-out to a TOC instance.
  *
- * @pre { t != NULL, cueify_toc_is_immutable(t) == FALSE,
+ * @pre { t != NULL, cueify_toc_is_mutable(t) == TRUE,
  *        cueify_toc_add_track() has been called successfully with this t exactly
  *        (last - first + 1) times,
  *        offset > any previous value of offset specified in a call to
@@ -276,7 +276,7 @@ int cueify_toc_add_lead_out(cueify_toc *t, uint8_t control, uint8_t sub_q,
 			    uint32_t offset, uint8_t first, uint8_t last);
 
 /**
- * Get the immutability state of a TOC instance.
+ * Get the mutability state of a TOC instance.
  *
  * @note This will always return FALSE on a TOC instance populated
  *       with cueify_device_read_toc() or cueify_toc_deserialize().
@@ -285,8 +285,8 @@ int cueify_toc_add_lead_out(cueify_toc *t, uint8_t control, uint8_t sub_q,
  *
  * @pre { t != NULL }
  * @param t a TOC instance
- * @return TRUE if a lead-out track is present in t, else FALSE
+ * @return TRUE if a lead-out track is not present in t, else FALSE
  */
-int cueify_toc_is_immutable(cueify_toc *t);
+int cueify_toc_is_mutable(cueify_toc *t);
 
 #endif /* _LIBCUEIFY_TOC_H */
