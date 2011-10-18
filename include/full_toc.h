@@ -55,6 +55,7 @@ cueify_full_toc *cueify_full_toc_new();
  * with a device handle.
  *
  * @pre { d != NULL, t != NULL }
+ * @post { cueify_full_toc_is_mutable(t) == FALSE }
  * @param d an opened device handle
  * @param t a full TOC instance to populate
  * @return CUEIFY_OK if the full TOC was successfully read; otherwise
@@ -72,6 +73,7 @@ int cueify_device_read_full_toc(cueify_device *d, cueify_full_toc *t);
  *       0010b, excluding any track descriptors with ADR=5.
  *
  * @pre { t != NULL, buffer != NULL }
+ * @post { cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance to populate
  * @param buffer a pointer to the serialized full TOC data
  * @param size the size of the buffer
@@ -88,7 +90,7 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer, size_t size
  *       returned by the MMC READ TOC/PMA/ATIP command with format
  *       0010b, excluding any track descriptors with ADR=5.
  *
- * @pre { t != NULL, size != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE, size != NULL }
  * @param t a full TOC instance to serialize
  * @param buffer a pointer to a location to serialize data to, or NULL
  *               to determine the optimal size of such a buffer
@@ -107,7 +109,7 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer, size_t *size)
 /**
  * Free a full TOC instance. Deletes the object pointed to by t.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a cueify_full_toc object created by cueify_full_toc_new()
  */
 void cueify_full_toc_free(cueify_full_toc *t);
@@ -116,7 +118,7 @@ void cueify_full_toc_free(cueify_full_toc *t);
 /**
  * Get the number of the first session in a full TOC instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance
  * @return the number of the first session in t
  */
@@ -126,7 +128,7 @@ uint8_t cueify_full_toc_get_first_session(cueify_full_toc *t);
 /**
  * Get the number of the last session in a full TOC instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance
  * @return the number of the last session in t
  */
@@ -136,7 +138,7 @@ uint8_t cueify_full_toc_get_last_session(cueify_full_toc *t);
 /**
  * Get the number of the session for a track in a full TOC instance.
  *
- * @pre { t != NULL,
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE,
  *        cueify_full_toc_get_first_track(t) <= track <= cueify_full_toc_get_last_track(t)
  *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2 }
  * @param t a full TOC instance
@@ -149,7 +151,7 @@ uint8_t cueify_full_toc_get_track_session(cueify_full_toc *t, uint8_t track);
 /**
  * Get the track control flags for a track in a full TOC instance.
  *
- * @pre { t != NULL,
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE,
  *        cueify_full_toc_get_first_track(t) <= track <= cueify_full_toc_get_last_track(t)
  *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2 }
  * @param t a full TOC instance
@@ -165,7 +167,7 @@ uint8_t cueify_full_toc_get_track_control_flags(cueify_full_toc *t, uint8_t trac
  * @note In most cases, this function will return
  *       CUEIFY_SUB_Q_NOTHING, however it is provided for completeness.
  *
- * @pre { t != NULL,
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE,
  *        cueify_full_toc_get_first_track(t) <= track <= cueify_full_toc_get_last_track(t)
  *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2 }
  * @param t a full TOC instance
@@ -181,7 +183,7 @@ uint8_t cueify_full_toc_get_track_sub_q_channel_contents(cueify_full_toc *t,
  * Get the absolute time of a point in the lead-in in a full TOC
  * instance.
  *
- * @pre { t != NULL,
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE,
  *        cueify_full_toc_get_first_track(t) <= track <= cueify_full_toc_get_last_track(t)
  *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2}
  * @param t a full TOC instance
@@ -195,7 +197,7 @@ cueify_msf_t cueify_full_toc_get_point_address(cueify_full_toc *t, uint8_t point
 /**
  * Get the time of the start address of a track in a full TOC instance.
  *
- * @pre { t != NULL,
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE,
  *        cueify_full_toc_get_first_track(t) <= track <= cueify_full_toc_get_last_track(t)
  *        OR track == CUEIFY_LEAD_OUT_TRACK }
  * @param t a full TOC instance
@@ -209,7 +211,7 @@ cueify_msf_t cueify_full_toc_get_track_address(cueify_full_toc *t, uint8_t track
 /**
  * Get the number of the first track in a full TOC instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance
  * @return the number of the first track in t
  */
@@ -219,7 +221,7 @@ uint8_t cueify_full_toc_get_first_track(cueify_full_toc *t);
 /**
  * Get the number of the last track in a full TOC instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance
  * @return the number of the last track in t
  */
@@ -234,7 +236,7 @@ uint8_t cueify_full_toc_get_last_track(cueify_full_toc *t);
 /**
  * Get the disc type in a full TOC instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance
  * @return the disc type of t
  */
@@ -246,7 +248,7 @@ uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t);
  *
  * @note Shorthand for cueify_full_toc_get_start_address(t, CUEIFY_LEAD_OUT_TRACK).
  *
- * @pre { t != NULL }
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance
  * @return the total length of t
  */
@@ -257,7 +259,7 @@ uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t);
 /**
  * Get the total length of a track in a full TOC instance.
  *
- * @pre { t != NULL,
+ * @pre { t != NULL, cueify_full_toc_is_mutable(t) == FALSE,
  *        cueify_full_toc_get_first_track(t) <= track <= cueify_full_toc_get_last_track(t)}
  * @param t a full TOC instance
  * @param track the number of the track for which the length should be returned
@@ -270,11 +272,11 @@ cueify_msf_t cueify_full_toc_get_track_length(cueify_full_toc *t, uint8_t track)
  * Append a track to a full TOC instance.
  *
  * @pre { t != NULL, cueify_full_toc_is_mutable(t) == TRUE,
- *        if cueify_full_toc_add_track() has not been called with this t: session == 1,
+ *        if cueify_full_toc_append_track() has not been called with this t: session == 1,
  *        1 <= session, session >= any previous value of session specified in a call to
- *        cueify_full_toc_add_track() with this t,
+ *        cueify_full_toc_append_track() with this t,
  *        offset > any previous value of offset specified in a call to
- *        cueify_full_toc_add_track() with this t }
+ *        cueify_full_toc_append_track() with this t }
  * @param t a full TOC instance
  * @param session the session number for the new track
  * @param control the track control flags for the new track; these
@@ -296,16 +298,17 @@ int cueify_toc_append_track(cueify_full_toc *t, uint8_t session, uint8_t control
  * @pre { t != NULL, cueify_full_toc_is_mutable(t) == TRUE,
  *        1 <= first_session <= last_session <= lead_out_session,
  *        first_session >= any previous value of session specified in a call to
- *        cueify_full_toc_add_track() with this t,
- *        cueify_full_toc_add_track() has been called successfully with this t exactly
+ *        cueify_full_toc_append_track() with this t,
+ *        cueify_full_toc_append_track() has been called successfully with this t exactly
  *        (last - first + 1) times,
  *        lead_out > any previous value of offset specified in a call to
- *        cueify_full_toc_add_track() with this t,
+ *        cueify_full_toc_append_track() with this t,
  *        1 <= first <= last <= 99 }
+ * @post { cueify_full_toc_is_mutable(t) == FALSE }
  * @param t a full TOC instance
  * @param first_session the session number for track 0xA0
  * @param last_session the session number for track 0xA1
- * @pamar lead_out_session the session number for the lead-out
+ * @param lead_out_session the session number for the lead-out
  * @param first_control the track control flags for track 0xA0; these
  *                      flags must be valid
  * @param last_control the track control flags for track 0xA1; these
@@ -352,7 +355,7 @@ int cueify_full_toc_append_lead_out(cueify_full_toc *t,
  *
  * @note This will always return FALSE on a full TOC instance populated
  *       with cueify_device_read_full_toc() or cueify_full_toc_deserialize().
- *       It will also return FALSE if cueify_full_toc_add_lead_out() has
+ *       It will also return FALSE if cueify_full_toc_append_lead_out() has
  *       been successfully called on t.
  *
  * @pre { t != NULL }
