@@ -1,4 +1,4 @@
-/* error.h - Header for libcueify error values.
+/* device.c - CD-ROM device functions.
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -23,13 +23,47 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_ERROR_H
-#define _LIBCUEIFY_ERROR_H
+#include <stdlib.h>
+#include "libcueify/device.h"
+#include "libcueify/device_private.h"
 
-/** Possible return values for functions in libcueify. */
-enum cueify_error {
-    CUEIFY_OK = 0,              /** The last function returned successfully. */
-    CUEIFY_BADARG,              /** A bad argument was provided. */
-};
+cueify_device *cueify_device_new() {
+    return calloc(1, sizeof(cueify_device_private));
+}  /* cueify_device_new */
 
-#endif /* _LIBCUEIFY_ERROR_H */
+
+int cueify_device_open(cueify_device *d, const char *device) {
+    cueify_device_private *dev = (cueify_device_private *)d;
+
+    if (dev == NULL) {
+	return CUEIFY_BADARG;
+    }
+    if (device == NULL) {
+	device = cueify_device_get_default_device();
+    }
+
+    memset(dev, 0, sizeof(cueify_device_private));
+
+    return cueify_device_open_unportable(d, device);
+}  /* cueify_device_open */
+
+
+int cueify_device_close(cueify_device *d) {
+    cueify_device_private *dev = (cueify_device_private *)d;
+
+    if (dev == NULL) {
+	return CUEIFY_BADARG;
+    }
+
+    return cueify_device_close_unportable(d);
+}  /* cueify_device_close */
+
+
+void cueify_device_free(cueify_device *d) {
+    free(d);
+}  /* cueify_device_free */
+
+
+const char *cueify_device_get_default_device() {
+    return cueify_device_get_default_device_unportable();
+}  /* cueify_device_get_default_device */
