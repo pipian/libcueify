@@ -558,4 +558,4 @@ uint8_t cueify_cdtext_block_get_genre_code(cueify_cdtext_block *b);
  */
 const char *cueify_cdtext_block_get_genre_name(cueify_cdtext_block *b);
 
-#endif /* _LIBCUEIFY_CDTEXT_BLOCK_H */
+#endif /* _LIBCUEIFY_CDTEXT_H */
