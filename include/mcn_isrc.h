@@ -45,8 +45,7 @@
  * @return CUEIFY_OK if the media catalog number was successfully
  *         read; otherwise an error code is returned
  */
-const char *cueify_device_read_mcn(cueify_device *d,
-				   char *buffer, size_t *size);
+int cueify_device_read_mcn(cueify_device *d, char *buffer, size_t *size);
 
 
 /**
@@ -70,7 +69,7 @@ const char *cueify_device_read_mcn(cueify_device *d,
  * @return CUEIFY_OK if the ISRC was successfully
  *         read; otherwise an error code is returned
  */
-const char *cueify_device_read_isrc(cueify_device *d, uint8_t track,
-				    char *buffer, size_t *size);
+int cueify_device_read_isrc(cueify_device *d, uint8_t track,
+			    char *buffer, size_t *size);
 
 #endif /* _LIBCUEIFY_MCN_ISRC_H */
