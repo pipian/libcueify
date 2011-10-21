@@ -74,19 +74,20 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
 				      cueify_toc_private *t) {
     struct ioc_toc_header hdr;
     struct cd_toc_entry entries[100];
-    struct ioc_read_toc_entries toc;
+    struct ioc_read_toc_entry toc;
+    int i;
 
     if (ioctl(d->handle, CDIOREADTOCHEADER, &hdr) < 0) {
 	return CUEIFY_ERR_INTERNAL;
     }
 
-    t->first_track_number = hdr->starting_track;
-    t->last_track_number = hdr->ending_track;
+    t->first_track_number = hdr.starting_track;
+    t->last_track_number = hdr.ending_track;
 
     toc.address_format = CD_LBA_FORMAT;
     toc.starting_track = 0;
     toc.data_len = sizeof(entries);
-    toc.data = &entries;
+    toc.data = entries;
 
     if (ioctl(d->handle, CDIOREADTOCENTRYS, &toc) < 0) {
 	return CUEIFY_ERR_INTERNAL;
