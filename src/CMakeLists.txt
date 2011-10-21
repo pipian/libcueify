@@ -1,7 +1,7 @@
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
-SET(_sources cdrom.c toc.c latin1.c msjis.c)
+SET(_sources device.c toc.c latin1.c msjis.c)
 
 ADD_LIBRARY(libcueify SHARED ${_sources})
 
