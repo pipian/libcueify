@@ -24,7 +24,9 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <libcueify/device.h>
+#include <libcueify/error.h>
 #include "device_private.h"
 
 cueify_device *cueify_device_new() {
@@ -53,7 +55,7 @@ int cueify_device_open(cueify_device *d, const char *device) {
 
     memset(dev, 0, sizeof(cueify_device_private));
 
-    return cueify_device_open_unportable(d, device);
+    return cueify_device_open_unportable(dev, device);
 }  /* cueify_device_open */
 
 

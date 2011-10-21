@@ -38,4 +38,33 @@ typedef struct {
     device_handle handle;  /** OS-specific device handle */
 } cueify_device_private;
 
+/** Unportable version of cueify_device_open().
+ *
+ * @param d the cueify device handle to open
+ * @param device the OS-specific device identifier of the device to open
+ * @return CUEIFY_OK if the device opened successfully;
+ *         CUEIFY_ERR_NO_DEVICE if no such device exists or the device
+ *         could not be opened; otherwise, another appropriate error
+ *         code.
+ */
+int cueify_device_open_unportable(cueify_device_private *d,
+				  const char *device);
+
+
+/** Unportable version of cueify_device_close().
+ *
+ * @param d the cueify device handle to close
+ * @return CUEIFY_OK if the device opened successfully; otherwise,
+ *         another appropriate error code.
+ */
+int cueify_device_close_unportable(cueify_device_private *d);
+
+
+/** Unportable version of cueify_device_get_default_device().
+ *
+ * @return the OS-specific device identifier of the default optical
+ *         disc (CD-ROM) device, or NULL if none is available
+ */
+const char *cueify_device_get_default_device_unportable();
+
 #endif  /* _LIBCUEIFY_DEVICE_PRIVATE_H */
