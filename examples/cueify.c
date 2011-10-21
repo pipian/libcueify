@@ -206,7 +206,7 @@ cueify_msf_t remove_disc_pregap(uint32_t offset)
 
     retval.frm = corrected_offset % 75;
     retval.sec = corrected_offset / 75 % 60;
-    retval.min = corrected_offset / 60;
+    retval.min = corrected_offset / 75 / 60;
 
     return retval;
 }
@@ -276,6 +276,9 @@ int print_cuesheet(const char *device) {
     }
 
     if (cueify_device_open(dev, device) == CUEIFY_OK) {
+	if (device == NULL) {
+	    device = cueify_device_get_default_device();
+	}
 	strftime(time_str, 256, "%Y-%m-%dT%H:%M:%S", gmtime(&t));
 	printf("REM GENTIME \"%s\"\n"
 	       "REM DRIVE \"%s\"\n",
