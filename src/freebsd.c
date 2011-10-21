@@ -27,10 +27,11 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-/** #include <sys/ioctl.h> */
-/** cdio.h */
+#include <sys/ioctl.h>
+#include <sys/cdio.h>
 #include <libcueify/error.h>
 #include "device_private.h"
+#include "toc_private.h"
 
 int cueify_device_open_unportable(cueify_device_private *d,
 				  const char *device) {
@@ -43,7 +44,8 @@ int cueify_device_open_unportable(cueify_device_private *d,
     }
     d->handle = fd;
     return CUEIFY_OK;
-}
+}  /* cueify_device_open_unportable */
+
 
 int cueify_device_close_unportable(cueify_device_private *d) {
     if (close(d->handle) == 0) {
@@ -51,7 +53,8 @@ int cueify_device_close_unportable(cueify_device_private *d) {
     } else {
 	return CUEIFY_ERR_INTERNAL;
     }
-}
+}  /* cueify_device_close_unportable */
+
 
 const char *cueify_device_get_default_device_unportable() {
     struct stat buf;
@@ -64,4 +67,43 @@ const char *cueify_device_get_default_device_unportable() {
     } else {
 	return NULL;
     }
-}
+}  /* cueify_device_get_default_device_unportable */
+
+
+int cueify_device_read_toc_unportable(cueify_device_private *d,
+				      cueify_toc_private *t) {
+    struct ioc_toc_header hdr;
+    struct cd_toc_entry entries[100];
+    struct ioc_read_toc_entries toc;
+
+    if (ioctl(d->handle, CDIOREADTOCHEADER, &hdr) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    t->first_track_number = hdr->starting_track;
+    t->last_track_number = hdr->ending_track;
+
+    toc.address_format = CD_LBA_FORMAT;
+    toc.starting_track = 0;
+    toc.data_len = sizeof(entries);
+    toc.data = &entries;
+
+    if (ioctl(d->handle, CDIOREADTOCENTRYS, &toc) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    for (i = 0; i < MAX_TRACKS; i++) {
+	if (toc.data[i].track == 0xAA) {
+	    /* Lead-out Track */
+	    t->tracks[0].control = toc.data[i].control;
+	    t->tracks[0].adr = toc.data[i].addr_type;
+	    t->tracks[0].lba = toc.data[i].addr.lba;
+	} else if (toc.data[i].track != 0) {
+	    t->tracks[toc.data[i].track].control = toc.data[i].control;
+	    t->tracks[toc.data[i].track].adr = toc.data[i].addr_type;
+	    t->tracks[toc.data[i].track].lba = toc.data[i].addr.lba;
+	}
+    }
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_toc_unportable */

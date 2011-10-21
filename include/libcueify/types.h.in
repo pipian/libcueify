@@ -1,4 +1,4 @@
-/* types.h - Header for basic types in libcueify
+/* types.h.in - Header for basic types in libcueify
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -25,6 +25,15 @@
 
 #ifndef _LIBCUEIFY_TYPES_H
 #define _LIBCUEIFY_TYPES_H
+
+#cmakedefine HAVE_STDINT_H
+#cmakedefine HAVE_STDDEF_H
+#cmakedefine HAVE_UINT8_T
+#cmakedefine HAVE_UINT16_T
+#cmakedefine HAVE_UINT32_T
+#cmakedefine SIZEOF_INT
+#cmakedefine HAVE_SIZE_T
+#cmakedefine HAVE_NULL
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
