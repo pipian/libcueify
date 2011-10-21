@@ -25,6 +25,8 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 /** #include <sys/ioctl.h> */
 /** cdio.h */
 #include <libcueify/error.h>
@@ -52,10 +54,12 @@ int cueify_device_close_unportable(cueify_device_private *d) {
 }
 
 const char *cueify_device_get_default_device_unportable() {
+    struct stat buf;
+
     /* Test for /dev/cd0 and /dev/acd0 */
-    if (access("/dev/cd0", R_OK) == 0) {
+    if (stat("/dev/cd0", &buf) == 0) {
 	return "/dev/cd0";
-    } else if (access("/dev/acd0", R_OK) == 0) {
+    } else if (stat("/dev/acd0", &buf) == 0) {
 	return "/dev/acd0";
     } else {
 	return NULL;
