@@ -27,6 +27,8 @@
 #include <unistd.h>
 /** #include <sys/ioctl.h> */
 /** cdio.h */
+#include <libcueify/error.h>
+#include "device_private.h"
 
 int cueify_device_open_unportable(cueify_device_private *d,
 				  const char *device) {
