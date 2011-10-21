@@ -27,6 +27,9 @@
 #ifndef _LIBCUEIFY_TOC_H
 #define _LIBCUEIFY_TOC_H
 
+#include <libcueify/device.h>
+#include <libcueify/types.h>
+
 /**
  * A transparent handle for the table of contents (TOC) of an audio CD.
  *
