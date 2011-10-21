@@ -838,12 +838,12 @@ int main(int argc, char *argv[]) {
     char *device;
 
     /* Just got two command-line arguments we expect: drive letter and log. */
-    if (argc != 2 && argc != 3) {
+    if (argc != 1 && argc != 2) {
 	printf("Usage: cueify [DEVICE]\n");
 	return 0;
     }
 
-    if (argc == 3) {
+    if (argc == 2) {
 	device = argv[1];
     } else {
 	device = NULL;
