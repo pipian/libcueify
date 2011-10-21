@@ -63,10 +63,10 @@ int cueify_device_close(cueify_device *d) {
     cueify_device_private *dev = (cueify_device_private *)d;
 
     if (dev == NULL) {
-	return CUEIFY_BADARG;
+	return CUEIFY_ERR_BADARG;
     }
 
-    return cueify_device_close_unportable(d);
+    return cueify_device_close_unportable(dev);
 }  /* cueify_device_close */
 
 
