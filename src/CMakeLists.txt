@@ -1,9 +1,20 @@
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
-SET(_sources device.c toc.c latin1.c msjis.c)
+SET(_sources device.c)
 
-ADD_LIBRARY(libcueify SHARED ${_sources})
+INCLUDE(CheckSymbolExists)
+CHECK_SYMBOL_EXISTS(_WIN32 windows.h OS_IS_WINDOWS)
+CHECK_SYMBOL_EXISTS(__FreeBSD__ sys/param.h OS_IS_FREEBSD)
+
+IF(OS_IS_WINDOWS)
+    SET(_os_sources win32.c)
+ENDIF(OS_IS_WINDOWS)
+IF(OS_IS_FREEBSD)
+    SET(_os_sources freebsd.c)
+ENDIF(OS_IS_FREEBSD)
+
+ADD_LIBRARY(libcueify SHARED ${_sources} ${_os_sources})
 
 SET_TARGET_PROPERTIES(libcueify PROPERTIES
     VERSION ${libcueify_VERSION}
