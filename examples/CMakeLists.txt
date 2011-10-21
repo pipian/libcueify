@@ -1,7 +1,8 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 LINK_LIBRARIES(cueify)
 
-ADD_EXECUTABLE(cueify cueify.c)
+ADD_EXECUTABLE(cueify-exe cueify.c)
+SET_TARGET_PROPERTIES(cueify-exe PROPERTIES OUTPUT_NAME "cueify")
 
 IF(CMAKE_COMPILER_IS_GNUCC)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic-errors")
