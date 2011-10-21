@@ -1,7 +1,7 @@
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
-SET(_sources device.c)
+SET(_sources device.c toc.c)
 
 INCLUDE(CheckSymbolExists)
 CHECK_SYMBOL_EXISTS(_WIN32 windows.h OS_IS_WINDOWS)

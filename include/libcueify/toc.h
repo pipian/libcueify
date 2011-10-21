@@ -112,7 +112,8 @@ int cueify_toc_serialize(cueify_toc *t, uint8_t *buffer, size_t *size);
 void cueify_toc_free(cueify_toc *t);
 
 
-#define CUEIFY_LEAD_OUT_TRACK  0xAA  /** Track number of the lead-out of a disc. */
+/** Track number of the lead-out of a disc. */
+#define CUEIFY_LEAD_OUT_TRACK  0xAA
 
 
 /**
@@ -135,59 +136,60 @@ uint8_t cueify_toc_get_first_track(cueify_toc *t);
 uint8_t cueify_toc_get_last_track(cueify_toc *t);
 
 
-#define CUEIFY_TOC_TRACK_HAS_PREEMPHASIS  0x1  /** The audio track has
-						   had preemphasis
-						   applied. */
-#define CUEIFY_TOC_TRACK_PERMITS_COPYING  0x2  /** The Digital Copy
-						   Permissions bit has
-						   been set on the
-						   audio track. */
-#define CUEIFY_TOC_TRACK_IS_DATA          0x4  /** The track is a data
-						   track. */
-#define CUEIFY_TOC_TRACK_IS_QUADRAPHONIC  0x8  /** The track contains
-						   quadraphonic (four
-						   channel) audio. */
+/** The audio track has had preemphasis applied. */
+#define CUEIFY_TOC_TRACK_HAS_PREEMPHASIS  0x1
+/** The Digital Copy Permissions bit has been set on the audio track. */
+#define CUEIFY_TOC_TRACK_PERMITS_COPYING  0x2
+/** The track is a data track. */
+#define CUEIFY_TOC_TRACK_IS_DATA          0x4
+/** The track contains quadraphonic (four-channel) audio. */
+#define CUEIFY_TOC_TRACK_IS_QUADRAPHONIC  0x8
 
 
 /**
  * Get the track control flags for a track in a TOC instance.
  *
  * @pre { t != NULL,
- *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) OR
+ *        cueify_toc_get_first_track(t)<=track<=cueify_toc_get_last_track(t) OR
  *        track == CUEIFY_LEAD_OUT_TRACK }
  * @param t a TOC instance
- * @param track the number of the track for which control flags should be returned
+ * @param track the number of the track for which control flags should
+ *              be returned
  * @return the control flags for track number track in t
  */
 uint8_t cueify_toc_get_track_control_flags(cueify_toc *t, uint8_t track);
 
 
-#define CUEIFY_SUB_Q_NOTHING   0x00  /** Sub-Q-channel contains
-					 nothing. */
-#define CUEIFY_SUB_Q_POSITION  0x01  /** Sub-Q-channel contains the
-					 current position. */
-#define CUEIFY_SUB_Q_MCN       0x02  /** Sub-Q-channel contains the
-					 media catalog number. */
-#define CUEIFY_SUB_Q_ISRC      0x03  /** Sub-Q-channel contains an
-					 International Standard
-					 Recording Code (ISRC). */
+/** The sub-Q-channel contains nothing. */
+#define CUEIFY_SUB_Q_NOTHING   0x0
+/** The sub-Q-channel contains the current position. */
+#define CUEIFY_SUB_Q_POSITION  0x1
+/** The sub-Q-channel contains the media catalog number. */
+#define CUEIFY_SUB_Q_MCN       0x2
+/** The sub-Q-channel contains an International Standard Recording
+ * Code (ISRC)
+ */
+#define CUEIFY_SUB_Q_ISRC      0x3
 
 
 /**
- * Get the format of the sub-Q-channel for a track in a TOC instance.
+ * Get the format of the content of the sub-Q-channel in the block in
+ * which a track in a TOC instance was found.
  *
  * @note In most cases, this function will return
  *       CUEIFY_SUB_Q_NOTHING, however it is provided for completeness.
  *
  * @pre { t != NULL,
- *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) OR
+ *        cueify_toc_get_first_track(t)<=track<=cueify_toc_get_last_track(t) OR
  *        track == CUEIFY_LEAD_OUT_TRACK }
  * @param t a TOC instance
  * @param track the number of the track for which the sub-Q-channel
  *              format should be returned
- * @return the contents of the sub-Q-channel for track number track in t
+ * @return the format of the contents of the sub-Q-channel for track
+ *         number track in t
  */
-uint8_t cueify_toc_get_track_sub_q_channel_contents(cueify_toc *t, uint8_t track);
+uint8_t cueify_toc_get_track_sub_q_channel_format(cueify_toc *t,
+						  uint8_t track);
 
 
 /**
@@ -195,7 +197,7 @@ uint8_t cueify_toc_get_track_sub_q_channel_contents(cueify_toc *t, uint8_t track
  * a TOC instance.
  *
  * @pre { t != NULL,
- *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) OR
+ *        cueify_toc_get_first_track(t)<=track<=cueify_toc_get_last_track(t) OR
  *        track == CUEIFY_LEAD_OUT_TRACK }
  * @param t a TOC instance
  * @param track the number of the track for which the address should
@@ -222,7 +224,7 @@ uint32_t cueify_toc_get_track_address(cueify_toc *t, uint8_t track);
  * Get the total number of CD-frames in a track in a TOC instance.
  *
  * @pre { t != NULL,
- *        cueify_toc_get_first_track(t) <= track <= cueify_toc_get_last_track(t) }
+ *        cueify_toc_get_first_track(t)<=track<=cueify_toc_get_last_track(t) }
  * @param t a TOC instance
  * @param track the number of the track for which the total number of
  *              CD-frames be returned
