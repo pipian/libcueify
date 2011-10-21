@@ -824,9 +824,22 @@ int print_cuesheet(const char *device) {
 	FreeCDText(cdtextData);
 	free(fulltoc);
 */
+	if (device == NULL) {
+	    printf("Opened device %s\n", cueify_device_get_default_device());
+	} else {
+	    printf("Opened device %s\n", device);
+	}
 	if (cueify_device_close(d) != CUEIFY_OK) {
 	    cueify_device_free(d);
 	    return 1;
+	}
+	printf("Closed device\n");
+    } else {
+	if (device == NULL) {
+	    printf("Did not open device %s\n",
+		   cueify_device_get_default_device());
+	} else {
+	    printf("Did not open device %s\n", device);
 	}
     }
     cueify_device_free(d);
