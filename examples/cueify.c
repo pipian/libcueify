@@ -1,4 +1,4 @@
-/* GenCue.c - A utility to generate CD cuesheets.
+/* cueify.c - A utility to generate CD cuesheets from a CD.
  *
  * Copyright (c) 2010, 2011 Ian Jacobi
  * 
@@ -23,8 +23,9 @@
  * SOFTWARE.
  */
 
-#include <time.h>
+#include <stdio.h>
 #include <libcueify/device.h>
+#include <libcueify/error.h>
 
 const char * const genreNames[0x1D] = {
     "NULL",
@@ -194,6 +195,7 @@ const char * const languageNames[] = {
  * @param index The TrackIndex struct to subtract two seconds from.
  * @return index, with two seconds subtracted from it.
  */
+/*
 static struct TrackIndex RemoveDiscPregap(struct TrackIndex index)
 {
     struct TrackIndex retval;
@@ -209,17 +211,19 @@ static struct TrackIndex RemoveDiscPregap(struct TrackIndex index)
     
     return retval;
 }
+*/
 
 /** Perform a partial sum of the CDDB DiscID.
  *
  * @param n The number of seconds in a track.
  * @return The partial sum of the CDDB DiscID so far.
  */
+/*
 int cddb_sum(int n)
 {
     int ret;
 
-    /* For backward compatibility this algorithm must not change */
+    * For backward compatibility this algorithm must not change *
 
     ret = 0;
     while (n > 0) {
@@ -228,19 +232,21 @@ int cddb_sum(int n)
     }
     return (ret);
 }
+*/
 
 /** Generate the CDDB DiscID for a given CDROM_TOC.
  *
  * @param toc A pointer to the CDROM_TOC to generate a DiscID for.
  * @return The CDDB DiscID for this disc.
  */
+/*
 unsigned long cddb_discid(CDROM_TOC *toc)
 {
     int i,
 	t = 0,
 	n = 0;
     
-    /* For backward compatibility this algorithm must not change */
+    * For backward compatibility this algorithm must not change *
 
     i = 0;
     while (i < toc->LastTrack) {
@@ -250,6 +256,7 @@ unsigned long cddb_discid(CDROM_TOC *toc)
     t = ((toc->TrackData[toc->LastTrack].Address[1] * 60) + toc->TrackData[toc->LastTrack].Address[2]) - ((toc->TrackData[0].Address[1] * 60) + toc->TrackData[0].Address[2]);
     return ((n % 0xff) << 24 | t << 8 | toc->LastTrack);
 }
+*/
 
 /** Write a cuesheet file to STDOUT based on the contents of an optical
  * disc (CD-ROM) device.
@@ -258,9 +265,6 @@ unsigned long cddb_discid(CDROM_TOC *toc)
  * @return 0 if succeeded.
  */
 int print_cuesheet(const char *device) {
-{
-    time_t t = time(NULL);
-    char szTime[256];
     cueify_device *d;
 
     d = cueify_device_new();
@@ -270,13 +274,13 @@ int print_cuesheet(const char *device) {
 
     if (cueify_device_open(d, device) == CUEIFY_OK) {
     /*
-	/* Read the TOC now, in case we are autonaming the cuesheet. *
+	* Read the TOC now, in case we are autonaming the cuesheet. *
 	ReadTOC(hDevice, &toc);
 	if (bAutonameCuesheet) {
-	    /* Generate the CDDB DiscID. *
+	    * Generate the CDDB DiscID. *
 	    int iDiscID = cddb_discid(&toc);
 	    
-	    /* A DiscID should never be 0 (0 tracks? Really?) *
+	    * A DiscID should never be 0 (0 tracks? Really?) *
 	    if (iDiscID == 0) {
 		goto error;
 	    }
@@ -291,7 +295,7 @@ int print_cuesheet(const char *device) {
 	}
 	
 	strftime(szTime, 256, "%Y-%m-%dT%H:%M:%S", gmtime(&t));
-	/* First read the last-session data. *
+	* First read the last-session data. *
 	ReadLastSession(hDevice, &session);
 	fprintf(log,
 		"REM GENTIME \"%s\"\n"
@@ -336,13 +340,13 @@ int print_cuesheet(const char *device) {
 		offset.S,
 		offset.F);
 	
-	/* Then get the full TOC data. *
+	* Then get the full TOC data. *
 	ReadTOC(hDevice, &toc);
 	fulltoc = ReadFullTOC(hDevice);
-	/* And the CD-Text. *
+	* And the CD-Text. *
 	cdtext = ReadCDText(hDevice);
 	
-	/* We can write out the CD-Text. *
+	* We can write out the CD-Text. *
 	if (cdtext != NULL &&
 	    ((cdtext->Length[0] << 8) | cdtext->Length[1]) > 2) {
 	    cdt = fopen(szCDTextFile, "wb");
@@ -357,10 +361,10 @@ int print_cuesheet(const char *device) {
 	    fclose(cdt);
 	}
 	
-	/* And actually parse the CD-Text. *
+	* And actually parse the CD-Text. *
 	cdtextData = ParseCDText(cdtext);
 	
-	/* Write out the MCN. *
+	* Write out the MCN. *
 	if (ReadMCN(hDevice, &data) && data.MediaCatalog.Mcval) {
 	    char szMCN[16] = "";
 	    memcpy(szMCN, data.MediaCatalog.MediaCatalog, 15);
@@ -368,7 +372,7 @@ int print_cuesheet(const char *device) {
 	    fprintf(log, "CATALOG %s\n", szMCN);
 	}
 	
-	/* Print any disc-level CD-Text strings. *
+	* Print any disc-level CD-Text strings. *
 	if (cdtextData != NULL) {
 	    for (iBlock = 0; iBlock < 8; iBlock++) {
 		if (cdtextData->blocks[iBlock].arrangers != NULL &&
@@ -458,8 +462,8 @@ int print_cuesheet(const char *device) {
 				cdtextData->blocks[iBlock].titles[0]);
 		    }
 		}
-		/* Ignore TOC_INFO. *
-		/* Ignore TOC_INFO2 (for now). *
+		* Ignore TOC_INFO. *
+		* Ignore TOC_INFO2 (for now). *
 		if (cdtextData->blocks[iBlock].upc_ean_isrcs != NULL &&
 		    cdtextData->blocks[iBlock].upc_ean_isrcs[0] != NULL) {
 		    if (iBlock == 0) {
@@ -470,7 +474,7 @@ int print_cuesheet(const char *device) {
 				cdtextData->blocks[iBlock].upc_ean_isrcs[0]);
 		    }
 		}
-		/* We ARE, however, interested in the sizeInfo. *
+		* We ARE, however, interested in the sizeInfo. *
 		if (iBlock == 0 && cdtextData->blocks[iBlock].bValid) {
 		    switch (cdtextData->blocks[iBlock].charset) {
 		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
@@ -557,14 +561,14 @@ int print_cuesheet(const char *device) {
 	    break;
 	}
 	
-	/* And lastly the track stuff. *
+	* And lastly the track stuff. *
 	fprintf(log, "FILE \"disc.bin\" BINARY\n");
 	for (iTrack = toc.FirstTrack; iTrack <= toc.LastTrack; iTrack++) {
-	    /* Find the appropriate descriptor. *
+	    * Find the appropriate descriptor. *
 	    for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != iTrack || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
 	    if (curSession != fulltoc->Descriptors[iDescriptor].SessionNumber) {
 		if (curSession != 0) {
-		    /* Print the leadout of the last session. *
+		    * Print the leadout of the last session. *
 		    int iLeadoutDescriptor;
 		    
 		    for (iLeadoutDescriptor = 0; iLeadoutDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iLeadoutDescriptor].Point != 0xA2 || fulltoc->Descriptors[iLeadoutDescriptor].Adr != 1 || fulltoc->Descriptors[iLeadoutDescriptor].SessionNumber != curSession); iLeadoutDescriptor++);
@@ -586,12 +590,12 @@ int print_cuesheet(const char *device) {
 	    }
 	    if (toc.TrackData[iTrack - 1].Control & AUDIO_DATA_TRACK) {
 		if (trackMode == 0x10) {
-		    /* CD-I...  We special case. *
+		    * CD-I...  We special case. *
 		    fprintf(log,
 			    "    TRACK %02d CDI/2352\n",
 			    iTrack);
 		} else {
-		    /* Best way to detect the data mode is a raw read. *
+		    * Best way to detect the data mode is a raw read. *
 		    raw = ReadRawSector(
 			hDevice,
 			toc.TrackData[iTrack - 1].Address[1] * 60 * 75 +
@@ -611,7 +615,7 @@ int print_cuesheet(const char *device) {
 				    iTrack);
 			    break;
 			case 0x0F:
-			    /* Unknown *
+			    * Unknown *
 			default:
 			    fprintf(log,
 				    "    TRACK %02d MODE1/2352\n",
@@ -621,7 +625,7 @@ int print_cuesheet(const char *device) {
 			free(raw);
 			raw = NULL;
 		    } else {
-			/* Dunno :-/ *
+			* Dunno :-/ *
 			fprintf(log,
 				"    TRACK %02d MODE1/2352\n",
 				iTrack);
@@ -762,7 +766,7 @@ int print_cuesheet(const char *device) {
 		    offset.S,
 		    offset.F);
 	    
-	    /* Detect any other indices. *
+	    * Detect any other indices. *
 	    if (DetectTrackIndices(hDevice, &toc, iTrack, &indices)) {
 		for (iIndex = 1; iIndex < indices.iIndices; iIndex++) {
 		    if (iIndex + 1 == indices.iIndices &&
@@ -796,7 +800,7 @@ int print_cuesheet(const char *device) {
 		offset.S,
 		offset.F);
 	
-	/* And finally, we can dump out intervals from TOC_INFO2. *
+	* And finally, we can dump out intervals from TOC_INFO2. *
 	if (cdtextData != NULL) {
 	    if (cdtextData->tocInfo2.iIntervals > 0) {
 		fprintf(log, "REM INTERVALS:\n");
