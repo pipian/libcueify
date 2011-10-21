@@ -220,7 +220,7 @@ uint32_t cueify_toc_get_track_address(cueify_toc *t, uint8_t track);
  * @return the total number of CD-frames in t
  */
 #define cueify_toc_get_disc_length(t)  \
-    cueify_toc_get_track_offset(t, CUEIFY_LEAD_OUT_TRACK)
+    cueify_toc_get_track_address(t, CUEIFY_LEAD_OUT_TRACK)
 
 
 /**

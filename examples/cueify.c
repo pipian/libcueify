@@ -24,8 +24,11 @@
  */
 
 #include <stdio.h>
+#include <time.h>
 #include <libcueify/device.h>
 #include <libcueify/error.h>
+#include <libcueify/toc.h>
+#include <libcueify/types.h>
 
 const char * const genreNames[0x1D] = {
     "NULL",
@@ -190,28 +193,23 @@ const char * const languageNames[] = {
     "AMHARIC"
 };
 
-/** Subtract the 2-second disc pregap from the specified TrackIndex struct.
+/** Subtract the 2-second/150-frame disc pregap from the specified LBA
+ * offset and return the corresponding MSF time.
  *
- * @param index The TrackIndex struct to subtract two seconds from.
- * @return index, with two seconds subtracted from it.
+ * @param offset an offset to subtract two seconds from
+ * @return offset in MSF time, with two seconds subtracted from it
  */
-/*
-static struct TrackIndex RemoveDiscPregap(struct TrackIndex index)
+cueify_msf_t remove_disc_pregap(uint32_t offset)
 {
-    struct TrackIndex retval;
-    
-    retval.F = index.F;
-    retval.S = index.S - 2;
-    retval.M = index.M;
-    
-    if (retval.S >= 60) {
-	retval.S += 60;
-	retval.M--;
-    }
-    
+    uint32_t corrected_offset = (offset < 150) ? 0 : (offset - 150);
+    cueify_msf_t retval;
+
+    retval.frm = corrected_offset % 75;
+    retval.sec = corrected_offset / 75 % 60;
+    retval.min = corrected_offset / 60;
+
     return retval;
 }
-*/
 
 /** Perform a partial sum of the CDDB DiscID.
  *
@@ -265,43 +263,27 @@ unsigned long cddb_discid(CDROM_TOC *toc)
  * @return 0 if succeeded.
  */
 int print_cuesheet(const char *device) {
-    cueify_device *d;
+    cueify_device *dev;
+    cueify_toc *toc;
+    time_t t = time(NULL);
+    char time_str[256];
+    int i;
+    cueify_msf_t offset;
 
-    d = cueify_device_new();
-    if (d == NULL) {
+    dev = cueify_device_new();
+    if (dev == NULL) {
 	return 1;
     }
 
-    if (cueify_device_open(d, device) == CUEIFY_OK) {
-    /*
-	* Read the TOC now, in case we are autonaming the cuesheet. *
-	ReadTOC(hDevice, &toc);
-	if (bAutonameCuesheet) {
-	    * Generate the CDDB DiscID. *
-	    int iDiscID = cddb_discid(&toc);
-	    
-	    * A DiscID should never be 0 (0 tracks? Really?) *
-	    if (iDiscID == 0) {
-		goto error;
-	    }
-	    
-	    snprintf(szCuesheetFile, 255, "%s\%08x.cue", szFile, iDiscID);
-	    snprintf(szCDTextFile, 255, "%s\%08x.cdt", szFile, iDiscID);
-	    
-	    log = fopen(szCuesheetFile, "w");
-	    if (log == NULL) {
-		goto error;
-	    }
-	}
-	
-	strftime(szTime, 256, "%Y-%m-%dT%H:%M:%S", gmtime(&t));
-	* First read the last-session data. *
+    if (cueify_device_open(dev, device) == CUEIFY_OK) {
+	strftime(time_str, 256, "%Y-%m-%dT%H:%M:%S", gmtime(&t));
+	printf("REM GENTIME \"%s\"\n"
+	       "REM DRIVE \"%s\"\n",
+	       time_str,
+	       device);
+
+	/* First read the last-session data. *
 	ReadLastSession(hDevice, &session);
-	fprintf(log,
-		"REM GENTIME \"%s\"\n"
-		"REM DRIVE \"%c\"\n",
-		szTime,
-		cDriveLetter);
 	fprintf(log,
 		"REM FIRSTSESSION %d\n"
 		"REM LASTSESSION %d\n"
@@ -340,8 +322,16 @@ int print_cuesheet(const char *device) {
 		offset.S,
 		offset.F);
 	
-	* Then get the full TOC data. *
-	ReadTOC(hDevice, &toc);
+	*/
+
+	/* Now get the full TOC data. */
+	toc = cueify_toc_new();
+	if (toc == NULL) {
+	    goto error;
+	}
+	cueify_device_read_toc(dev, toc);
+
+	/*
 	fulltoc = ReadFullTOC(hDevice);
 	* And the CD-Text. *
 	cdtext = ReadCDText(hDevice);
@@ -560,11 +550,14 @@ int print_cuesheet(const char *device) {
 	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
 	    break;
 	}
-	
-	* And lastly the track stuff. *
-	fprintf(log, "FILE \"disc.bin\" BINARY\n");
-	for (iTrack = toc.FirstTrack; iTrack <= toc.LastTrack; iTrack++) {
-	    * Find the appropriate descriptor. *
+	*/
+
+	/* And lastly the track stuff. */
+	printf("FILE \"disc.bin\" BINARY\n");
+	for (i = cueify_toc_get_first_track(toc);
+	     i <= cueify_toc_get_last_track(toc);
+	     i++) {
+	    /* Find the appropriate descriptor. *
 	    for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != iTrack || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
 	    if (curSession != fulltoc->Descriptors[iDescriptor].SessionNumber) {
 		if (curSession != 0) {
@@ -588,7 +581,10 @@ int print_cuesheet(const char *device) {
 			"  REM SESSION %02d\n",
 			curSession);
 	    }
-	    if (toc.TrackData[iTrack - 1].Control & AUDIO_DATA_TRACK) {
+	    */
+	    if (cueify_toc_get_track_control_flags(toc, i) &
+		CUEIFY_TOC_TRACK_IS_DATA) {
+		/*
 		if (trackMode == 0x10) {
 		    * CD-I...  We special case. *
 		    fprintf(log,
@@ -605,9 +601,10 @@ int print_cuesheet(const char *device) {
 		    if (raw != NULL) {
 			switch (raw[15]) {
 			case 0x01:
-			    fprintf(log,
-				    "    TRACK %02d MODE1/2352\n",
-				    iTrack);
+		*/
+			    printf("    TRACK %02d MODE1/2352\n",
+				   i);
+			    /*
 			    break;
 			case 0x02:
 			    fprintf(log,
@@ -631,12 +628,13 @@ int print_cuesheet(const char *device) {
 				iTrack);
 		    }
 		}
+			    */
 	    } else {
-		fprintf(log,
-			"    TRACK %02d AUDIO\n",
-			iTrack);
+		printf("    TRACK %02d AUDIO\n",
+		       i);
 	    }
-	    
+
+	    /*
 	    if (cdtextData != NULL) {
 		for (iBlock = 0; iBlock < 8; iBlock++) {
 		    if (cdtextData->blocks[iBlock].iTracks < iTrack) {
@@ -722,24 +720,27 @@ int print_cuesheet(const char *device) {
 		
 		fprintf(log, "      ISRC %s\n", szISRC);
 	    }
-	    
-	    if ((toc.TrackData[iTrack - 1].Control & ~AUDIO_DATA_TRACK) != 0) {
-		int iControl = toc.TrackData[iTrack - 1].Control;
-		
-		fprintf(log, "      FLAGS");
-		
-		if ((iControl & AUDIO_WITH_PREEMPHASIS) > 0) {
-		    fprintf(log, " PRE");
+	    */
+
+	    if ((cueify_toc_get_track_control_flags(toc, i) &
+		 ~CUEIFY_TOC_TRACK_IS_DATA) != 0) {
+		int control = cueify_toc_get_track_control_flags(toc, i);
+
+		printf("      FLAGS");
+
+		if ((control & CUEIFY_TOC_TRACK_HAS_PREEMPHASIS) > 0) {
+		    printf(" PRE");
 		}
-		if ((iControl & DIGITAL_COPY_PERMITTED) > 0) {
-		    fprintf(log, " DCP");
+		if ((control & CUEIFY_TOC_TRACK_PERMITS_COPYING) > 0) {
+		    printf(" DCP");
 		}
-		if ((iControl & TWO_FOUR_CHANNEL_AUDIO) > 0) {
-		    fprintf(log, " 4CH");
+		if ((control & CUEIFY_TOC_TRACK_IS_QUADRAPHONIC) > 0) {
+		    printf(" 4CH");
 		}
-		fprintf(log, "\n");
+		printf("\n");
 	    }
-	    
+
+	    /*
 	    if (bHasPregap) {
 		pregap = RemoveDiscPregap(pregap);
 		fprintf(log,
@@ -754,19 +755,16 @@ int print_cuesheet(const char *device) {
 			toc.TrackData[iTrack - 1].Address[3] != 0)) {
 		fprintf(log, "      INDEX 00 00:00:00\n");
 	    }
-	    
-	    offset.M = toc.TrackData[iTrack - 1].Address[1];
-	    offset.S = toc.TrackData[iTrack - 1].Address[2];
-	    offset.F = toc.TrackData[iTrack - 1].Address[3];
-	    offset = RemoveDiscPregap(offset);
-	    
-	    fprintf(log,
-		    "      INDEX 01 %02d:%02d:%02d\n",
-		    offset.M,
-		    offset.S,
-		    offset.F);
-	    
-	    * Detect any other indices. *
+	    */
+
+	    offset = remove_disc_pregap(cueify_toc_get_track_address(toc, i));
+
+	    printf("      INDEX 01 %02d:%02d:%02d\n",
+		   offset.min,
+		   offset.sec,
+		   offset.frm);
+
+	    /* Detect any other indices. *
 	    if (DetectTrackIndices(hDevice, &toc, iTrack, &indices)) {
 		for (iIndex = 1; iIndex < indices.iIndices; iIndex++) {
 		    if (iIndex + 1 == indices.iIndices &&
@@ -787,20 +785,17 @@ int print_cuesheet(const char *device) {
 		}
 		free(indices.indices);
 	    }
+	    */
 	}
-	
-	offset.M = toc.TrackData[iTrack - 1].Address[1];
-	offset.S = toc.TrackData[iTrack - 1].Address[2];
-	offset.F = toc.TrackData[iTrack - 1].Address[3];
-	offset = RemoveDiscPregap(offset);
-	
-	fprintf(log,
-		"  REM LEAD-OUT %02d:%02d:%02d\n",
-		offset.M,
-		offset.S,
-		offset.F);
-	
-	* And finally, we can dump out intervals from TOC_INFO2. *
+
+	offset = remove_disc_pregap(cueify_toc_get_disc_length(toc));
+
+	printf("  REM LEAD-OUT %02d:%02d:%02d\n",
+	       offset.min,
+	       offset.sec,
+	       offset.frm);
+
+	/* And finally, we can dump out intervals from TOC_INFO2. *
 	if (cdtextData != NULL) {
 	    if (cdtextData->tocInfo2.iIntervals > 0) {
 		fprintf(log, "REM INTERVALS:\n");
@@ -824,25 +819,14 @@ int print_cuesheet(const char *device) {
 	FreeCDText(cdtextData);
 	free(fulltoc);
 */
-	if (device == NULL) {
-	    printf("Opened device %s\n", cueify_device_get_default_device());
-	} else {
-	    printf("Opened device %s\n", device);
-	}
-	if (cueify_device_close(d) != CUEIFY_OK) {
-	    cueify_device_free(d);
+	cueify_toc_free(toc);
+    error:
+	if (cueify_device_close(dev) != CUEIFY_OK) {
+	    cueify_device_free(dev);
 	    return 1;
 	}
-	printf("Closed device\n");
-    } else {
-	if (device == NULL) {
-	    printf("Did not open device %s\n",
-		   cueify_device_get_default_device());
-	} else {
-	    printf("Did not open device %s\n", device);
-	}
     }
-    cueify_device_free(d);
+    cueify_device_free(dev);
 
     return 0;
 }
