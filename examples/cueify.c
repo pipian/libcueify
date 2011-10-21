@@ -1,6 +1,6 @@
 /* GenCue.c - A utility to generate CD cuesheets.
  *
- * Copyright (c) 2010,2011 Ian Jacobi
+ * Copyright (c) 2010, 2011 Ian Jacobi
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -23,12 +23,8 @@
  * SOFTWARE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
-#include <windows.h>
-#include "cdrom.h"
-#include "toc.h"
+#include <libcueify/device.h>
 
 const char * const genreNames[0x1D] = {
     "NULL",
@@ -255,61 +251,32 @@ unsigned long cddb_discid(CDROM_TOC *toc)
     return ((n % 0xff) << 24 | t << 8 | toc->LastTrack);
 }
 
-/** Generate a Cuesheet file from the contents of the drive cDriveLetter.
+/** Write a cuesheet file to STDOUT based on the contents of an optical
+ * disc (CD-ROM) device.
  *
- * @param szFile The cuesheet file to write (without the .cue suffix).
- * @param cDriveLetter The letter of the drive to generate the cuesheet from.
- * @param bAutonameCuesheet If TRUE, szFile will be treated as a directory to
- *                          write the cuesheet in, and the cuesheet will be
- *                          given a name based on the CDDB DiscID.
+ * @param device the device to read out a cuesheet for
  * @return 0 if succeeded.
  */
-int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
+int print_cuesheet(const char *device) {
 {
-    char szCuesheetFile[256];
-    char szCDTextFile[256];
-    
-    /* Do some extra logging of disc data, since dBpoweramp falls down
-     * on the job. */
-    FILE *log = NULL, *cdt = NULL;
-    if (!bAutonameCuesheet) {
-	snprintf(szCuesheetFile, 255, "%s.cue", szFile);
-	snprintf(szCDTextFile, 255, "%s.cdt", szFile);
-	
-	log = fopen(szCuesheetFile, "w");
-	if (log == NULL) {
-	    goto error;
-	}
-    }
-    
     time_t t = time(NULL);
     char szTime[256];
-    HANDLE hDevice;
-    CDROM_TOC toc;
-    CDROM_TOC_FULL_TOC_DATA *fulltoc;
-    CDROM_TOC_SESSION_DATA session;
-    unsigned char cdtextBacking[4096];
-    CDROM_TOC_CD_TEXT_DATA *cdtext = (CDROM_TOC_CD_TEXT_DATA *)cdtextBacking;
-    SUB_Q_CHANNEL_DATA data;
-    unsigned char *raw;
-    int iTrack, iIndex, iDescriptor, iBlock;
-    struct CDText *cdtextData;
-    struct TrackIndices indices;
-    BOOL bHasPregap = FALSE;
-    struct TrackIndex pregap;
-    struct TrackIndex offset;
-    UCHAR curSession = 0;
-    UCHAR trackMode = 0;
-    
-    hDevice = OpenVolume(cDriveLetter);
-    if (hDevice != INVALID_HANDLE_VALUE) {
-	/* Read the TOC now, in case we are autonaming the cuesheet. */
+    cueify_device *d;
+
+    d = cueify_device_new();
+    if (d == NULL) {
+	return 1;
+    }
+
+    if (cueify_device_open(d, device) == CUEIFY_OK) {
+    /*
+	/* Read the TOC now, in case we are autonaming the cuesheet. *
 	ReadTOC(hDevice, &toc);
 	if (bAutonameCuesheet) {
-	    /* Generate the CDDB DiscID. */
+	    /* Generate the CDDB DiscID. *
 	    int iDiscID = cddb_discid(&toc);
 	    
-	    /* A DiscID should never be 0 (0 tracks? Really?) */
+	    /* A DiscID should never be 0 (0 tracks? Really?) *
 	    if (iDiscID == 0) {
 		goto error;
 	    }
@@ -324,7 +291,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	}
 	
 	strftime(szTime, 256, "%Y-%m-%dT%H:%M:%S", gmtime(&t));
-	/* First read the last-session data. */
+	/* First read the last-session data. *
 	ReadLastSession(hDevice, &session);
 	fprintf(log,
 		"REM GENTIME \"%s\"\n"
@@ -369,13 +336,13 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		offset.S,
 		offset.F);
 	
-	/* Then get the full TOC data. */
+	/* Then get the full TOC data. *
 	ReadTOC(hDevice, &toc);
 	fulltoc = ReadFullTOC(hDevice);
-	/* And the CD-Text. */
+	/* And the CD-Text. *
 	cdtext = ReadCDText(hDevice);
 	
-	/* We can write out the CD-Text. */
+	/* We can write out the CD-Text. *
 	if (cdtext != NULL &&
 	    ((cdtext->Length[0] << 8) | cdtext->Length[1]) > 2) {
 	    cdt = fopen(szCDTextFile, "wb");
@@ -390,10 +357,10 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	    fclose(cdt);
 	}
 	
-	/* And actually parse the CD-Text. */
+	/* And actually parse the CD-Text. *
 	cdtextData = ParseCDText(cdtext);
 	
-	/* Write out the MCN. */
+	/* Write out the MCN. *
 	if (ReadMCN(hDevice, &data) && data.MediaCatalog.Mcval) {
 	    char szMCN[16] = "";
 	    memcpy(szMCN, data.MediaCatalog.MediaCatalog, 15);
@@ -401,7 +368,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	    fprintf(log, "CATALOG %s\n", szMCN);
 	}
 	
-	/* Print any disc-level CD-Text strings. */
+	/* Print any disc-level CD-Text strings. *
 	if (cdtextData != NULL) {
 	    for (iBlock = 0; iBlock < 8; iBlock++) {
 		if (cdtextData->blocks[iBlock].arrangers != NULL &&
@@ -491,8 +458,8 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 				cdtextData->blocks[iBlock].titles[0]);
 		    }
 		}
-		/* Ignore TOC_INFO. */
-		/* Ignore TOC_INFO2 (for now). */
+		/* Ignore TOC_INFO. *
+		/* Ignore TOC_INFO2 (for now). *
 		if (cdtextData->blocks[iBlock].upc_ean_isrcs != NULL &&
 		    cdtextData->blocks[iBlock].upc_ean_isrcs[0] != NULL) {
 		    if (iBlock == 0) {
@@ -503,7 +470,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 				cdtextData->blocks[iBlock].upc_ean_isrcs[0]);
 		    }
 		}
-		/* We ARE, however, interested in the sizeInfo. */
+		/* We ARE, however, interested in the sizeInfo. *
 		if (iBlock == 0 && cdtextData->blocks[iBlock].bValid) {
 		    switch (cdtextData->blocks[iBlock].charset) {
 		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
@@ -590,14 +557,14 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	    break;
 	}
 	
-	/* And lastly the track stuff. */
+	/* And lastly the track stuff. *
 	fprintf(log, "FILE \"disc.bin\" BINARY\n");
 	for (iTrack = toc.FirstTrack; iTrack <= toc.LastTrack; iTrack++) {
-	    /* Find the appropriate descriptor. */
+	    /* Find the appropriate descriptor. *
 	    for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != iTrack || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
 	    if (curSession != fulltoc->Descriptors[iDescriptor].SessionNumber) {
 		if (curSession != 0) {
-		    /* Print the leadout of the last session. */
+		    /* Print the leadout of the last session. *
 		    int iLeadoutDescriptor;
 		    
 		    for (iLeadoutDescriptor = 0; iLeadoutDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iLeadoutDescriptor].Point != 0xA2 || fulltoc->Descriptors[iLeadoutDescriptor].Adr != 1 || fulltoc->Descriptors[iLeadoutDescriptor].SessionNumber != curSession); iLeadoutDescriptor++);
@@ -619,12 +586,12 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	    }
 	    if (toc.TrackData[iTrack - 1].Control & AUDIO_DATA_TRACK) {
 		if (trackMode == 0x10) {
-		    /* CD-I...  We special case. */
+		    /* CD-I...  We special case. *
 		    fprintf(log,
 			    "    TRACK %02d CDI/2352\n",
 			    iTrack);
 		} else {
-		    /* Best way to detect the data mode is a raw read. */
+		    /* Best way to detect the data mode is a raw read. *
 		    raw = ReadRawSector(
 			hDevice,
 			toc.TrackData[iTrack - 1].Address[1] * 60 * 75 +
@@ -644,7 +611,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 				    iTrack);
 			    break;
 			case 0x0F:
-			    /* Unknown */
+			    /* Unknown *
 			default:
 			    fprintf(log,
 				    "    TRACK %02d MODE1/2352\n",
@@ -654,7 +621,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 			free(raw);
 			raw = NULL;
 		    } else {
-			/* Dunno :-/ */
+			/* Dunno :-/ *
 			fprintf(log,
 				"    TRACK %02d MODE1/2352\n",
 				iTrack);
@@ -795,7 +762,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		    offset.S,
 		    offset.F);
 	    
-	    /* Detect any other indices. */
+	    /* Detect any other indices. *
 	    if (DetectTrackIndices(hDevice, &toc, iTrack, &indices)) {
 		for (iIndex = 1; iIndex < indices.iIndices; iIndex++) {
 		    if (iIndex + 1 == indices.iIndices &&
@@ -829,7 +796,7 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 		offset.S,
 		offset.F);
 	
-	/* And finally, we can dump out intervals from TOC_INFO2. */
+	/* And finally, we can dump out intervals from TOC_INFO2. *
 	if (cdtextData != NULL) {
 	    if (cdtextData->tocInfo2.iIntervals > 0) {
 		fprintf(log, "REM INTERVALS:\n");
@@ -852,45 +819,35 @@ int GenCuesheet(char *szFile, char cDriveLetter, BOOL bAutonameCuesheet)
 	free(cdtext);
 	FreeCDText(cdtextData);
 	free(fulltoc);
-	CloseVolume(hDevice);
+*/
+	if (cueify_device_close(d) != CUEIFY_OK) {
+	    cueify_device_free(d);
+	    return 1;
+	}
     }
-    
-    fclose(log);
-    
+    cueify_device_free(d);
+
     return 0;
-    
-error:
-    if (log != NULL) {
-	fclose(log);
-    }
-    
-    /* We failed?? */
-    return 1;
 }
 
-int main(int argc, char *argv[])
-{
-    char *szDriveLetter;
-    char *szCuesheet;
-    BOOL bAutonameCuesheet;
-    
+int main(int argc, char *argv[]) {
+    char *device;
+
     /* Just got two command-line arguments we expect: drive letter and log. */
-    if ((argc != 3 && argc != 4) || (argc == 4 && strcmp(argv[2], "--cuesheet-directory") != 0)) {
-	printf("Usage: GenCue DRIVELETTER CUESHEETNAME [without .cue]\n      GenCue DRIVELETTER --cuesheet-directory DIRECTORY\n");
+    if (argc != 2 && argc != 3) {
+	printf("Usage: cueify [DEVICE]\n");
 	return 0;
     }
-    
-    szDriveLetter = argv[1];
-    szCuesheet = argv[2];
-    bAutonameCuesheet = FALSE;
-    if (argc == 4) {
-	szCuesheet = argv[3];
-	bAutonameCuesheet = TRUE;
+
+    if (argc == 3) {
+	device = argv[1];
+    } else {
+	device = NULL;
     }
-    
-    if (GenCuesheet(szCuesheet, szDriveLetter[0], bAutonameCuesheet)) {
-	printf("There was an issue writing the cuesheet!\n");
+
+    if (print_cuesheet(device)) {
+	printf("There was an issue reading the cuesheet!\n");
     }
-    
+
     return 0;
 }
