@@ -23,6 +23,7 @@
  * SOFTWARE.
  */
 
+#include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -76,6 +77,8 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
     struct cd_toc_entry entries[100];
     struct ioc_read_toc_entry toc;
     int i;
+
+    memset(entries, 0, sizeof(entries));
 
     if (ioctl(d->handle, CDIOREADTOCHEADER, &hdr) < 0) {
 	return CUEIFY_ERR_INTERNAL;
