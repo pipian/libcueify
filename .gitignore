@@ -1,2 +1,7 @@
 # Ignore editor cruft
 *~
+\#*
+.\#*
+
+# Ignore build directory
+/build
