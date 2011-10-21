@@ -38,7 +38,9 @@ enum cueify_error {
 				 * Memory could not be allocated
 				 * during this operation.
 				 */
-    CUEIFY_ERR_NO_DEVICE        /** The device could not be opened. */
+    CUEIFY_ERR_NO_DEVICE,       /** The device could not be opened. */
+    CUEIFY_ERR_TRUNCATED,       /** The serialized data was truncated. */
+    CUEIFY_ERR_TOOSMALL         /** The serialized data could not fit. */
 };
 
 #endif /* _LIBCUEIFY_ERROR_H */

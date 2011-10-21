@@ -27,6 +27,7 @@
 #define _LIBCUEIFY_TOC_PRIVATE_H
 
 #include <libcueify/types.h>
+#include "device_private.h"
 
 #define MAX_TRACKS  100  /** Maximum number of tracks on a CD. */
 
@@ -40,6 +41,7 @@ typedef struct {
     uint32_t lba;
 } cueify_toc_track_private;
 
+
 /** Internal structure to hold TOC data. */
 typedef struct {
     /** Number of the first track in the TOC. */
@@ -49,5 +51,18 @@ typedef struct {
     /** Tracks in the TOC. */
     cueify_toc_track_private tracks[MAX_TRACKS];
 } cueify_toc_private;
+
+
+/**
+ * Unportable read of the TOC of the disc in the optical disc device
+ * associated with a device handle.
+ *
+ * @param d an opened device handle
+ * @param t a TOC instance to populate
+ * @return CUEIFY_OK if the TOC was successfully read; otherwise an
+ *         appropriate error code is returned
+ */
+int cueify_device_read_toc_unportable(cueify_device_private *d,
+				      cueify_toc_private *t);
 
 #endif  /* _LIBCUEIFY_TOC_PRIVATE_H */

@@ -23,8 +23,10 @@
  * SOFTWARE.
  */
 
+#include <stdlib.h>
 #include <libcueify/toc.h>
 #include <libcueify/error.h>
+#include "device_private.h"
 #include "toc_private.h"
 
 cueify_toc *cueify_toc_new() {
@@ -33,11 +35,14 @@ cueify_toc *cueify_toc_new() {
 
 
 int cueify_device_read_toc(cueify_device *d, cueify_toc *t) {
+    cueify_device_private *dev = (cueify_device_private *)d;
+    cueify_toc_private *toc = (cueify_toc_private *)t;
+
     if (d == NULL || t == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
 
-    return cueify_device_read_toc_unportable(d, t);
+    return cueify_device_read_toc_unportable(dev, toc);
 }  /* cueify_device_read_toc */
 
 
@@ -77,9 +82,9 @@ int cueify_toc_deserialize(cueify_toc *t, uint8_t *buffer, size_t size) {
 	/* Reserved */
 	bp++;
 	/* ADR */
-	toc->tracks[offset].adr = bp >> 4;
+	toc->tracks[offset].adr = *bp >> 4;
 	/* CONTROL */
-	toc->tracks[offset].control = bp & 0xF;
+	toc->tracks[offset].control = *bp & 0xF;
 	bp++;
 	/* Track Number */
 	bp++;
@@ -108,7 +113,8 @@ int cueify_toc_serialize(cueify_toc *t, uint8_t *buffer, size_t *size) {
 	return CUEIFY_ERR_BADARG;
     }
 
-    toc_length = (toc->last_track - toc->first_track + 2) * 8 + 4;
+    toc_length = (toc->last_track_number -
+		  toc->first_track_number + 2) * 8 + 4;
     if (*size < toc_length) {
 	return CUEIFY_ERR_TOOSMALL;
     }
@@ -157,7 +163,7 @@ int cueify_toc_serialize(cueify_toc *t, uint8_t *buffer, size_t *size) {
 
 
 void cueify_toc_free(cueify_toc *t) {
-    free(d);
+    free(t);
 }  /* cueify_toc_free */
 
 
