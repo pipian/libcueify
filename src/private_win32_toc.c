@@ -70,25 +70,6 @@ BOOL ReadLastSession(HANDLE hDevice, CDROM_TOC_SESSION_DATA *session)
 			   &dwReturned, NULL);
 }
 
-BOOL ReadTOC(HANDLE hDevice, CDROM_TOC *toc)
-{
-    DWORD dwReturned;
-    CDROM_READ_TOC_EX toc_ex;
-    
-    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_TOC;
-    toc_ex.Reserved1 = 0;
-    toc_ex.Msf = TRUE;
-    toc_ex.SessionTrack = 1;
-    toc_ex.Reserved2 = 0;
-    toc_ex.Reserved3 = 0;
-    
-    return DeviceIoControl(hDevice,
-			   IOCTL_CDROM_READ_TOC_EX,
-			   &toc_ex, sizeof(CDROM_READ_TOC_EX),
-			   toc, sizeof(CDROM_TOC),
-			   &dwReturned, NULL);
-}
-
 CDROM_TOC_FULL_TOC_DATA *ReadFullTOC(HANDLE hDevice)
 {
     DWORD dwReturned;

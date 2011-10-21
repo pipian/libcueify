@@ -112,3 +112,54 @@ const char *cueify_device_get_default_device_unportable() {
     }
     return NULL;
 }
+
+int cueify_device_read_toc_unportable(cueify_device_private *d,
+				      cueify_toc_private *t) {
+    DWORD dwReturned;
+    CDROM_READ_TOC_EX toc_ex;
+    BOOL succeded;
+    int i;
+    
+    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_TOC;
+    toc_ex.Reserved1 = 0;
+    toc_ex.Msf = FALSE;
+    toc_ex.SessionTrack = 1;
+    toc_ex.Reserved2 = 0;
+    toc_ex.Reserved3 = 0;
+    
+    succeded = DeviceIoControl(d->handle,
+			       IOCTL_CDROM_READ_TOC_EX,
+			       &toc_ex, sizeof(CDROM_READ_TOC_EX),
+			       toc, sizeof(CDROM_TOC),
+			       &dwReturned, NULL);
+    if (!succeeded) {
+	return CUEIFY_ERR_INTERNAL;
+    } else {
+	t->first_track_number = toc->FirstTrack;
+	t->last_track_number = toc->LastTrack;
+	for (i = 0; i < MAXIMUM_NUMBER_TRACKS; i++) {
+	    if (toc->TrackData[i].TrackNumber == 0xAA) {
+		/* Lead-out Track */
+		t->tracks[0].control = toc->TrackData[i].Control;
+		t->tracks[0].adr = toc->TrackData[i].Adr;
+		t->tracks[0].lba =
+		    ((toc->TrackData[i].Address[0] << 24) |
+		     (toc->TrackData[i].Address[1] << 16) |
+		     (toc->TrackData[i].Address[2] << 8) |
+		     toc->TrackData[i].Address[3]);
+	    } else if (toc->TrackData[i].TrackNumber != 0) {
+		t->tracks[toc->TrackData[i].TrackNumber].control =
+		    toc->TrackData[i].Control;
+		t->tracks[toc->TrackData[i].TrackNumber].adr =
+		    toc->TrackData[i].Adr;
+		t->tracks[toc->TrackData[i].TrackNumber].lba =
+		    ((toc->TrackData[i].Address[0] << 24) |
+		     (toc->TrackData[i].Address[1] << 16) |
+		     (toc->TrackData[i].Address[2] << 8) |
+		     toc->TrackData[i].Address[3]);
+	    }
+	}
+    }
+
+    return CUEIFY_OK;
+}
