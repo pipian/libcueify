@@ -1,7 +1,6 @@
-/* cdrom.c - CD-ROM handling functions for the MFDigital 7602/7604 Ripstation
- *           driver for dBpoweramp BatchRipper.
+/* win32.c - win32-specific (Windows XP+) CD-ROM API glue
  *
- * Copyright (c) 2010 Ian Jacobi
+ * Copyright (c) 2010, 2011 Ian Jacobi
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,23 +25,32 @@
 
 #include <windows.h>
 #include <tchar.h>
-#include <winioctl.h>
-#include "7604args.h"
-#include "cdrom.h"
 
-LPTSTR szVolumeFormat = TEXT("\\\\.\\%c:");
-LPTSTR szRootFormat = TEXT("%c:\\");
+LPCTSTR szVolumeFormat[9] = "\\\\.\\%lc:";
+LPCTSTR szRootFormat[6] = "%lc:\\";
 
-HANDLE OpenVolume(TCHAR cDriveLetter)
-{
+int cueify_device_open_unportable(cueify_device_private *d,
+				  const char *device) {
     HANDLE hVolume;
+    WCHAR cDriveLetter;
     UINT uDriveType;
-    TCHAR szVolumeName[8];
-    TCHAR szRootName[5];
+    TCHAR szVolumeName[7];
+    TCHAR szRootName[4];
     DWORD dwAccessFlags;
-    
+
+    /* Precondition: device[0] != '\0' */
+
+    /* Is it a drive letter? (Regular Expression: c(?::\?\)?) */
+    if ( device[1] == '\0' ||
+	(device[1] == ':' && device[2] == '\0')) {
+	/* Just a single letter. */
+	cDriveLetter = device[0];
+    } else {
+	/* We currently don't handle drives without a letter. */
+	return CUEIFY_BADARG;
+    }
     wsprintf(szRootName, szRootFormat, cDriveLetter);
-    
+
     uDriveType = GetDriveType(szRootName);
     switch (uDriveType) {
     case DRIVE_REMOVABLE:
@@ -52,11 +60,10 @@ HANDLE OpenVolume(TCHAR cDriveLetter)
 	dwAccessFlags = GENERIC_READ;
 	break;
     default:
-	return INVALID_HANDLE_VALUE;
+	return CUEIFY_ERR_NO_DEVICE;
     }
-    
     wsprintf(szVolumeName, szVolumeFormat, cDriveLetter);
-    
+
     hVolume = CreateFile(szVolumeName,
 			 dwAccessFlags,
 			 FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -64,126 +71,44 @@ HANDLE OpenVolume(TCHAR cDriveLetter)
 			 OPEN_EXISTING,
 			 0,
 			 NULL);
-    return hVolume;
-}
-
-BOOL CloseVolume(HANDLE hVolume)
-{
-    return CloseHandle(hVolume);
-}
-
-BOOL AutoEjectVolume(HANDLE hVolume)
-{
-    DWORD dwBytesReturned;
-    
-    return DeviceIoControl(hVolume,
-			   IOCTL_STORAGE_EJECT_MEDIA,
-			   NULL, 0,
-			   NULL, 0,
-			   &dwBytesReturned,
-			   NULL);
-}
-
-BOOL EjectVolume(TCHAR cDriveLetter, CmdArguments *args)
-{
-    HANDLE hVolume;
-    BOOL fAutoEject = FALSE;
-    
-    /* Open the volume. */
-    hVolume = OpenVolume(cDriveLetter);
     if (hVolume == INVALID_HANDLE_VALUE) {
-	return FALSE;
+	return CUEIFY_ERR_NO_DEVICE;
+    } else {
+	d->handle = hVolume;
+	return CUEIFY_OK;
     }
-    
-    /* Eject the volume without locking (since dBpoweramp already locks). */
-    if (AutoEjectVolume(hVolume)) {
-	fAutoEject = TRUE;
-    }
-    
-    /* Close the volume so other processes can use the drive. */
-    if (!CloseVolume(hVolume)) {
-	return FALSE;
-    }
-    
-    return fAutoEject;
 }
 
-BOOL AutoLoadVolume(HANDLE hVolume)
-{
-    DWORD dwBytesReturned;
-    
-    return DeviceIoControl(hVolume,
-			   IOCTL_STORAGE_LOAD_MEDIA,
-			   NULL, 0,
-			   NULL, 0,
-			   &dwBytesReturned,
-			   NULL);
+int cueify_device_close_unportable(cueify_device_private *d) {
+    if (CloseHandle(d->handle)) {
+	return CUEIFY_OK;
+    } else {
+	return CUEIFY_ERR_INTERNAL;
+    }
 }
 
-BOOL LoadVolume(TCHAR cDriveLetter, CmdArguments *args)
-{
-    HANDLE hVolume;
-    BOOL fAutoLoad = FALSE;
-    
-    /* Open the volume. */
-    hVolume = OpenVolume(cDriveLetter);
-    if (hVolume == INVALID_HANDLE_VALUE) {
-	return FALSE;
-    }
-    
-    /* Load the volume. */
-    if (AutoLoadVolume(hVolume)) {
-	fAutoLoad = TRUE;
-    }
-    
-    /* Close the volume so other processes can use the drive. */
-    if (!CloseVolume(hVolume)) {
-	return FALSE;
-    }
-    
-    return fAutoLoad;
-}
+const char *driveLetters[26] = {
+    "a:\\", "b:\\", "c:\\", "d:\\", "e:\\", "f:\\", "g:\\", "h:\\",
+    "i:\\", "j:\\", "k:\\", "l:\\", "m:\\", "n:\\", "o:\\", "p:\\",
+    "q:\\", "r:\\", "s:\\", "t:\\", "u:\\", "v:\\", "w:\\", "x:\\",
+    "y:\\", "z:\\"
+};
 
-BOOL CheckVolume(HANDLE hVolume)
-{
-    DWORD dwBytesReturned;
-    
-    return DeviceIoControl(hVolume,
-			   IOCTL_STORAGE_CHECK_VERIFY,
-			   NULL, 0,
-			   NULL, 0,
-			   &dwBytesReturned,
-			   NULL);
-}
+const char *cueify_device_get_default_device_unportable() {
+    int i;
+    DWORD dwDrives;
+    TCHAR szRootName[4] = "a:\\";
 
-BOOL VolumeHasMedia(TCHAR cDriveLetter, CmdArguments *args, int iDelay)
-{
-    HANDLE hVolume;
-    BOOL fHasMedia = FALSE;
-    
-    /* Open the volume. */
-    hVolume = OpenVolume(cDriveLetter);
-    if (hVolume == INVALID_HANDLE_VALUE) {
-	return FALSE;
-    }
-    
-    /* Test the volume for media. */
-    while (!CheckVolume(hVolume) && iDelay > 0) {
-	/*
-	 * If the volume doesn't have media, wait a little bit in case
-	 * the drive is settling.
-	 */
-	iDelay--;
-	if (iDelay > 0) {
-	    Sleep(1000);
+    dwDrives = GetLogicalDrives();
+    for (i = 0; i < 26; i++) {
+	if (dwDrives & 0x01) {
+	    uDriveType = GetDriveType(szRootName);
+	    if (uDriveType == DRIVE_CDROM) {
+		return driveLetters[i];
+	    }
 	}
+	dwDrives >>= 1;
+	szRootName[0]++;
     }
-    if (iDelay > 0) {
-	fHasMedia = TRUE;
-    }
-    
-    /* Close the volume so other processes can use the drive. */
-    CloseVolume(hVolume);
-    
-    return fHasMedia;
+    return NULL;
 }

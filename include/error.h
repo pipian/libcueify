@@ -29,7 +29,16 @@
 /** Possible return values for functions in libcueify. */
 enum cueify_error {
     CUEIFY_OK = 0,              /** The last function returned successfully. */
-    CUEIFY_BADARG,              /** A bad argument was provided. */
+    CUEIFY_ERR_INTERNAL,        /**
+				 * An internal error occured. Ideally,
+				 * this should never be returned.
+				 */
+    CUEIFY_ERR_BADARG,          /** A bad argument was provided. */
+    CUEIFY_ERR_NOMEM,           /**
+				 * Memory could not be allocated
+				 * during this operation.
+				 */
+    CUEIFY_ERR_NO_DEVICE,       /** The device could not be opened. */
 };
 
 #endif /* _LIBCUEIFY_ERROR_H */

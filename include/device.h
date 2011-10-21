@@ -44,18 +44,23 @@ cueify_device *cueify_device_new();
 
 
 /**
- * Open an optical disc (CD-ROM) device and associate it with a device handle.
+ * Open an optical disc (CD-ROM) device and associate it with a device
+ * handle.
  *
  * This function should be called after cueify_device_new() but before
  * any other cueify_device_*() functions.
  *
  * @pre { d != NULL }
  * @param d an unopened device handle
- * @param device an operating-system-specific device identifier of the device to open,
- *               or NULL to open the default device returned by
- *               cueify_device_get_default_device()
- * @return CUEIFY_OK if the device was successfully opened; otherwise an error code is
- *         returned
+ * @param device an operating-system-specific device identifier of the
+ *               device to open, or NULL to open the default device
+ *               returned by cueify_device_get_default_device().
+
+ * @return CUEIFY_OK if the device was successfully opened, otherwise,
+ *         an error code is returned. This error code may include:
+ *         CUEIFY_ERR_NO_DEVICE if the device specified by device
+ *         could not be found, or device is NULL and
+ *         cueify_get_default_device() returns NULL.
  */
 int cueify_device_open(cueify_device *d, const char *device);
 
@@ -68,8 +73,8 @@ int cueify_device_open(cueify_device *d, const char *device);
  *
  * @pre { d != NULL, cueify_device_open(d) last returned CUEIFY_OK }
  * @param d an opened device handle
- * @return CUEIFY_OK if the device was successfully closed; otherwise an error code is
- *         returned
+ * @return CUEIFY_OK if the device was successfully closed; otherwise
+ *         an error code is returned
  */
 int cueify_device_close(cueify_device *d);
 

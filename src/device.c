@@ -35,11 +35,20 @@ cueify_device *cueify_device_new() {
 int cueify_device_open(cueify_device *d, const char *device) {
     cueify_device_private *dev = (cueify_device_private *)d;
 
+    /* Must have a defined device instance */
     if (dev == NULL) {
-	return CUEIFY_BADARG;
+	return CUEIFY_ERR_BADARG;
     }
+    /* Get the default device if needed */
     if (device == NULL) {
 	device = cueify_device_get_default_device();
+	if (device == NULL) {
+	    return CUEIFY_ERR_NO_DEVICE;
+	}
+    }
+    /* The device should actually be something */
+    if (device[0] == '\0') {
+	return CUEIFY_ERR_BADARG;
     }
 
     memset(dev, 0, sizeof(cueify_device_private));
