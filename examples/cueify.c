@@ -193,20 +193,18 @@ const char * const languageNames[] = {
     "AMHARIC"
 };
 
-/** Subtract the 2-second/150-frame disc pregap from the specified LBA
- * offset and return the corresponding MSF time.
+/** Get the MSF time for an absolute LBA offset.
  *
- * @param offset an offset to subtract two seconds from
- * @return offset in MSF time, with two seconds subtracted from it
+ * @param offset an offset to get the MSF time for.
+ * @return offset in MSF time, excluding the pre-gap
  */
-cueify_msf_t remove_disc_pregap(uint32_t offset)
+cueify_msf_t lba_to_msf(uint32_t offset)
 {
-    uint32_t corrected_offset = (offset < 150) ? 0 : (offset - 150);
     cueify_msf_t retval;
 
-    retval.frm = corrected_offset % 75;
-    retval.sec = corrected_offset / 75 % 60;
-    retval.min = corrected_offset / 75 / 60;
+    retval.frm = offset % 75;
+    retval.sec = offset / 75 % 60;
+    retval.min = offset / 75 / 60;
 
     return retval;
 }
@@ -760,7 +758,7 @@ int print_cuesheet(const char *device) {
 	    }
 	    */
 
-	    offset = remove_disc_pregap(cueify_toc_get_track_address(toc, i));
+	    offset = lba_to_msf(cueify_toc_get_track_address(toc, i));
 
 	    printf("      INDEX 01 %02d:%02d:%02d\n",
 		   offset.min,
@@ -791,7 +789,7 @@ int print_cuesheet(const char *device) {
 	    */
 	}
 
-	offset = remove_disc_pregap(cueify_toc_get_disc_length(toc));
+	offset = lba_to_msf(cueify_toc_get_disc_length(toc));
 
 	printf("  REM LEAD-OUT %02d:%02d:%02d\n",
 	       offset.min,

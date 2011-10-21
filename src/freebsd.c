@@ -98,11 +98,19 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
 	    /* Lead-out Track */
 	    t->tracks[0].control = toc.data[i].control;
 	    t->tracks[0].adr = toc.data[i].addr_type;
-	    t->tracks[0].lba = toc.data[i].addr.lba;
+	    t->tracks[0].lba =
+		((toc.data[0].addr.addr[0] << 24) |
+		 (toc.data[0].addr.addr[1] << 16) |
+		 (toc.data[0].addr.addr[2] << 8) |
+		 toc.data[0].addr.addr[3]);
 	} else if (toc.data[i].track != 0) {
 	    t->tracks[toc.data[i].track].control = toc.data[i].control;
 	    t->tracks[toc.data[i].track].adr = toc.data[i].addr_type;
-	    t->tracks[toc.data[i].track].lba = toc.data[i].addr.lba;
+	    t->tracks[toc.data[i].track].lba =
+		((toc.data[i].addr.addr[0] << 24) |
+		 (toc.data[i].addr.addr[1] << 16) |
+		 (toc.data[i].addr.addr[2] << 8) |
+		 toc.data[i].addr.addr[3]);
 	}
     }
 
