@@ -24,8 +24,8 @@
  */
 
 #include <stdlib.h>
-#include "libcueify/device.h"
-#include "libcueify/device_private.h"
+#include <libcueify/device.h>
+#include "device_private.h"
 
 cueify_device *cueify_device_new() {
     return calloc(1, sizeof(cueify_device_private));
