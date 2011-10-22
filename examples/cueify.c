@@ -29,6 +29,7 @@
 #include <libcueify/error.h>
 #include <libcueify/toc.h>
 #include <libcueify/sessions.h>
+#include <libcueify/full_toc.h>
 #include <libcueify/types.h>
 
 const char * const genreNames[0x1D] = {
@@ -265,10 +266,12 @@ int print_cuesheet(const char *device) {
     cueify_device *dev;
     cueify_toc *toc;
     cueify_sessions *sessions;
+    cueify_full_toc *fulltoc;
     time_t t = time(NULL);
     char time_str[256];
     int i;
     cueify_msf_t offset;
+    uint8_t cur_session = 0;
 
     dev = cueify_device_new();
     if (dev == NULL) {
@@ -334,9 +337,12 @@ int print_cuesheet(const char *device) {
 	}
 	cueify_device_read_toc(dev, toc);
 
-	/*
-	fulltoc = ReadFullTOC(hDevice);
-	* And the CD-Text. *
+	fulltoc = cueify_full_toc_new();
+	if (cueify_device_read_full_toc(dev, fulltoc) != CUEIFY_OK) {
+	    cueify_full_toc_free(fulltoc);
+	    fulltoc = NULL;
+	}
+	/* And the CD-Text. *
 	cdtext = ReadCDText(hDevice);
 	
 	* We can write out the CD-Text. *
@@ -536,55 +542,54 @@ int print_cuesheet(const char *device) {
 		    }
 		}
 	    }
+	}*/
+
+	if (fulltoc != NULL) {
+	    switch (cueify_full_toc_get_disc_type(fulltoc)) {
+	    case CUEIFY_DISC_MODE_1:
+		printf("REM ORIGINAL MEDIA-TYPE: CD\n");
+		break;
+	    case CUEIFY_DISC_CDI:
+		printf("REM ORIGINAL MEDIA-TYPE: CD-I\n");
+		break;
+	    case CUEIFY_DISC_MODE_2:
+		printf("REM ORIGINAL MEDIA-TYPE: CD-XA\n");
+		break;
+	    default:
+		printf("REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
+		break;
+	    }
 	}
-	for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != 0xA0 || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
-	trackMode = fulltoc->Descriptors[iDescriptor].Msf[1];
-	switch (trackMode) {
-	case 0x00:
-	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD\n");
-	    break;
-	case 0x10:
-	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-I\n");
-	    break;
-	case 0x20:
-	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: CD-XA\n");
-	    break;
-	default:
-	    fprintf(log, "REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
-	    break;
-	}
-	*/
 
 	/* And lastly the track stuff. */
 	printf("FILE \"disc.bin\" BINARY\n");
 	for (i = cueify_toc_get_first_track(toc);
 	     i <= cueify_toc_get_last_track(toc);
 	     i++) {
-	    /* Find the appropriate descriptor. *
-	    for (iDescriptor = 0; iDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iDescriptor].Point != iTrack || fulltoc->Descriptors[iDescriptor].Adr != 1); iDescriptor++);
-	    if (curSession != fulltoc->Descriptors[iDescriptor].SessionNumber) {
-		if (curSession != 0) {
-		    * Print the leadout of the last session. *
-		    int iLeadoutDescriptor;
-		    
-		    for (iLeadoutDescriptor = 0; iLeadoutDescriptor * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) < ((fulltoc->Length[0] << 8) | fulltoc->Length[1]) - 2 && (fulltoc->Descriptors[iLeadoutDescriptor].Point != 0xA2 || fulltoc->Descriptors[iLeadoutDescriptor].Adr != 1 || fulltoc->Descriptors[iLeadoutDescriptor].SessionNumber != curSession); iLeadoutDescriptor++);
-		    offset.M = fulltoc->Descriptors[iLeadoutDescriptor].Msf[0];
-		    offset.S = fulltoc->Descriptors[iLeadoutDescriptor].Msf[1];
-		    offset.F = fulltoc->Descriptors[iLeadoutDescriptor].Msf[2];
-		    offset = RemoveDiscPregap(offset);
-		    
-		    fprintf(log,
-			    "  REM LEAD-OUT %02d:%02d:%02d\n",
-			    offset.M,
-			    offset.S,
-			    offset.F);
+	    if (fulltoc != NULL &&
+		cur_session != cueify_full_toc_get_track_session(fulltoc, i)) {
+		if (cur_session != 0) {
+		    /* Print the leadout of the last session. */
+		    offset = cueify_full_toc_get_track_address(fulltoc, i);
+
+		    /* Adjust the lead-out. */
+		    offset.min -= 2;
+		    if (offset.sec < 32) {
+			offset.sec += 60;
+			offset.min--;
+		    }
+		    offset.sec -= 32;
+
+		    printf("  REM LEAD-OUT %02d:%02d:%02d\n",
+			   offset.min,
+			   offset.sec,
+			   offset.frm);
 		}
-		curSession = fulltoc->Descriptors[iDescriptor].SessionNumber;
-		fprintf(log,
-			"  REM SESSION %02d\n",
-			curSession);
+		cur_session = cueify_full_toc_get_track_session(fulltoc, i);
+		printf("  REM SESSION %02d\n",
+		       cur_session);
 	    }
-	    */
+
 	    if (cueify_toc_get_track_control_flags(toc, i) &
 		CUEIFY_TOC_TRACK_IS_DATA) {
 		/*
@@ -822,6 +827,9 @@ int print_cuesheet(const char *device) {
 	FreeCDText(cdtextData);
 	free(fulltoc);
 */
+	if (fulltoc != NULL) {
+	    cueify_full_toc_free(fulltoc);
+	}
 	cueify_toc_free(toc);
     error:
 	if (cueify_device_close(dev) != CUEIFY_OK) {
