@@ -36,6 +36,7 @@
 /** Internal version of the cueify_device structure. */
 typedef struct {
     device_handle handle;  /** OS-specific device handle */
+    const char *path;  /** OS-specific identifier used to open the handle. */
 } cueify_device_private;
 
 /** Unportable version of cueify_device_open().

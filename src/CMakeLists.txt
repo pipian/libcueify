@@ -29,6 +29,10 @@ ENDIF(OS_IS_FREEBSD)
 
 ADD_LIBRARY(cueify SHARED ${_sources} ${_os_sources})
 
+IF(OS_IS_FREEBSD)
+    TARGET_LINK_LIBRARIES(cueify cam)
+ENDIF(OS_IS_FREEBSD)
+
 SET_TARGET_PROPERTIES(cueify PROPERTIES
     VERSION ${cueify_VERSION}
     SOVERSION ${cueify_SOVERSION}
@@ -36,7 +40,12 @@ SET_TARGET_PROPERTIES(cueify PROPERTIES
 )
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic-errors")
+    IF(OS_IS_FREEBSD)
+        # Unfortunately, libcam fails -pedantic-errors
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic")
+    ELSE(OS_IS_FREEBSD)
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic-errors")
+    ENDIF(OS_IS_FREEBSD)
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 INSTALL(TARGETS cueify DESTINATION ${LIB_INSTALL_DIR})

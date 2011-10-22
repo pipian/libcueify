@@ -54,6 +54,10 @@ int cueify_device_open(cueify_device *d, const char *device) {
     }
 
     memset(dev, 0, sizeof(cueify_device_private));
+    dev->path = malloc(strlen(device) + 1);
+    if (dev->path == NULL) {
+	return CUEIFY_ERR_NOMEM;
+    }
 
     return cueify_device_open_unportable(dev, device);
 }  /* cueify_device_open */

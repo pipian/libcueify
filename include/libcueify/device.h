@@ -50,12 +50,15 @@ cueify_device *cueify_device_new();
  * This function should be called after cueify_device_new() but before
  * any other cueify_device_*() functions.
  *
+ * @note It is assumed that the data pointed to by device will not be
+ *       freed until after cueify_device_close() has been called on
+ *       the device handle.
+ *
  * @pre { d != NULL }
  * @param d an unopened device handle
  * @param device an operating-system-specific device identifier of the
  *               device to open, or NULL to open the default device
  *               returned by cueify_device_get_default_device().
-
  * @return CUEIFY_OK if the device was successfully opened, otherwise,
  *         an error code is returned. This error code may include:
  *         CUEIFY_ERR_NO_DEVICE if the device specified by device
