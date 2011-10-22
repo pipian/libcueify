@@ -35,10 +35,12 @@
 #include <sys/ioctl.h>
 #include <sys/cdio.h>
 #include <libcueify/sessions.h>
+#include <libcueify/full_toc.h>
 #include <libcueify/error.h>
 #include "device_private.h"
 #include "toc_private.h"
 #include "sessions_private.h"
+#include "full_toc_private.h"
 
 #define READ_TOC  0x43  /** MMC op code for READ TOC/PMA/ATIP */
 
