@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/../include)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/libcueify/types.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/../include/libcueify/types.h)
 
-SET(_sources device.c toc.c sessions.c)
+SET(_sources device.c toc.c sessions.c full_toc.c)
 
 INCLUDE(CheckTypeSize)
 CHECK_TYPE_SIZE(uint8_t UINT8_T)
