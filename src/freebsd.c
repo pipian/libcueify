@@ -152,12 +152,15 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
 
     /* cam_open_device does not resolve symlinks. */
     memset(link_path, 0, sizeof(link_path));
-    if (readlink(d->path, link_path, sizeof(link_path) - 1) < 0 &&
-	errno != EINVAL) {
+    result = readlink(d->path, link_path, sizeof(link_path) - 1);
+    if (result < 0 && errno != EINVAL) {
 	return CUEIFY_ERR_INTERNAL;
+    } else if (result < 0) {  /* errno == EINVAL */
+	camdev = cam_open_device(d->path, O_RDONLY);
+    } else {
+	camdev = cam_open_device(link_path, O_RDONLY);
     }
 
-    camdev = cam_open_device(d->path, O_RDONLY);
     if (camdev == NULL) {
 	return CUEIFY_ERR_INTERNAL;
     }
