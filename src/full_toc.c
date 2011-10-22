@@ -125,7 +125,7 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
 	} else if (offset == MAX_TRACKS + 1) {
 	    /* POINT == 0xA1 */
 	    /* Last Track Number */
-	    toc->last_track_number = *bp;
+	    toc->last_track_number = *bp++;
 	    /* Reserved */
 	    bp += 2;
 	} else {
