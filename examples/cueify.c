@@ -28,6 +28,7 @@
 #include <libcueify/device.h>
 #include <libcueify/error.h>
 #include <libcueify/toc.h>
+#include <libcueify/sessions.h>
 #include <libcueify/types.h>
 
 const char * const genreNames[0x1D] = {
@@ -263,6 +264,7 @@ unsigned long cddb_discid(CDROM_TOC *toc)
 int print_cuesheet(const char *device) {
     cueify_device *dev;
     cueify_toc *toc;
+    cueify_sessions *sessions;
     time_t t = time(NULL);
     char time_str[256];
     int i;
@@ -283,47 +285,45 @@ int print_cuesheet(const char *device) {
 	       time_str,
 	       device);
 
-	/* First read the last-session data. *
-	ReadLastSession(hDevice, &session);
-	fprintf(log,
-		"REM FIRSTSESSION %d\n"
-		"REM LASTSESSION %d\n"
-		"REM LASTSESSION TRACK %02d\n",
-		session.FirstCompleteSession,
-		session.LastCompleteSession,
-		session.TrackData[0].TrackNumber);
-	if (session.TrackData[0].Control != 0) {
-	    int iControl = session.TrackData[0].Control;
-	    
-	    fprintf(log, "REM LASTSESSION FLAGS");
-	    
-	    if (iControl & AUDIO_WITH_PREEMPHASIS) {
-		fprintf(log, " PRE");
-	    }
-	    if (iControl & DIGITAL_COPY_PERMITTED) {
-		fprintf(log, " DCP");
-	    }
-	    if (iControl & AUDIO_DATA_TRACK) {
-		fprintf(log, " DATA");
-	    }
-	    if (iControl & TWO_FOUR_CHANNEL_AUDIO) {
-		fprintf(log, " 4CH");
-	    }
-	    fprintf(log, "\n");
+	/* First read the last-session data. */
+	sessions = cueify_sessions_new();
+	if (sessions == NULL) {
+	    goto error;
 	}
-	
-	offset.M = session.TrackData[0].Address[1];
-	offset.S = session.TrackData[0].Address[2];
-	offset.F = session.TrackData[0].Address[3];
-	offset = RemoveDiscPregap(offset);
-	
-	fprintf(log,
-		"REM LASTSESSION INDEX 01 %02d:%02d:%02d\n",
-		offset.M,
-		offset.S,
-		offset.F);
-	
-	*/
+	cueify_device_read_sessions(dev, sessions);
+	printf("REM FIRSTSESSION %d\n"
+	       "REM LASTSESSION %d\n"
+	       "REM LASTSESSION TRACK %02d\n",
+	       cueify_sessions_get_first_session(sessions),
+	       cueify_sessions_get_last_session(sessions),
+	       cueify_sessions_get_last_session_track_number(sessions));
+	if (cueify_sessions_get_last_session_control_flags(sessions) != 0) {
+	    int control =
+		cueify_sessions_get_last_session_control_flags(sessions);;
+
+	    printf("REM LASTSESSION FLAGS");
+
+	    if ((control & CUEIFY_TOC_TRACK_HAS_PREEMPHASIS) > 0) {
+		printf(" PRE");
+	    }
+	    if ((control & CUEIFY_TOC_TRACK_PERMITS_COPYING) > 0) {
+		printf(" DCP");
+	    }
+	    if ((control & CUEIFY_TOC_TRACK_IS_QUADRAPHONIC) > 0) {
+		printf(" 4CH");
+	    }
+	    printf("\n");
+	}
+
+	offset =
+	    lba_to_msf(cueify_sessions_get_last_session_address(sessions));
+
+	printf("REM LASTSESSION INDEX 01 %02d:%02d:%02d\n",
+	       offset.min,
+	       offset.sec,
+	       offset.frm);
+
+	cueify_sessions_free(sessions);
 
 	/* Now get the full TOC data. */
 	toc = cueify_toc_new();
