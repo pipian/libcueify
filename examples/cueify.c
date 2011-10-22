@@ -290,38 +290,40 @@ int print_cuesheet(const char *device) {
 	if (sessions == NULL) {
 	    goto error;
 	}
-	cueify_device_read_sessions(dev, sessions);
-	printf("REM FIRSTSESSION %d\n"
-	       "REM LASTSESSION %d\n"
-	       "REM LASTSESSION TRACK %02d\n",
-	       cueify_sessions_get_first_session(sessions),
-	       cueify_sessions_get_last_session(sessions),
-	       cueify_sessions_get_last_session_track_number(sessions));
-	if (cueify_sessions_get_last_session_control_flags(sessions) != 0) {
-	    int control =
-		cueify_sessions_get_last_session_control_flags(sessions);;
+	if (cueify_device_read_sessions(dev, sessions) == CUEIFY_OK) {
+	    /* It may be the case we can't read sessions (e.g permissions)! */
+	    printf("REM FIRSTSESSION %d\n"
+		   "REM LASTSESSION %d\n"
+		   "REM LASTSESSION TRACK %02d\n",
+		   cueify_sessions_get_first_session(sessions),
+		   cueify_sessions_get_last_session(sessions),
+		   cueify_sessions_get_last_session_track_number(sessions));
+	    if (cueify_sessions_get_last_session_control_flags(sessions) != 0){
+		int control =
+		    cueify_sessions_get_last_session_control_flags(sessions);
 
-	    printf("REM LASTSESSION FLAGS");
+		printf("REM LASTSESSION FLAGS");
 
-	    if ((control & CUEIFY_TOC_TRACK_HAS_PREEMPHASIS) > 0) {
-		printf(" PRE");
+		if ((control & CUEIFY_TOC_TRACK_HAS_PREEMPHASIS) > 0) {
+		    printf(" PRE");
+		}
+		if ((control & CUEIFY_TOC_TRACK_PERMITS_COPYING) > 0) {
+		    printf(" DCP");
+		}
+		if ((control & CUEIFY_TOC_TRACK_IS_QUADRAPHONIC) > 0) {
+		    printf(" 4CH");
+		}
+		printf("\n");
 	    }
-	    if ((control & CUEIFY_TOC_TRACK_PERMITS_COPYING) > 0) {
-		printf(" DCP");
-	    }
-	    if ((control & CUEIFY_TOC_TRACK_IS_QUADRAPHONIC) > 0) {
-		printf(" 4CH");
-	    }
-	    printf("\n");
+
+	    offset =
+		lba_to_msf(cueify_sessions_get_last_session_address(sessions));
+
+	    printf("REM LASTSESSION INDEX 01 %02d:%02d:%02d\n",
+		   offset.min,
+		   offset.sec,
+		   offset.frm);
 	}
-
-	offset =
-	    lba_to_msf(cueify_sessions_get_last_session_address(sessions));
-
-	printf("REM LASTSESSION INDEX 01 %02d:%02d:%02d\n",
-	       offset.min,
-	       offset.sec,
-	       offset.frm);
 
 	cueify_sessions_free(sessions);
 
