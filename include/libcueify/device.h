@@ -50,10 +50,6 @@ cueify_device *cueify_device_new();
  * This function should be called after cueify_device_new() but before
  * any other cueify_device_*() functions.
  *
- * @note It is assumed that the data pointed to by device will not be
- *       freed until after cueify_device_close() has been called on
- *       the device handle.
- *
  * @pre { d != NULL }
  * @param d an unopened device handle
  * @param device an operating-system-specific device identifier of the

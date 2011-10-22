@@ -36,6 +36,7 @@ cueify_device *cueify_device_new() {
 
 int cueify_device_open(cueify_device *d, const char *device) {
     cueify_device_private *dev = (cueify_device_private *)d;
+    int retval = CUEIFY_OK;
 
     /* Must have a defined device instance */
     if (dev == NULL) {
@@ -58,8 +59,13 @@ int cueify_device_open(cueify_device *d, const char *device) {
     if (dev->path == NULL) {
 	return CUEIFY_ERR_NOMEM;
     }
+    strcpy(dev->path, device);
 
-    return cueify_device_open_unportable(dev, device);
+    retval = cueify_device_open_unportable(dev, device);
+    if (retval != CUEIFY_OK) {
+	free(dev->path);
+    }
+    return retval;
 }  /* cueify_device_open */
 
 
@@ -69,6 +75,7 @@ int cueify_device_close(cueify_device *d) {
     if (dev == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
+    free(dev->path);
 
     return cueify_device_close_unportable(dev);
 }  /* cueify_device_close */
