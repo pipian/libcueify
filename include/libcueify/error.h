@@ -40,6 +40,7 @@ enum cueify_error {
 				 */
     CUEIFY_ERR_NO_DEVICE,       /** The device could not be opened. */
     CUEIFY_ERR_TRUNCATED,       /** The serialized data was truncated. */
+    CUEIFY_ERR_CORRUPTED,       /** The serialized data was corrupted. */
     CUEIFY_ERR_TOOSMALL         /** The serialized data could not fit. */
 };
 

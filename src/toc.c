@@ -1,4 +1,4 @@
-/* toc.h - CD-ROM functions which read the (basic) TOC of a disc.
+/* toc.c - CD-ROM functions which read the (basic) TOC of a disc.
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -63,6 +63,9 @@ int cueify_toc_deserialize(cueify_toc *t, uint8_t *buffer, size_t size) {
     toc_length = ((buffer[0] << 8) | buffer[1]);
     if (size - 2 < toc_length) {
 	return CUEIFY_ERR_TRUNCATED;
+    }
+    if (toc_length - 2 % 8 != 0) {
+	return CUEIFY_ERR_CORRUPTED;
     }
 
     /* First Track Number */

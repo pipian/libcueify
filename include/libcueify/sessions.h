@@ -27,6 +27,9 @@
 #ifndef _LIBCUEIFY_SESSIONS_H
 #define _LIBCUEIFY_SESSIONS_H
 
+#include <libcueify/device.h>
+#include <libcueify/types.h>
+
 /**
  * A transparent handle for the multi-session data of an audio CD.
  *
@@ -54,8 +57,8 @@ cueify_sessions *cueify_sessions_new();
  * @pre { d != NULL, s != NULL }
  * @param d an opened device handle
  * @param s a multisession instance to populate
- * @return CUEIFY_OK if the multisession data was successfully read; otherwise an error code is
- *         returned
+ * @return CUEIFY_OK if the multisession data was successfully read;
+ *         otherwise an error code is returned
  */
 int cueify_device_read_sessions(cueify_device *d, cueify_sessions *s);
 
@@ -157,18 +160,18 @@ uint8_t cueify_sessions_get_last_session_control_flags(cueify_sessions *s);
 
 
 /**
- * Get the format of the sub-Q-channel for the first track in the last
- * complete session in a multisession instance.
+ * Get the format of the content of the sub-Q-channel for the first
+ * track in the last complete session in a multisession instance.
  *
  * @note In most cases, this function will return
  *       CUEIFY_SUB_Q_NOTHING, however it is provided for completeness.
  *
  * @pre { s != NULL }
  * @param s a multisession instance
- * @return the contents of the sub-Q-channel for first track in the
- *         last complete session in s
+ * @return the format of contents of the sub-Q-channel for the first
+ *         track in the last complete session in s
  */
-uint8_t cueify_sessions_get_last_session_sub_q_channel_contents(
+uint8_t cueify_sessions_get_last_session_sub_q_channel_format(
     cueify_sessions *s);
 
 
