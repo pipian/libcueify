@@ -64,7 +64,7 @@ int cueify_toc_deserialize(cueify_toc *t, uint8_t *buffer, size_t size) {
     if (size - 2 < toc_length) {
 	return CUEIFY_ERR_TRUNCATED;
     }
-    if (toc_length - 2 % 8 != 0) {
+    if ((toc_length - 2) % 8 != 0) {
 	return CUEIFY_ERR_CORRUPTED;
     }
 
