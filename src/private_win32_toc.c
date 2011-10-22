@@ -51,38 +51,6 @@ static void SectorsToAddress(int sectors, int *m, int *s, int *f)
     *f = sectors % 75;
 }
 
-CDROM_TOC_FULL_TOC_DATA *ReadFullTOC(HANDLE hDevice)
-{
-    DWORD dwReturned;
-    CDROM_READ_TOC_EX toc_ex;
-    CDROM_TOC_FULL_TOC_DATA *fulltoc = NULL;
-    int iSize = 256 * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) + sizeof(CDROM_TOC_FULL_TOC_DATA);
-    
-    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_FULL_TOC;
-    toc_ex.Reserved1 = 0;
-    toc_ex.Msf = TRUE;
-    toc_ex.SessionTrack = 1;
-    toc_ex.Reserved2 = 0;
-    toc_ex.Reserved3 = 0;
-    
-    /* Can't call IOCTL_CDROM_READ_TOC_EX twice for some reason, so we just
-     * have to guess. */
-    fulltoc = calloc(1, iSize);
-    
-    if (fulltoc != NULL) {
-	if (!DeviceIoControl(hDevice,
-			     IOCTL_CDROM_READ_TOC_EX,
-			     &toc_ex, sizeof(CDROM_READ_TOC_EX),
-			     fulltoc, iSize,
-			     &dwReturned, NULL)) {
-	    free(fulltoc);
-	    return NULL;
-	}
-    }
-    
-    return fulltoc;
-}
-
 CDROM_TOC_CD_TEXT_DATA *ReadCDText(HANDLE hDevice)
 {
     DWORD dwReturned;

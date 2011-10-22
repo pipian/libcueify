@@ -202,5 +202,120 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
     }
 
     return CUEIFY_OK;
-}
+}  /* cueify_device_read_sessions_unportable */
 
+
+int cueify_device_read_full_toc_unportable(cueify_device_private *d,
+					   cueify_full_toc_private *t) {
+{
+    DWORD dwReturned;
+    CDROM_READ_TOC_EX toc_ex;
+    int iSize = 256 * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) +
+	sizeof(CDROM_TOC_FULL_TOC_DATA);
+    uint8_t buf[iSize], point;
+    CDROM_TOC_FULL_TOC_DATA *fulltoc = buf;
+    int i;
+
+    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_FULL_TOC;
+    toc_ex.Reserved1 = 0;
+    toc_ex.Msf = TRUE;
+    toc_ex.SessionTrack = 1;
+    toc_ex.Reserved2 = 0;
+    toc_ex.Reserved3 = 0;
+
+    /* Can't call IOCTL_CDROM_READ_TOC_EX twice for some reason, so we just
+     * have to guess. */
+    if (!DeviceIoControl(d->handle,
+			 IOCTL_CDROM_READ_TOC_EX,
+			 &toc_ex, sizeof(CDROM_READ_TOC_EX),
+			 fulltoc, iSize,
+			 &dwReturned, NULL)) {
+	return CUEIFY_ERR_INTERNAL;
+    } else {
+	t->first_session_number = fulltoc->FirstCompleteSession;
+	t->last_session_number = fulltoc->LastCompleteSession;
+	for (i = 0; i < 256; i++) {
+	    if (fulltoc->Descriptors[i].Adr == 1) {
+		point = fulltoc->Descriptors[i].Point;
+
+		if (point < MAXIMUM_NUMBER_TRACKS) {
+		    t->tracks[point].session =
+			fulltoc->Descriptors[i].SessionNumber;
+		    t->tracks[point].control =
+			fulltoc->Descriptors[i].Control;
+		    t->tracks[point].adr =
+			fulltoc->Descriptors[i].Adr;
+		    t->tracks[point].atime.min =
+			fulltoc->Descriptors[i].MsfExtra[0];
+		    t->tracks[point].atime.sec =
+			fulltoc->Descriptors[i].MsfExtra[1];
+		    t->tracks[point].atime.frm =
+			fulltoc->Descriptors[i].MsfExtra[2];
+		    t->tracks[point].offset.min =
+			fulltoc->Descriptors[i].Msf[0];
+		    t->tracks[point].offset.sec =
+			fulltoc->Descriptors[i].Msf[1];
+		    t->tracks[point].offset.frm =
+			fulltoc->Descriptors[i].Msf[2];
+		} else if (point == 0xA0) {
+		    point = MAX_TRACKS;
+		    t->tracks[point].session =
+			fulltoc->Descriptors[i].SessionNumber;
+		    t->tracks[point].control =
+			fulltoc->Descriptors[i].Control;
+		    t->tracks[point].adr =
+			fulltoc->Descriptors[i].Adr;
+		    t->tracks[point].atime.min =
+			fulltoc->Descriptors[i].MsfExtra[0];
+		    t->tracks[point].atime.sec =
+			fulltoc->Descriptors[i].MsfExtra[1];
+		    t->tracks[point].atime.frm =
+			fulltoc->Descriptors[i].MsfExtra[2];
+		    t->first_track_number =
+			fulltoc->Descriptors[i].Msf[0];
+		    t->disc_type =
+			fulltoc->Descriptors[i].Msf[1];
+		} else if (point == 0xA1) {
+		    point = MAX_TRACKS + 1;
+		    t->tracks[point].session =
+			fulltoc->Descriptors[i].SessionNumber;
+		    t->tracks[point].control =
+			fulltoc->Descriptors[i].Control;
+		    t->tracks[point].adr =
+			fulltoc->Descriptors[i].Adr;
+		    t->tracks[point].atime.min =
+			fulltoc->Descriptors[i].MsfExtra[0];
+		    t->tracks[point].atime.sec =
+			fulltoc->Descriptors[i].MsfExtra[1];
+		    t->tracks[point].atime.frm =
+			fulltoc->Descriptors[i].MsfExtra[2];
+		    t->last_track_number =
+			fulltoc->Descriptors[i].Msf[0];
+		} else if (point == 0xA2) {
+		    /* Lead-Out */
+		    point = 0;
+		    t->tracks[point].session =
+			fulltoc->Descriptors[i].SessionNumber;
+		    t->tracks[point].control =
+			fulltoc->Descriptors[i].Control;
+		    t->tracks[point].adr =
+			fulltoc->Descriptors[i].Adr;
+		    t->tracks[point].atime.min =
+			fulltoc->Descriptors[i].MsfExtra[0];
+		    t->tracks[point].atime.sec =
+			fulltoc->Descriptors[i].MsfExtra[1];
+		    t->tracks[point].atime.frm =
+			fulltoc->Descriptors[i].MsfExtra[2];
+		    t->tracks[point].offset.min =
+			fulltoc->Descriptors[i].Msf[0];
+		    t->tracks[point].offset.sec =
+			fulltoc->Descriptors[i].Msf[1];
+		    t->tracks[point].offset.frm =
+			fulltoc->Descriptors[i].Msf[2];
+		}
+	    }
+	}
+    }
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_full_toc_unportable */
