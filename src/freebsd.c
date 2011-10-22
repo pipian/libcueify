@@ -156,9 +156,9 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
     if (result < 0 && errno != EINVAL) {
 	return CUEIFY_ERR_INTERNAL;
     } else if (result < 0) {  /* errno == EINVAL */
-	camdev = cam_open_device(d->path, O_RDONLY);
+	camdev = cam_open_device(d->path, O_RDWR);
     } else {
-	camdev = cam_open_device(link_path, O_RDONLY);
+	camdev = cam_open_device(link_path, O_RDWR);
     }
 
     if (camdev == NULL) {
@@ -167,6 +167,7 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
 
     ccb = cam_getccb(camdev);
     if (ccb == NULL) {
+	cam_close_device(camdev);
 	return CUEIFY_ERR_INTERNAL;
     }
 
