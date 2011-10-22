@@ -51,25 +51,6 @@ static void SectorsToAddress(int sectors, int *m, int *s, int *f)
     *f = sectors % 75;
 }
 
-BOOL ReadLastSession(HANDLE hDevice, CDROM_TOC_SESSION_DATA *session)
-{
-    DWORD dwReturned;
-    CDROM_READ_TOC_EX toc_ex;
-    
-    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_SESSION;
-    toc_ex.Reserved1 = 0;
-    toc_ex.Msf = TRUE;
-    toc_ex.SessionTrack = 0;
-    toc_ex.Reserved2 = 0;
-    toc_ex.Reserved3 = 0;
-    
-    return DeviceIoControl(hDevice,
-			   IOCTL_CDROM_READ_TOC_EX,
-			   &toc_ex, sizeof(CDROM_READ_TOC_EX),
-			   session, sizeof(CDROM_TOC_SESSION_DATA),
-			   &dwReturned, NULL);
-}
-
 CDROM_TOC_FULL_TOC_DATA *ReadFullTOC(HANDLE hDevice)
 {
     DWORD dwReturned;
