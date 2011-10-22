@@ -52,8 +52,8 @@ typedef struct {
  *
  * @param d an opened device handle
  * @param s a multisession instance to populate
- * @return CUEIFY_OK if the TOC was successfully read; otherwise an
- *         appropriate error code is returned
+ * @return CUEIFY_OK if the multisession data was successfully read;
+ *         otherwise an appropriate error code is returned
  */
 int cueify_device_read_sessions_unportable(cueify_device_private *d,
 					   cueify_sessions_private *s);

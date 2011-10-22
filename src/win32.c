@@ -77,7 +77,7 @@ int cueify_device_open_unportable(cueify_device_private *d,
 	d->handle = hVolume;
 	return CUEIFY_OK;
     }
-}
+}  /* cueify_device_open_unportable */
 
 int cueify_device_close_unportable(cueify_device_private *d) {
     if (CloseHandle(d->handle)) {
@@ -85,7 +85,7 @@ int cueify_device_close_unportable(cueify_device_private *d) {
     } else {
 	return CUEIFY_ERR_INTERNAL;
     }
-}
+}  /* cueify_device_close_unportable */
 
 const char *driveLetters[26] = {
     "a:\\", "b:\\", "c:\\", "d:\\", "e:\\", "f:\\", "g:\\", "h:\\",
@@ -111,12 +111,13 @@ const char *cueify_device_get_default_device_unportable() {
 	szRootName[0]++;
     }
     return NULL;
-}
+}  /* cueify_device_get_default_device_unportable */
 
 int cueify_device_read_toc_unportable(cueify_device_private *d,
 				      cueify_toc_private *t) {
     DWORD dwReturned;
     CDROM_READ_TOC_EX toc_ex;
+    CDROM_TOC toc;
     BOOL succeded;
     int i;
     
@@ -130,7 +131,7 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
     succeded = DeviceIoControl(d->handle,
 			       IOCTL_CDROM_READ_TOC_EX,
 			       &toc_ex, sizeof(CDROM_READ_TOC_EX),
-			       toc, sizeof(CDROM_TOC),
+			       &toc, sizeof(CDROM_TOC),
 			       &dwReturned, NULL);
     if (!succeeded) {
 	return CUEIFY_ERR_INTERNAL;
@@ -162,4 +163,44 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
     }
 
     return CUEIFY_OK;
+}  /* cueify_device_read_toc_unportable */
+
+
+int cueify_device_read_sessions_unportable(cueify_device_private *d,
+					   cueify_sessions_private *s) {
+{
+    DWORD dwReturned;
+    CDROM_READ_TOC_EX toc_ex;
+    CDROM_TOC_SESSION_DATA session;
+    BOOL succeded;
+
+    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_SESSION;
+    toc_ex.Reserved1 = 0;
+    toc_ex.Msf = FALSE;
+    toc_ex.SessionTrack = 0;
+    toc_ex.Reserved2 = 0;
+    toc_ex.Reserved3 = 0;
+
+    succeeded = DeviceIoControl(d->device,
+				IOCTL_CDROM_READ_TOC_EX,
+				&toc_ex, sizeof(CDROM_READ_TOC_EX),
+				&session, sizeof(CDROM_TOC_SESSION_DATA),
+				&dwReturned, NULL);
+    if (!succeeded) {
+	return CUEIFY_ERR_INTERNAL;
+    } else {
+	s->first_session_number = session->FirstCompleteSession;
+	s->last_session_number = session->LastCompleteSession;
+	s->track_control = session->TrackData[0].Control;
+	s->track_adr = session->TrackData[0].Adr;
+	s->track_number = session->TrackData[0].TrackNumber;
+	s->track_lba =
+	  ((session->TrackData[0].Address[0] << 24) |
+	   (session->TrackData[0].Address[1] << 16) |
+	   (session->TrackData[0].Address[2] << 8) |
+	   session->TrackData[0].Address[3]);
+    }
+
+    return CUEIFY_OK;
 }
+
