@@ -313,6 +313,9 @@ int print_cuesheet(const char *device) {
 		if ((control & CUEIFY_TOC_TRACK_PERMITS_COPYING) > 0) {
 		    printf(" DCP");
 		}
+		if ((control & CUEIFY_TOC_TRACK_IS_DATA) > 0) {
+		    printf(" DATA");
+		}
 		if ((control & CUEIFY_TOC_TRACK_IS_QUADRAPHONIC) > 0) {
 		    printf(" 4CH");
 		}
