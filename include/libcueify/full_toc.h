@@ -346,17 +346,15 @@ uint8_t cueify_full_toc_get_session_last_track(cueify_full_toc *t,
 
 
 /**
- * Get the session type/disc mode in a full TOC instance.
+ * Get the disc type in a full TOC instance.
  *
  * @pre { t != NULL,
  *        cueify_full_toc_get_first_session(t) <= session AND
  *        session <= cueify_full_toc_get_last_session(t) }
  * @param t a full TOC instance
- * @param session the number of the session to get the disc mode for
  * @return the disc type of t
  */
-uint8_t cueify_full_toc_get_session_type(cueify_full_toc *t,
-					 uint8_t session);
+uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t);
 
 
 /**
