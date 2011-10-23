@@ -570,21 +570,23 @@ int print_cuesheet(const char *device) {
 		cur_session != cueify_full_toc_get_track_session(fulltoc, i)) {
 		if (cur_session != 0) {
 		    /* Print the leadout of the last session. */
-		    offset = cueify_full_toc_get_track_address(fulltoc, i);
+		    offset =
+			cueify_full_toc_get_session_leadout_address(
+			    fulltoc, cur_session);
 
 		    /* Adjust the lead-out. */
-		    offset.min -= 2;
-		    if (offset.sec < 32) {
-			offset.sec += 60;
+		    if (offset.sec < 2) {
 			offset.min--;
+			offset.sec += 60;
 		    }
-		    offset.sec -= 32;
+		    offset.sec -= 2;
 
 		    printf("  REM LEAD-OUT %02d:%02d:%02d\n",
 			   offset.min,
 			   offset.sec,
 			   offset.frm);
 		}
+
 		cur_session = cueify_full_toc_get_track_session(fulltoc, i);
 		printf("  REM SESSION %02d\n",
 		       cur_session);
