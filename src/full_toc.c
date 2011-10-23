@@ -77,6 +77,11 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
     /* TOC Track Descriptor(s) */
     bp = buffer + 4;
     while (bp < buffer + toc_length + 2) {
+	if ((bp[1] >> 4) == 0x05) {
+	    /* Ignore extra ATIP/Interval data */
+	    bp += 11;
+	    continue;
+	}
 	/* Track Number */
 	offset = bp[3];
 	if (offset == 0xA2) {
