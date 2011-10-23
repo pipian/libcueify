@@ -74,6 +74,8 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
     /* Last Complete Session Number */
     toc->last_session_number = buffer[3];
 
+    toc->first_track_number = toc->last_track_number = 0;
+
     /* TOC Track Descriptor(s) */
     bp = buffer + 4;
     while (bp < buffer + toc_length + 2) {
@@ -84,62 +86,130 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
 	}
 	/* Track Number */
 	offset = bp[3];
-	if (offset == 0xA2) {
-	    offset = 0;
-	} else if (offset == 0xA0) {
-	    offset = MAX_TRACKS;
-	} else if (offset == 0xA1) {
-	    offset = MAX_TRACKS + 1;
-	}
-
-	/* Session Number */
-	toc->tracks[offset].session = *bp++;
-	/* ADR */
-	toc->tracks[offset].adr = *bp >> 4;
-	/* CONTROL */
-	toc->tracks[offset].control = *bp & 0xF;
-	bp++;
-	/* TNO */
-	bp++;
-	/* POINT */
-	bp++;
-	/* Min */
-	toc->tracks[offset].atime.min = *bp++;
-	/* Sec */
-	toc->tracks[offset].atime.sec = *bp++;
-	/* Frame */
-	toc->tracks[offset].atime.frm = *bp++;
-	/* Zero */
-	bp++;
-	if (offset == 0) {
-	    /* Lead-Out */
+	if (offset < MAX_TRACKS) {
+	    /* standard track */
+	    /* Session Number */
+	    toc->tracks[offset].session = *bp++;
+	    /* ADR */
+	    toc->tracks[offset].adr = *bp >> 4;
+	    /* CONTROL */
+	    toc->tracks[offset].control = *bp & 0xF;
+	    bp++;
+	    /* TNO */
+	    bp++;
+	    /* POINT */
+	    bp++;
+	    /* Min */
+	    toc->tracks[offset].atime.min = *bp++;
+	    /* Sec */
+	    toc->tracks[offset].atime.sec = *bp++;
+	    /* Frame */
+	    toc->tracks[offset].atime.frm = *bp++;
+	    /* Zero */
+	    bp++;
 	    /* PMIN */
 	    toc->tracks[offset].offset.min = *bp++;
 	    /* PSEC */
 	    toc->tracks[offset].offset.sec = *bp++;
 	    /* PFRAME */
 	    toc->tracks[offset].offset.frm = *bp++;
-	} else if (offset == MAX_TRACKS) {
+	} else if (offset == 0xA0) {
 	    /* POINT == 0xA0 */
+	    offset = *bp++;
+	    /* Session Number */
+	    toc->sessions[offset].pseudotracks[1].session = offset;
+	    /* ADR */
+	    toc->sessions[offset].pseudotracks[1].adr = *bp >> 4;
+	    /* CONTROL */
+	    toc->sessions[offset].pseudotracks[1].control = *bp & 0xF;
+	    bp++;
+	    /* TNO */
+	    bp++;
+	    /* POINT */
+	    bp++;
+	    /* Min */
+	    toc->sessions[offset].pseudotracks[1].atime.min = *bp++;
+	    /* Sec */
+	    toc->sessions[offset].pseudotracks[1].atime.sec = *bp++;
+	    /* Frame */
+	    toc->sessions[offset].pseudotracks[1].atime.frm = *bp++;
+	    /* Zero */
+	    bp++;
 	    /* First Track Number */
-	    toc->first_track_number = *bp++;
+	    toc->sessions[offset].first_track_number = *bp++;
+	    if (toc->sessions[offset].first_track_number == 0 ||
+		toc->sessions[offset].first_track_number <
+		toc->first_track_number) {
+		toc->first_track_number =
+		    toc->sessions[offset].first_track_number;
+	    }
 	    /* Disc Type */
-	    toc->disc_type = *bp++;
+	    toc->sessions[offset].session_type = *bp++;
 	    /* Reserved */
 	    bp++;
-	} else if (offset == MAX_TRACKS + 1) {
+	} else if (offset == 0xA1) {
 	    /* POINT == 0xA1 */
+	    offset = *bp++;
+	    /* Session Number */
+	    toc->sessions[offset].pseudotracks[2].session = offset;
+	    /* ADR */
+	    toc->sessions[offset].pseudotracks[2].adr = *bp >> 4;
+	    /* CONTROL */
+	    toc->sessions[offset].pseudotracks[2].control = *bp & 0xF;
+	    bp++;
+	    /* TNO */
+	    bp++;
+	    /* POINT */
+	    bp++;
+	    /* Min */
+	    toc->sessions[offset].pseudotracks[2].atime.min = *bp++;
+	    /* Sec */
+	    toc->sessions[offset].pseudotracks[2].atime.sec = *bp++;
+	    /* Frame */
+	    toc->sessions[offset].pseudotracks[2].atime.frm = *bp++;
+	    /* Zero */
+	    bp++;
 	    /* Last Track Number */
-	    toc->last_track_number = *bp++;
+	    toc->sessions[offset].last_track_number = *bp++;
+	    if (toc->sessions[offset].last_track_number == 0 ||
+		toc->sessions[offset].last_track_number >
+		toc->last_track_number) {
+		toc->last_track_number =
+		    toc->sessions[offset].last_track_number;
+	    }
 	    /* Reserved */
 	    bp += 2;
-	} else {
+	} else if (offset == 0xA2) {
+	    /* POINT == 0xA2 */
+	    /* Session Number */
+	    offset = *bp++;
+	    /* Session Number */
+	    toc->sessions[offset].pseudotracks[0].session = offset;
+	    /* ADR */
+	    toc->sessions[offset].pseudotracks[0].adr = *bp >> 4;
+	    /* CONTROL */
+	    toc->sessions[offset].pseudotracks[0].control = *bp & 0xF;
+	    bp++;
+	    /* TNO */
+	    bp++;
+	    /* POINT */
+	    bp++;
+	    /* Min */
+	    toc->sessions[offset].pseudotracks[0].atime.min = *bp++;
+	    /* Sec */
+	    toc->sessions[offset].pseudotracks[0].atime.sec = *bp++;
+	    /* Frame */
+	    toc->sessions[offset].pseudotracks[0].atime.frm = *bp++;
+	    /* Zero */
+	    bp++;
 	    /* PMIN */
-	    toc->tracks[offset].offset.min = *bp++;
+	    toc->sessions[offset].pseudotracks[0].offset.min = *bp++;
 	    /* PSEC */
-	    toc->tracks[offset].offset.sec = *bp++;
+	    toc->sessions[offset].pseudotracks[0].offset.sec = *bp++;
 	    /* PFRAME */
-	    toc->tracks[offset].offset.frm = *bp++;
+	    toc->sessions[offset].pseudotracks[0].offset.frm = *bp++;
+	    toc->sessions[offset].leadout =
+		toc->sessions[offset].pseudotracks[0].offset;
 	}
     }
 
@@ -152,6 +222,7 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
     cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
     uint16_t toc_length;
     uint8_t *bp;
+    uint8_t cur_session = 0;
     uint8_t track_number;
     int i;
 
@@ -159,8 +230,10 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
 	return CUEIFY_ERR_BADARG;
     }
 
-    toc_length = (toc->last_track_number -
-		  toc->first_track_number + 4) * 8 + 4;
+    toc_length =
+	( (toc->last_track_number   - toc->first_track_number   + 1) +
+	 ((toc->last_session_number - toc->first_session_number + 1) * 3)) * 11
+	+ 4;
     if (*size < toc_length) {
 	return CUEIFY_ERR_TOOSMALL;
     }
@@ -178,15 +251,90 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
 
     /* TOC Track Descriptor(s) */
     bp = buffer + 4;
-    for (i = 0; i <= toc->last_track_number + 2; i++) {
-	if (i == toc->last_track_number + 2) {
-	    /* Lead-out */
-	    track_number = 0;
-	} else if (i >= toc->last_track_number) {
-	    /* POINT == 0xA0 and POINT == 0xA1 */
-	    track_number = MAX_TRACKS + (i - (toc->last_track_number + 1));
-	} else {
-	    track_number = i;
+    for (i = toc->first_track_number; i <= toc->last_track_number; i++) {
+	if (toc->tracks[track_number].session != cur_session) {
+	    /* New session.  Add session-specific lines first. */
+	    cur_session = toc->tracks[track_number].session;
+
+	    /* POINT = 0xA0 */
+	    /* Session Number */
+	    *bp++ = cur_session;
+	    /* ADR */
+	    *bp = 0;
+	    *bp |= toc->sessions[cur_session].pseudotracks[1].adr << 4;
+	    /* CONTROL */
+	    *bp++ |= toc->sessions[cur_session].pseudotracks[1].control & 0x0F;
+	    /* TNO */
+	    *bp++ = 0;
+	    /* POINT */
+	    *bp++ = 0xA0;
+	    /* Min */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[1].atime.min;
+	    /* Sec */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[1].atime.sec;
+	    /* Frm */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[1].atime.frm;
+	    /* Zero */
+	    *bp++ = 0;
+	    /* First Track Number */
+	    *bp++ = toc->sessions[cur_session].first_track_number;
+	    /* Disc Type */
+	    *bp++ = toc->sessions[cur_session].session_type;
+	    /* Reserved */
+	    *bp++ = 0;
+
+	    /* POINT = 0xA1 */
+	    /* Session Number */
+	    *bp++ = cur_session;
+	    /* ADR */
+	    *bp = 0;
+	    *bp |= toc->sessions[cur_session].pseudotracks[2].adr << 4;
+	    /* CONTROL */
+	    *bp++ |= toc->sessions[cur_session].pseudotracks[2].control & 0x0F;
+	    /* TNO */
+	    *bp++ = 0;
+	    /* POINT */
+	    *bp++ = 0xA1;
+	    /* Min */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[2].atime.min;
+	    /* Sec */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[2].atime.sec;
+	    /* Frm */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[2].atime.frm;
+	    /* Zero */
+	    *bp++ = 0;
+	    /* First Track Number */
+	    *bp++ = toc->sessions[cur_session].last_track_number;
+	    /* Reserved */
+	    *bp++ = 0;
+	    *bp++ = 0;
+
+	    /* POINT = 0xA2 */
+	    /* Session Number */
+	    *bp++ = cur_session;
+	    /* ADR */
+	    *bp = 0;
+	    *bp |= toc->sessions[cur_session].pseudotracks[0].adr << 4;
+	    /* CONTROL */
+	    *bp++ |= toc->sessions[cur_session].pseudotracks[0].control & 0x0F;
+	    /* TNO */
+	    *bp++ = 0;
+	    /* POINT */
+	    *bp++ = 0xA1;
+	    /* Min */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[0].atime.min;
+	    /* Sec */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[0].atime.sec;
+	    /* Frm */
+	    *bp++ = toc->sessions[cur_session].pseudotracks[0].atime.frm;
+	    /* Zero */
+	    *bp++ = 0;
+	    /* PMIN */
+	    *bp++ = toc->sessions[cur_session].leadout.min;
+	    /* PSEC */
+	    *bp++ = toc->sessions[cur_session].leadout.sec;
+	    /* PFRAME */
+	    *bp++ = toc->sessions[cur_session].leadout.frm;
 	}
 
 	/* Session Number */
@@ -199,13 +347,7 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
 	/* TNO */
 	*bp++ = 0;
 	/* POINT */
-	if (track_number == 0) {
-	    *bp++ = 0xA2;
-	} else if (track_number >= MAX_TRACKS) {
-	    *bp++ = 0xA0 + (track_number - MAX_TRACKS);
-	} else {
-	    *bp++ = track_number;
-	}
+	*bp++ = track_number;
 	/* Min */
 	*bp++ = toc->tracks[track_number].atime.min;
 	/* Sec */
@@ -214,38 +356,12 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
 	*bp++ = toc->tracks[track_number].atime.frm;
 	/* Zero */
 	*bp++ = 0;
-	/* Track Start Address (LBA) */
-	if (track_number == 0) {
-	    /* Lead-Out */
-	    /* PMIN */
-	    *bp++ = toc->tracks[track_number].offset.min;
-	    /* PSEC */
-	    *bp++ = toc->tracks[track_number].offset.sec;
-	    /* PFRAME */
-	    *bp++ = toc->tracks[track_number].offset.frm;
-	} else if (track_number == MAX_TRACKS) {
-	    /* POINT == 0xA0 */
-	    /* First Track Number */
-	    *bp++ = toc->first_track_number;
-	    /* Disc Type */
-	    *bp++ = toc->disc_type;
-	    /* Reserved */
-	    *bp++ = 0;
-	} else if (track_number == MAX_TRACKS + 1) {
-	    /* POINT == 0xA1 */
-	    /* Last Track Number */
-	    *bp++ = toc->last_track_number;
-	    /* Reserved */
-	    *bp++ = 0;
-	    *bp++ = 0;
-	} else {
-	    /* PMIN */
-	    *bp++ = toc->tracks[track_number].offset.min;
-	    /* PSEC */
-	    *bp++ = toc->tracks[track_number].offset.sec;
-	    /* PFRAME */
-	    *bp++ = toc->tracks[track_number].offset.frm;
-	}
+	/* PMIN */
+	*bp++ = toc->tracks[track_number].offset.min;
+	/* PSEC */
+	*bp++ = toc->tracks[track_number].offset.sec;
+	/* PFRAME */
+	*bp++ = toc->tracks[track_number].offset.frm;
     }
 
     return CUEIFY_OK;
@@ -287,11 +403,6 @@ uint8_t cueify_full_toc_get_track_session(cueify_full_toc *t, uint8_t track) {
     } else if (track >= toc->first_track_number &&
 	       track <= toc->last_track_number) {
 	return toc->tracks[track].session;
-    } else if (track == CUEIFY_LEAD_OUT_TRACK ||
-	       track == 0xA2) {
-	return toc->tracks[0].session;
-    } else if (track == 0xA0 || track == 0xA1) {
-	return toc->tracks[MAX_TRACKS + (track - 0xA0)].session;
     } else {
 	return 0;
     }
@@ -307,11 +418,6 @@ uint8_t cueify_full_toc_get_track_control_flags(cueify_full_toc *t,
     } else if (track >= toc->first_track_number &&
 	       track <= toc->last_track_number) {
 	return toc->tracks[track].control;
-    } else if (track == CUEIFY_LEAD_OUT_TRACK ||
-	       track == 0xA2) {
-	return toc->tracks[0].control;
-    } else if (track == 0xA0 || track == 0xA1) {
-	return toc->tracks[MAX_TRACKS + (track - 0xA0)].control;
     } else {
 	return 0;
     }
@@ -327,18 +433,64 @@ uint8_t cueify_full_toc_get_track_sub_q_channel_format(cueify_full_toc *t,
     } else if (track >= toc->first_track_number &&
 	       track <= toc->last_track_number) {
 	return toc->tracks[track].adr;
-    } else if (track == CUEIFY_LEAD_OUT_TRACK ||
-	       track == 0xA2) {
-	return toc->tracks[0].adr;
-    } else if (track == 0xA0 || track == 0xA1) {
-	return toc->tracks[MAX_TRACKS + (track - 0xA0)].adr;
     } else {
 	return 0;
     }
 }  /* cueify_full_toc_get_track_sub_q_channel_format */
 
 
+uint8_t cueify_full_toc_get_session_control_flags(cueify_full_toc *t,
+						  uint8_t session,
+						  uint8_t point) {
+    cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
+
+    if (toc == NULL) {
+	return 0;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	switch (point) {
+	case CUEIFY_FULL_TOC_FIRST_TRACK_PSEUDOTRACK:
+	    return toc->sessions[session].pseudotracks[1].control;
+	case CUEIFY_FULL_TOC_LAST_TRACK_PSEUDOTRACK:
+	    return toc->sessions[session].pseudotracks[2].control;
+	case CUEIFY_LEAD_OUT_TRACK:
+	    return toc->sessions[session].pseudotracks[0].control;
+	default:
+	    return 0;
+	}
+    } else {
+	return 0;
+    }
+}  /* cueify_full_toc_get_session_control_flags */
+
+
+uint8_t cueify_full_toc_get_session_sub_q_channel_format(cueify_full_toc *t,
+							 uint8_t session,
+							 uint8_t point) {
+    cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
+
+    if (toc == NULL) {
+	return 0;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	switch (point) {
+	case CUEIFY_FULL_TOC_FIRST_TRACK_PSEUDOTRACK:
+	    return toc->sessions[session].pseudotracks[1].adr;
+	case CUEIFY_FULL_TOC_LAST_TRACK_PSEUDOTRACK:
+	    return toc->sessions[session].pseudotracks[2].adr;
+	case CUEIFY_LEAD_OUT_TRACK:
+	    return toc->sessions[session].pseudotracks[0].adr;
+	default:
+	    return 0;
+	}
+    } else {
+	return 0;
+    }
+}  /* cueify_full_toc_get_session_sub_q_channel_format */
+
+
 cueify_msf_t cueify_full_toc_get_point_address(cueify_full_toc *t,
+					       uint8_t session,
 					       uint8_t point) {
     cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
     cueify_msf_t zero;
@@ -351,12 +503,19 @@ cueify_msf_t cueify_full_toc_get_point_address(cueify_full_toc *t,
 	return zero;
     } else if (point >= toc->first_track_number &&
 	       point <= toc->last_track_number) {
-	return toc->tracks[point].atime;
-    } else if (point == CUEIFY_LEAD_OUT_TRACK ||
-	       point == 0xA2) {
-	return toc->tracks[0].atime;
-    } else if (point == 0xA0 || point == 0xA1) {
-	return toc->tracks[MAX_TRACKS + (point - 0xA0)].atime;
+	return toc->tracks[point].atime;  /* session doesn't actually matter */
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	switch (point) {
+	case CUEIFY_FULL_TOC_FIRST_TRACK_PSEUDOTRACK:
+	    return toc->sessions[session].pseudotracks[1].atime;
+	case CUEIFY_FULL_TOC_LAST_TRACK_PSEUDOTRACK:
+	    return toc->sessions[session].pseudotracks[2].atime;
+	case CUEIFY_LEAD_OUT_TRACK:
+	    return toc->sessions[session].pseudotracks[0].atime;
+	default:
+	    return zero;
+	}
     } else {
 	return zero;
     }
@@ -377,45 +536,75 @@ cueify_msf_t cueify_full_toc_get_track_address(cueify_full_toc *t,
     } else if (track >= toc->first_track_number &&
 	       track <= toc->last_track_number) {
 	return toc->tracks[track].offset;
-    } else if (track == CUEIFY_LEAD_OUT_TRACK) {
-	return toc->tracks[0].offset;
     } else {
 	return zero;
     }
 }  /* cueify_full_toc_get_track_address */
 
 
-uint8_t cueify_full_toc_get_first_track(cueify_full_toc *t) {
+uint8_t cueify_full_toc_get_session_first_track(cueify_full_toc *t,
+						uint8_t session) {
     cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
 
     if (toc == NULL) {
 	return 0;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	return toc->sessions[session].first_track_number;
     } else {
-	return toc->first_track_number;
+	return 0;
     }
-}  /* cueify_full_toc_get_first_track */
+}  /* cueify_full_toc_get_session_first_track */
 
 
-uint8_t cueify_full_toc_get_last_track(cueify_full_toc *t) {
+uint8_t cueify_full_toc_get_session_last_track(cueify_full_toc *t,
+					       uint8_t session) {
     cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
 
     if (toc == NULL) {
 	return 0;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	return toc->sessions[session].last_track_number;
     } else {
-	return toc->last_track_number;
+	return 0;
     }
-}  /* cueify_full_toc_get_last_track */
+}  /* cueify_full_toc_get_session_last_track */
 
 
-uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t) {
+uint8_t cueify_full_toc_get_session_type(cueify_full_toc *t,
+					 uint8_t session) {
     cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
 
     if (toc == NULL) {
 	return 0;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	return toc->sessions[session].session_type;
     } else {
-	return toc->disc_type;
+	return 0;
     }
-}  /* cueify_full_toc_get_disc_type */
+}  /* cueify_full_toc_get_session_type */
+
+
+cueify_msf_t cueify_full_toc_get_session_leadout_address(cueify_full_toc *t,
+							 uint8_t session) {
+    cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
+    cueify_msf_t zero;
+
+    zero.min = 0;
+    zero.sec = 0;
+    zero.frm = 0;
+
+    if (toc == NULL) {
+	return zero;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	return toc->sessions[session].leadout;
+    } else {
+	return zero;
+    }
+}  /* cueify_full_toc_get_session_leadout_address */
 
 
 cueify_msf_t cueify_full_toc_get_track_length(cueify_full_toc *t,
@@ -470,3 +659,40 @@ cueify_msf_t cueify_full_toc_get_track_length(cueify_full_toc *t,
 	return diff;
     }
 }  /* cueify_full_toc_get_track_length */
+
+
+cueify_msf_t cueify_full_toc_get_session_length(cueify_full_toc *t,
+						uint8_t session) {
+    cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
+    cueify_msf_t start, diff;
+
+    diff.min = 0;
+    diff.sec = 0;
+    diff.frm = 0;
+
+    if (toc == NULL) {
+	return diff;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	diff = toc->sessions[session].leadout;
+	start = toc->tracks[toc->sessions[session].first_track_number].offset;
+	diff.min -= start.min;
+	if (diff.sec < start.sec) {
+	    diff.sec += 60;
+	    diff.min--;
+	}
+	diff.sec -= start.sec;
+	if (diff.frm < start.frm) {
+	    diff.frm += 75;
+	    if (diff.sec == 0) {
+		diff.sec += 60;
+		diff.min--;
+	    }
+	    diff.sec--;
+	}
+	diff.frm -= start.frm;
+	return diff;
+    } else {
+	return diff;
+    }
+}  /* cueify_full_toc_get_session_length */

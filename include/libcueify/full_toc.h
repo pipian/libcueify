@@ -144,8 +144,7 @@ uint8_t cueify_full_toc_get_last_session(cueify_full_toc *t);
  *
  * @pre { t != NULL,
  *        cueify_full_toc_get_first_track(t) <= track AND
- *        track <= cueify_full_toc_get_last_track(t),
- *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2 }
+ *        track <= cueify_full_toc_get_last_track(t) }
  * @param t a full TOC instance
  * @param track the number of the track for which the session number
  *              should be returned
@@ -159,8 +158,7 @@ uint8_t cueify_full_toc_get_track_session(cueify_full_toc *t, uint8_t track);
  *
  * @pre { t != NULL,
  *        cueify_full_toc_get_first_track(t) <= track AND
- *        track <= cueify_full_toc_get_last_track(t),
- *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2 }
+ *        track <= cueify_full_toc_get_last_track(t) }
  * @param t a full TOC instance
  * @param track the number of the track for which control flags should
  *              be returned
@@ -179,8 +177,7 @@ uint8_t cueify_full_toc_get_track_control_flags(cueify_full_toc *t,
  *
  * @pre { t != NULL,
  *        cueify_full_toc_get_first_track(t) <= track AND
- *        track <= cueify_full_toc_get_last_track(t),
- *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2 }
+ *        track <= cueify_full_toc_get_last_track(t) }
  * @param t a full TOC instance
  * @param track the number of the track for which the sub-Q-channel
  *              format should be returned
@@ -191,20 +188,80 @@ uint8_t cueify_full_toc_get_track_sub_q_channel_format(cueify_full_toc *t,
 						       uint8_t track);
 
 
+/** Point number identifying the track descriptor containing the first
+ * track number in a session.
+ */
+#define CUEIFY_FULL_TOC_FIRST_TRACK_PSEUDOTRACK  0xA0
+/** Point number identifying the track descriptor containing the last
+ * track number in a session.
+ */
+#define CUEIFY_FULL_TOC_LAST_TRACK_PSEUDOTRACK   0xA1
+
+
+/**
+ * Get the track control flags for a point in a session in a full TOC instance.
+ *
+ * @pre { t != NULL,
+ *        point IN { CUEIFY_FULL_TOC_FIRST_TRACK_PSUEDOTRACK,
+ *                   CUEIFY_FULL_TOC_LAST_TRACK_PSEUDOTRACK,
+ *                   CUEIFY_LEAD_OUT_TRACK },
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t) }
+ * @param t a full TOC instance
+ * @param session the session number for which the point applies
+ * @param point the point in the lead-in for which the track control flags
+ *              should be returned
+ * @return the control flags for track number track in t
+ */
+uint8_t cueify_full_toc_get_session_control_flags(cueify_full_toc *t,
+						  uint8_t session,
+						  uint8_t point);
+
+
+/**
+ * Get the format of the sub-Q-channel of the block in which a track
+ * in a full TOC instance was found.
+ *
+ * @note In most cases, this function will return
+ *       CUEIFY_SUB_Q_POSITION, however it is provided for completeness.
+ *
+ * @pre { t != NULL,
+ *        point IN { CUEIFY_FULL_TOC_FIRST_TRACK_PSUEDOTRACK,
+ *                   CUEIFY_FULL_TOC_LAST_TRACK_PSEUDOTRACK,
+ *                   CUEIFY_LEAD_OUT_TRACK },
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t) }
+ * @param t a full TOC instance
+ * @param session the session number for which the point applies
+ * @param point the point in the lead-in for which the track control flags
+ *              should be returned
+ * @return the format of the contents of the sub-Q-channel for track
+ *         number track in t
+ */
+uint8_t cueify_full_toc_get_point_sub_q_channel_format(cueify_full_toc *t,
+						       uint8_t session,
+						       uint8_t point);
+
+
 /**
  * Get the absolute time of a point in the lead-in in a full TOC
  * instance.
  *
  * @pre { t != NULL,
- *        cueify_full_toc_get_first_track(t) <= track AND
- *        track <= cueify_full_toc_get_last_track(t),
- *        OR track == CUEIFY_LEAD_OUT_TRACK OR 0xA0 <= track <= 0xA2}
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t),
+ *        point is either a track number in session, or in the set
+ *        { CUEIFY_FIRST_TRACK_PSEUDOTRACK,
+ *          CUEIFY_LAST_TRACK_PSEUDOTRACK,
+ *          CUEIFY_LEAD_OUT_TRACK } }
  * @param t a full TOC instance
+ * @param session the session number for which the point applies
  * @param point the point in the lead-in for which the absolute time
  *              should be returned
  * @return the absolute time of point in t
  */
 cueify_msf_t cueify_full_toc_get_point_address(cueify_full_toc *t,
+					       uint8_t session,
 					       uint8_t point);
 
 
@@ -213,8 +270,7 @@ cueify_msf_t cueify_full_toc_get_point_address(cueify_full_toc *t,
  *
  * @pre { t != NULL,
  *        cueify_full_toc_get_first_track(t) <= track AND
- *        track <= cueify_full_toc_get_last_track(t),
- *        OR track == CUEIFY_LEAD_OUT_TRACK }
+ *        track <= cueify_full_toc_get_last_track(t) }
  * @param t a full TOC instance
  * @param track the number of the track for which the time of the
  *              start address should be returned
@@ -225,23 +281,60 @@ cueify_msf_t cueify_full_toc_get_track_address(cueify_full_toc *t,
 
 
 /**
+ * Get the number of the first track of a session in a full TOC instance.
+ *
+ * @pre { t != NULL,
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t) }
+ * @param t a full TOC instance
+ * @param session the number of the session to get the first track for
+ * @return the number of the first track in session number session in t
+ */
+uint8_t cueify_full_toc_get_session_first_track(cueify_full_toc *t,
+						uint8_t session);
+
+
+/**
  * Get the number of the first track in a full TOC instance.
+ *
+ * @note Shorthand for cueify_full_toc_get_session_first_track(t,
+ *       cueify_full_toc_get_first_session(t)).
  *
  * @pre { t != NULL }
  * @param t a full TOC instance
  * @return the number of the first track in t
  */
-uint8_t cueify_full_toc_get_first_track(cueify_full_toc *t);
+#define cueify_full_toc_get_first_track(t)    \
+    cueify_full_toc_get_session_first_track(  \
+	t, cueify_full_toc_get_first_session(t))
+
+/**
+ * Get the number of the last track of a session in a full TOC instance.
+ *
+ * @pre { t != NULL,
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t) }
+ * @param t a full TOC instance
+ * @param session the number of the session to get the last track for
+ * @return the number of the last track of session number session in t
+ */
+uint8_t cueify_full_toc_get_session_last_track(cueify_full_toc *t,
+					       uint8_t session);
 
 
 /**
  * Get the number of the last track in a full TOC instance.
  *
+ * @note Shorthand for cueify_full_toc_get_session_last_track(t,
+ *       cueify_full_toc_get_last_session(t)).
+ *
  * @pre { t != NULL }
  * @param t a full TOC instance
  * @return the number of the last track in t
  */
-uint8_t cueify_full_toc_get_last_track(cueify_full_toc *t);
+#define cueify_full_toc_get_last_track(t)    \
+    cueify_full_toc_get_session_last_track(  \
+	t, cueify_full_toc_get_last_session(t))
 
 
 /** The disc is a CD-DA disc, or CD Data with the first track in Mode 1. */
@@ -253,27 +346,47 @@ uint8_t cueify_full_toc_get_last_track(cueify_full_toc *t);
 
 
 /**
- * Get the disc type in a full TOC instance.
+ * Get the session type/disc mode in a full TOC instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL,
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t) }
  * @param t a full TOC instance
+ * @param session the number of the session to get the disc mode for
  * @return the disc type of t
  */
-uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t);
+uint8_t cueify_full_toc_get_session_type(cueify_full_toc *t,
+					 uint8_t session);
+
+
+/**
+ * Get the time of the lead-out of a session in a full TOC instance.
+ *
+ * @pre { t != NULL,
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t) }
+ * @param t a full TOC instance
+ * @param session the number of the session for which the time of the
+ *                lead-out address should be returned
+ * @return the time of the lead-out address of session number session in t
+ */
+cueify_msf_t cueify_full_toc_get_session_leadout_address(cueify_full_toc *t,
+							 uint8_t session);
 
 
 /**
  * Get the total length of a full TOC instance.
  *
- * @note Shorthand for cueify_full_toc_get_track_address(t,
- *       CUEIFY_LEAD_OUT_TRACK).
+ * @note Shorthand for cueify_full_toc_get_session_leadout_address(
+ *       cueify_full_toc_get_last_session(t))
  *
  * @pre { t != NULL }
  * @param t a full TOC instance
  * @return the total length of t
  */
-#define cueify_full_toc_get_disc_length(t)  \
-    cueify_full_toc_get_track_address(t, CUEIFY_LEAD_OUT_TRACK)
+#define cueify_full_toc_get_disc_length(t)        \
+    cueify_full_toc_get_session_leadout_address(  \
+        cueify_full_toc_get_last_session(t))
 
 
 /**
@@ -281,12 +394,27 @@ uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t);
  *
  * @pre { t != NULL,
  *        cueify_full_toc_get_first_track(t) <= track AND
- *        track <= cueify_full_toc_get_last_track(t)}
+ *        track <= cueify_full_toc_get_last_track(t) }
  * @param t a full TOC instance
  * @param track the number of the track for which the length should be returned
  * @return the length of track number track in t
  */
 cueify_msf_t cueify_full_toc_get_track_length(cueify_full_toc *t,
 					      uint8_t track);
+
+
+/**
+ * Get the total length of a session in a full TOC instance.
+ *
+ * @pre { t != NULL,
+ *        cueify_full_toc_get_first_session(t) <= session AND
+ *        session <= cueify_full_toc_get_last_session(t) }
+ * @param t a full TOC instance
+ * @param session the number of the session for which the length
+ *                should be returned
+ * @return the length of session number session in t
+ */
+cueify_msf_t cueify_full_toc_get_session_length(cueify_full_toc *t,
+						uint8_t session);
 
 #endif /* _LIBCUEIFY_FULL_TOC_H */

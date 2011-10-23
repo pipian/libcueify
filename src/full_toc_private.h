@@ -46,6 +46,21 @@ typedef struct {
 } cueify_full_toc_track_private;
 
 
+/** Internal structure to hold session data in a full TOC. */
+typedef struct {
+    /** Number of the first track in the session. */
+    uint8_t first_track_number;
+    /** Number of the last track in the session. */
+    uint8_t last_track_number;
+    /** Data format of the session. */
+    uint8_t session_type;
+    /** Offset of the leadout of the track (MSF). */
+    cueify_msf_t leadout;
+    /** First track, last track, and lead-out pseudotrack data. */
+    cueify_full_toc_track_private pseudotracks[3];
+} cueify_full_toc_session_private;
+
+
 /** Internal structure to hold full TOC data. */
 typedef struct {
     /** Number of the first session in the TOC. */
@@ -56,10 +71,10 @@ typedef struct {
     uint8_t first_track_number;
     /** Number of the last track in the TOC. */
     uint8_t last_track_number;
-    /** Type of the disc of the TOC. */
-    uint8_t disc_type;
     /** Tracks in the TOC. */
-    cueify_full_toc_track_private tracks[MAX_TRACKS + 2];
+    cueify_full_toc_track_private tracks[MAX_TRACKS];
+    /** Sessions in the TOC. */
+    cueify_full_toc_session_private sessions[MAX_TRACKS];
 } cueify_full_toc_private;
 
 
