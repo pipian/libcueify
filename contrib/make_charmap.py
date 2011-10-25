@@ -1,6 +1,7 @@
 import sys
 
 chars = {}
+reverse_chars = {}
 for file in sys.argv[1:]:
     f = open(file, 'r')
     data = f.read()
@@ -28,6 +29,27 @@ for file in sys.argv[1:]:
         
         # Sort by first-byte.
         chars.setdefault((other >> 8), {})[other & 0xFF] = unicode
+        reverse_table = reverse_chars
+        for char in unicode:
+            reverse_table = reverse_table.setdefault((char >> 16), {})
+            reverse_table = reverse_table.setdefault((char >> 8) & 0xFF, {})
+            if char == unicode[-1]:
+                if reverse_table.get(char & 0xFF, None) is None:
+                    reverse_table[char & 0xFF] = other
+                elif isinstance(reverse_table[char & 0xFF], dict):
+                    reverse_table[char & 0xFF][None] = other
+                else:
+                    # Replace the previous copy.
+                    reverse_table[char & 0xFF] = other
+            else:
+                if reverse_table.get(char & 0xFF, None) is None:
+                    reverse_table = reverse_table.setdefault(char & 0xFF, {})
+                elif isinstance(reverse_table[char & 0xFF], dict):
+                    reverse_table = reverse_table[char & 0xFF]
+                else:
+                    reverse_table[char & 0xFF] = {
+                        None: reverse_table[char & 0xFF]}
+                    reverse_table = reverse_table[char & 0xFF]
 
 def formatTable(lobytes, hibyte=None):
     if hibyte is None:
@@ -59,7 +81,7 @@ def formatTable(lobytes, hibyte=None):
     print
 
 def formatMasterTable(hibytes):
-    print "static const char * const * const masterTable[256] = {"
+    print "static const char * const * const master_table[256] = {"
     line = '    '
     for byte in range(256):
         if byte in hibytes:
@@ -76,6 +98,92 @@ def formatMasterTable(hibytes):
     print "};"
     print
 
+formatReverseMasterTable = None
+
+def formatReverseSubsubtable(chars, prefix, hi, mid):
+    for lo in chars[hi][mid]:
+        if isinstance(chars[hi][mid][lo], dict):
+            formatReverseMasterTable(chars[hi][mid][lo],
+                                     '%02X%02X%02X' % (hi, mid, lo))
+    
+    print ("static const struct multibyte_codepoint " +
+           "reverse_table%s%02X%02X[256] = {" % (prefix, hi, mid))
+    line = '    '
+    for lo in range(256):
+        if lo in chars[hi][mid]:
+            if isinstance(chars[hi][mid][lo], dict):
+                if chars[hi][mid][lo].get(None, None) is not None:
+                    line += "{1, {0x%02X, 0x%02X}, " % (
+                        chars[hi][mid][lo][None] >> 8,
+                        chars[hi][mid][lo][None] & 0xFF)
+                    line += "reverse_master_table%s%02X%02X%02X}" % (
+                        prefix, hi, mid, lo)
+                else:
+                    line += "{0, {0, 0}, "
+                    line += "reverse_master_table%s%02X%02X%02X}" % (
+                        prefix, hi, mid, lo)
+            else:
+                line += "{1, {0x%02X, 0x%02X}, NULL}" % (
+                    chars[hi][mid][lo] >> 8,
+                    chars[hi][mid][lo] & 0xFF)
+        else:
+            line += "{0, {0, 0}, NULL}"
+        if lo != 255:
+            line += ','
+        if lo % 16 != 15:
+            line += ' '
+        else:
+            print line
+            line = '    '
+    print "};"
+    print
+
+def formatReverseSubtable(chars, prefix, hi):
+    for mid in chars[hi]:
+        formatReverseSubsubtable(chars, prefix, hi, mid)
+
+    print ("static const struct multibyte_codepoint " +
+           "*reverse_table%s%02X[256] = {" % (prefix, hi))
+    line = '    '
+    for mid in range(256):
+        if mid in chars[hi]:
+            line += "reverse_table%s%02X%02X" % (prefix, hi, mid)
+        else:
+            line += "NULL"
+        if mid != 255:
+            line += ','
+        if mid % 16 != 15:
+            line += ' '
+        else:
+            print line
+            line = '    '
+    print "};"
+    print
+
+def formatReverseMasterTable(chars, prefix=''):
+    for hi in chars:
+        if hi is None:
+            continue
+        formatReverseSubtable(chars, prefix, hi)
+
+    print ("static const struct multibyte_codepoint * const " +
+           "*reverse_master_table%s[256] = {" % (prefix))
+    line = '    '
+    for hi in range(256):
+        if hi in chars:
+            line += "reverse_table%s%02X" % (prefix, hi)
+        else:
+            line += "NULL"
+        if hi != 255:
+            line += ','
+        if hi % 16 != 15:
+            line += ' '
+        else:
+            print line
+            line = '    '
+    print "};"
+    print
+
 hibytes = sorted(chars.keys())
 if len(hibytes) == 1 and hibytes[0] == 0:
     # Just need to print out a single table.
@@ -85,3 +193,6 @@ else:
     for byte in hibytes:
         formatTable(chars[byte], byte)
     formatMasterTable(hibytes)
+
+# Format reverse table and successor tables
+formatReverseMasterTable(reverse_chars)

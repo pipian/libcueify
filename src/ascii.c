@@ -1,4 +1,4 @@
-/* latin1.c - (CD-Text) ISO 8859-1 to UTF-8 text codec functions.
+/* ascii.c - ASCII to UTF-8 text codec functions.
  *
  * Copyright (c) 2011 Ian Jacobi
  * 
@@ -27,63 +27,8 @@
 #include <stdlib.h>
 
 #include "charsets.h"
-#include "latin1_tables.h"
 
-char *latin1_to_utf8(uint8_t *latin1, int size)
-{
-    int output_size = 0, i;
-    const char *character;
-    char *output = NULL, *output_ptr;
-
-    if (size < 0) {
-	/* Count output size until we find a terminator/bad char. */
-	output = (char *)latin1;
-	while (table[(unsigned char)*output] != '\0') {
-	    output_size += strlen(table[(unsigned char)*output]);
-	}
-	/* And also include the terminator. */
-	output_size++;
-    } else {
-	/* Convert exactly size characters. */
-	output = (char *)latin1;
-	for (i = 0; i < size; i++) {
-	  if (table[(unsigned char)latin1[i]][0] == '\0') {
-		output_size++;
-	    } else {
-		output_size += strlen(table[(unsigned char)latin1[i]]);
-	    }
-	}
-	/* And also add a terminator. */
-	output_size++;
-    }
-
-    /* Allocate space for the conversion... */
-    output = calloc(output_size, 1);
-    if (output == NULL) {
-	return NULL;
-    }
-    /* Already set the terminator. */
-    output[--output_size] = '\0';
-
-    /* Now do the conversion. */
-    output_ptr = output;
-    while (output_size > 0) {
-	character = table[(unsigned char)*latin1++];
-	strcpy(output_ptr, character);
-	if (*character == '\0') {
-	    output_ptr++;
-	    output_size--;
-	} else {
-	    output_ptr += strlen(character);
-	    output_size -= strlen(character);
-	}
-    }
-
-    return output;
-}  /* latin1_to_utf8 */
-
-
-size_t latin1_byte_count(char *utf8) {
+size_t ascii_byte_count(char *utf8) {
     size_t size = 0;
     uint8_t *bp = (uint8_t *)utf8;
     uint32_t character;
@@ -130,7 +75,7 @@ size_t latin1_byte_count(char *utf8) {
 	    character |= (*bp++ & 0x3F) << 6;
 	    character |= (*bp++ & 0x3F);
 	}
-	if (character > 0xFF) {
+	if (character > 0x7F) {
 	    character = '?';
 	}
 	size++;
@@ -139,10 +84,10 @@ size_t latin1_byte_count(char *utf8) {
     size++;
 
     return size;
-}  /* latin1_byte_count */
+}  /* ascii_byte_count */
 
 
-uint8_t *utf8_to_latin1(char *utf8, size_t *size) {
+uint8_t *utf8_to_ascii(char *utf8, size_t *size) {
     uint8_t *output = NULL, *output_ptr = NULL;
     uint8_t *bp = (uint8_t *)utf8;
     uint32_t character;
@@ -196,7 +141,7 @@ uint8_t *utf8_to_latin1(char *utf8, size_t *size) {
 	    character |= (*bp++ & 0x3F) << 6;
 	    character |= (*bp++ & 0x3F);
 	}
-	if (character > 0xFF) {
+	if (character > 0x7F) {
 	    character = '?';
 	}
 	*output_ptr++ = (uint8_t)character;
@@ -206,4 +151,4 @@ uint8_t *utf8_to_latin1(char *utf8, size_t *size) {
     *size = (output_ptr - output) + 1;
 
     return output;
-}  /* utf8_to_latin1 */
+}  /* utf8_to_ascii */

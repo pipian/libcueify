@@ -29,77 +29,289 @@
 #include "charsets.h"
 #include "msjis_tables.h"
 
-char *ConvertMSJIS(char *szMSJIS, int iSize)
+char *msjis_to_utf8(uint8_t *msjis, int size)
 {
-    int iOutputSize = 0, i;
-    unsigned char cHi, cLo;
-    const char * const *aszTable;
-    const char *szChar;
-    char *szOutput = NULL, *szOutputPtr;
-    
-    if (iSize < 0) {
+    int output_size = 0, i;
+    uint8_t hi, lo;
+    const char * const *table;
+    const char *character;
+    char *output = NULL, *output_ptr;
+
+    if (size < 0) {
 	/* Count output size until we find a terminator/bad char. */
-	szOutput = szMSJIS;
+	output = (char *)msjis;
 	do {
-	    cHi = *szOutput++;
-	    cLo = *szOutput++;
-	    aszTable = masterTable[(unsigned char)cHi];
-	    if (aszTable == NULL) {
+	    hi = *output++;
+	    lo = *output++;
+	    table = master_table[(unsigned char)hi];
+	    if (table == NULL) {
 		/* Don't know this table! */
 		break;
-	    } else if (aszTable[(unsigned char)cLo][0] != '\0') {
-		iOutputSize += strlen(aszTable[(unsigned char)cLo]);
+	    } else if (table[(unsigned char)lo][0] != '\0') {
+		output_size += strlen(table[(unsigned char)lo]);
 	    }
-	} while (aszTable[(unsigned char)cLo] != '\0');
+	} while (table[(unsigned char)lo] != '\0');
 	/* And also include the terminator. */
-	iOutputSize++;
+	output_size++;
     } else {
-	/* Convert exactly iSize (wide) characters. */
-	szOutput = szMSJIS;
-	for (i = 0; i < iSize; i++) {
-	    cHi = *szOutput++;
-	    cLo = *szOutput++;
-	    aszTable = masterTable[(unsigned char)cHi];
-	    if (aszTable == NULL) {
+	/* Convert exactly size (wide) characters. */
+	output = (char *)msjis;
+	for (i = 0; i < size; i++) {
+	    hi = *output++;
+	    lo = *output++;
+	    table = master_table[(unsigned char)hi];
+	    if (table == NULL) {
 		/* Don't know this table! */
-		iOutputSize++;
-	    } else if (aszTable[(unsigned char)cLo][0] == '\0') {
-		iOutputSize++;
+		output_size++;
+	    } else if (table[(unsigned char)lo][0] == '\0') {
+		output_size++;
 	    } else {
-		iOutputSize += strlen(aszTable[(unsigned char)cLo]);
+		output_size += strlen(table[(unsigned char)lo]);
 	    }
 	}
 	/* And also add a terminator. */
-	iOutputSize++;
+	output_size++;
     }
     
     /* Allocate space for the conversion... */
-    szOutput = calloc(iOutputSize, 1);
-    if (szOutput == NULL) {
+    output = calloc(output_size, 1);
+    if (output == NULL) {
 	return NULL;
     }
-    szOutput[--iOutputSize] = '\0';
-    
+    output[--output_size] = '\0';
+
     /* Now do the conversion. */
-    szOutputPtr = szOutput;
-    while (iOutputSize > 0) {
-	cHi = *szMSJIS++;
-	cLo = *szMSJIS++;
-	aszTable = masterTable[(unsigned char)cHi];
-	if (aszTable == NULL) {
+    output_ptr = output;
+    while (output_size > 0) {
+	hi = *msjis++;
+	lo = *msjis++;
+	table = master_table[(unsigned char)hi];
+	if (table == NULL) {
 	    /* Don't know this table! */
-	    *szOutputPtr++ = '\0';
-	    iOutputSize--;
-	} else if (aszTable[(unsigned char)cLo][0] == '\0') {
-	    *szOutputPtr++ = '\0';
-	    iOutputSize--;
+	    *output_ptr++ = '\0';
+	    output_size--;
+	} else if (table[(unsigned char)lo][0] == '\0') {
+	    *output_ptr++ = '\0';
+	    output_size--;
 	} else {
-	    szChar = aszTable[(unsigned char)cLo];
-	    strcpy(szOutputPtr, szChar);
-	    szOutputPtr += strlen(szChar);
-	    iOutputSize -= strlen(szChar);
+	    character = table[(unsigned char)lo];
+	    strcpy(output_ptr, character);
+	    output_ptr += strlen(character);
+	    output_size -= strlen(character);
 	}
     }
-    
-    return szOutput;
+
+    return output;
 }
+
+
+size_t msjis_byte_count(char *utf8) {
+    size_t size = 0;
+    uint8_t *bp = (uint8_t *)utf8;
+    uint8_t hi, mid, lo;
+    uint32_t character;
+    struct multibyte_codepoint codepoint;
+    const struct multibyte_codepoint * const * const *master_table;
+    const struct multibyte_codepoint * const *subtable;
+    const struct multibyte_codepoint *table;
+
+    master_table = reverse_master_table;
+    while (*bp != 0) {
+	character = 0;
+	if (*bp <= 0x7F) {
+	    /* 1-byte codepoint */
+	    character = *bp;
+	} else if (*bp <= 0xBF) {
+	    /* Invalid codepoint */
+	    character = '?';
+	} else if (*bp <= 0xDF) {
+	    /* 2-byte codepoint */
+	    character  = (*bp++ & 0x1F) << 6;
+	    character |= (*bp++ & 0x3F);
+	    if (character <= 0x7F) {
+		character = '?';
+	    }
+	} else if (*bp <= 0xEF) {
+	    /* 3-byte codepoint */
+	    character  = (*bp++ & 0x0F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	} else if (*bp <= 0xF7) {
+	    /* 4-byte codepoint */
+	    character  = (*bp++ & 0x07) << 18;
+	    character |= (*bp++ & 0x3F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	} else if (*bp <= 0xFB) {
+	    /* 5-byte codepoint */
+	    character  = (*bp++ & 0x03) << 24;
+	    character |= (*bp++ & 0x3F) << 18;
+	    character |= (*bp++ & 0x3F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	} else if (*bp <= 0xFD) {
+	    /* 6-byte codepoint */
+	    character  = (*bp++ & 0x01) << 30;
+	    character |= (*bp++ & 0x3F) << 24;
+	    character |= (*bp++ & 0x3F) << 18;
+	    character |= (*bp++ & 0x3F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	}
+	if (character > 0x10FFFF) {
+	    character = '?';
+	}
+
+	/* Convert the character to MS-JIS (or wait for another
+	 * character I guess) */
+	/* TODO: What about successor characters (e.g. variation selectors)? */
+	hi = (character >> 16) & 0xFF;
+	mid = (character >> 8) & 0xFF;
+	lo = character & 0xFF;
+	if (master_table[hi] == NULL) {
+	    /* No MS-JIS encoding. */
+	    codepoint = reverse_table0000['?'];
+	} else {
+	    subtable = master_table[hi];
+
+	    if (subtable[mid] == NULL) {
+		/* No MS-JIS encoding. */
+		codepoint = reverse_table0000['?'];
+	    } else {
+		table = subtable[mid];
+		if (table[lo].has_encoding == 0 &&
+		    table[lo].successor_master_table == NULL) {
+		    /* No MS-JIS encoding. */
+		    codepoint = reverse_table0000['?'];
+		} else {
+		    codepoint = table[lo];
+		}
+	    }
+	}
+
+	if (codepoint.successor_master_table) {
+	    /* Check the successive character. */
+	    master_table = codepoint.successor_master_table;
+	} else {
+	    size++;
+	    /* Reset to look at the master table again. */
+	    master_table = reverse_master_table;
+	}
+    }
+    if (master_table != reverse_master_table) {
+	/* In this case, we must have read one character with no successor. */
+	size++;
+    }
+    /* Include the terminator */
+    size++;
+
+    return size * 2;  /* 2-byte character set */
+}  /* msjis_byte_count */
+
+
+uint8_t *utf8_to_msjis(char *utf8, size_t *size) {
+    uint8_t *output = NULL, *output_ptr = NULL;
+    uint8_t *bp = (uint8_t *)utf8;
+    uint8_t hi, mid, lo;
+    uint32_t character;
+    struct multibyte_codepoint codepoint;
+    const struct multibyte_codepoint * const * const *master_table;
+    const struct multibyte_codepoint * const *subtable;
+    const struct multibyte_codepoint *table;
+
+    master_table = reverse_master_table;
+    while (*bp != 0) {
+	character = 0;
+	if (*bp <= 0x7F) {
+	    /* 1-byte codepoint */
+	    character = *bp;
+	} else if (*bp <= 0xBF) {
+	    /* Invalid codepoint */
+	    character = '?';
+	} else if (*bp <= 0xDF) {
+	    /* 2-byte codepoint */
+	    character  = (*bp++ & 0x1F) << 6;
+	    character |= (*bp++ & 0x3F);
+	    if (character <= 0x7F) {
+		character = '?';
+	    }
+	} else if (*bp <= 0xEF) {
+	    /* 3-byte codepoint */
+	    character  = (*bp++ & 0x0F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	} else if (*bp <= 0xF7) {
+	    /* 4-byte codepoint */
+	    character  = (*bp++ & 0x07) << 18;
+	    character |= (*bp++ & 0x3F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	} else if (*bp <= 0xFB) {
+	    /* 5-byte codepoint */
+	    character  = (*bp++ & 0x03) << 24;
+	    character |= (*bp++ & 0x3F) << 18;
+	    character |= (*bp++ & 0x3F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	} else if (*bp <= 0xFD) {
+	    /* 6-byte codepoint */
+	    character  = (*bp++ & 0x01) << 30;
+	    character |= (*bp++ & 0x3F) << 24;
+	    character |= (*bp++ & 0x3F) << 18;
+	    character |= (*bp++ & 0x3F) << 12;
+	    character |= (*bp++ & 0x3F) << 6;
+	    character |= (*bp++ & 0x3F);
+	}
+	if (character > 0x10FFFF) {
+	    character = '?';
+	}
+
+	/* Convert the character to MS-JIS (or wait for another
+	 * character I guess) */
+	/* TODO: What about successor characters (e.g. variation selectors)? */
+	hi = (character >> 16) & 0xFF;
+	mid = (character >> 8) & 0xFF;
+	lo = character & 0xFF;
+	if (master_table[hi] == NULL) {
+	    /* No MS-JIS encoding. */
+	    codepoint = reverse_table0000['?'];
+	} else {
+	    subtable = master_table[hi];
+
+	    if (subtable[mid] == NULL) {
+		/* No MS-JIS encoding. */
+		codepoint = reverse_table0000['?'];
+	    } else {
+		table = subtable[mid];
+		if (table[lo].has_encoding == 0 &&
+		    table[lo].successor_master_table == NULL) {
+		    /* No MS-JIS encoding. */
+		    codepoint = reverse_table0000['?'];
+		} else {
+		    codepoint = table[lo];
+		}
+	    }
+	}
+
+	if (codepoint.successor_master_table) {
+	    /* Check the successive character. */
+	    master_table = codepoint.successor_master_table;
+	} else {
+	    memcpy(output_ptr, codepoint.value, 2);
+	    output_ptr += 2;
+	    /* Reset to look at the master table again. */
+	    master_table = reverse_master_table;
+	}
+    }
+    if (master_table != reverse_master_table) {
+	/* In this case, we must have read one character with no successor. */
+	memcpy(output_ptr, codepoint.value, 2);
+	output_ptr += 2;
+    }
+    /* Include the terminator */
+    *output_ptr++ = '\0';
+    *output_ptr = '\0';
+    *size = (output_ptr - output) + 1;
+
+    return output;
+}  /* utf8_to_msjis */

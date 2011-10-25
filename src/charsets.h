@@ -23,36 +23,140 @@
  * SOFTWARE.
  */
 
-#ifndef _7604DRIVERS_CHARSETS_H
-#define _7604DRIVERS_CHARSETS_H
+#ifndef _LIBCUEIFY_CHARSETS_H
+#define _LIBCUEIFY_CHARSETS_H
+
+#include <libcueify/types.h>
+
+/** Multi-byte codepoint data for encoding. */
+struct multibyte_codepoint {
+    /** Has an encoding of the codepoint */
+    int has_encoding;
+    /** Encoding of the codepoint */
+    uint8_t value[2];
+    /** Master table for successor characters */
+    const struct multibyte_codepoint * const * const *successor_master_table;
+};
+
 
 /** Allocate and populate a character buffer with the UTF-8
  *  translation of a string encoded with the ISO-8859-1 codec.
  *
- * @param szLatin1 A pointer to the string containing ISO-8859-1 data.
- * @param iSize The number of characters to convert.  If -1,
- *              characters will be translated until a null terminator
- *              or invalid character is found.
- * @return A newly allocated buffer containing a UTF-8 encoded version
- *         of the data in szLatin1.  If the buffer could not be
+ * @param latin1 a pointer to the string containing ISO-8859-1 data.
+ * @param size the number of characters to convert.  If -1,
+ *             characters will be translated until a null terminator
+ *             or invalid character is found.
+ * @return a newly allocated buffer containing a UTF-8 encoded version
+ *         of the data in latin.  If the buffer could not be
  *         allocated, NULL will be returned.  This buffer must be
  *         freed.
  */
-char *ConvertLatin1(char *szLatin1, int iSize);
+char *latin1_to_utf8(uint8_t *latin1, int size);
 
-/** Allocated and populate a character buffer with the UTF-8
+
+/** Allocate and populate a character buffer with the UTF-8
  *  translation of a string encoded using the Music Shift-JIS codec
  *  (assuming big-endian encoding).
  *
- * @param szMSJIS A pointer to the string containing MS-JIS data.
- * @param iSize The number of wide characters to convert.  If -1,
- *              characters will be translated until a null terminator
- *              or invalid character is found.
- * @return A newly allocated buffer containing a UTF-8 encoded version
- *         of the data in szMSJIS.  If the buffer could not be
+ * @param msjis a pointer to the string containing MS-JIS data.
+ * @param size the number of wide characters to convert.  If -1,
+ *             characters will be translated until a null terminator
+ *             or invalid character is found.
+ * @return a newly allocated buffer containing a UTF-8 encoded version
+ *         of the data in msjis.  If the buffer could not be
  *         allocated, NULL will be returned.  This buffer must be
  *         freed.
  */
-char *ConvertMSJIS(char *szLatin1, int iSize);
+char *msjis_to_utf8(uint8_t *msjis, int size);
+
+
+/** Get the number of bytes that would be needed to encode a UTF-8
+ *  string in ASCII.
+ *
+ * @note Characters which cannot be encoded in ASCII will be replaced
+ *       with '?' before counting.
+ *
+ * @param utf8 a UTF-8 string to re-encode as ASCII
+ * @return the number of bytes that would be needed to encode utf8 in
+ *         ASCII (including the terminating NULL character)
+ */
+size_t ascii_byte_count(char *utf8);
+
+
+/** Get the number of bytes that would be needed to encode a UTF-8
+ *  string in ISO-8859-1.
+ *
+ * @note Characters which cannot be encoded in ISO-8859-1 will be replaced
+ *       with '?' before counting.
+ *
+ * @param utf8 a UTF-8 string to re-encode as ISO-8859-1
+ * @return the number of bytes that would be needed to encode utf8 in
+ *         ISO-8859-1 (including the terminating NULL character)
+ */
+size_t latin1_byte_count(char *utf8);
+
+
+/** Get the number of bytes that would be needed to encode a UTF-8
+ *  string in the Music Shift-JIS codec (assuming big-endian encoding).
+ *
+ * @note Characters which cannot be encoded in Shift-JIS will be replaced
+ *       with '?' before counting.
+ *
+ * @param utf8 a UTF-8 string to re-encode as Music Shift-JIS
+ * @return the number of bytes that would be needed to encode utf8 in
+ *         Music Shift-JIS (including the terminating NULL character)
+ */
+size_t msjis_byte_count(char *utf8);
+
+
+/** Allocate and populate a character buffer with the ASCII
+ *  translation of a string encoded using the UTF-8 codec.
+ *
+ * @note Characters which cannot be encoded in ASCII will be replaced
+ *       with '?' before counting.
+ *
+ * @param utf8 a pointer to the string containing UTF-8 data
+ * @param size a pointer in which the number of bytes in the returned buffer
+ *             will be stored
+ * @return a newly allocated buffer containing an ASCII encoded version
+ *         of the data in utf8.  If the buffer could not be
+ *         allocated, NULL will be returned.  This buffer must be
+ *         freed.
+ */
+uint8_t *utf8_to_ascii(char *utf8, size_t *size);
+
+
+/** Allocate and populate a character buffer with the ISO-8859-1
+ *  translation of a string encoded using the UTF-8 codec.
+ *
+ * @note Characters which cannot be encoded in ISO-8859-1 will be replaced
+ *       with '?' before counting.
+ *
+ * @param utf8 a pointer to the string containing UTF-8 data
+ * @param size a pointer in which the number of bytes in the returned buffer
+ *             will be stored
+ * @return a newly allocated buffer containing an ISO-8859-1 encoded version
+ *         of the data in utf8.  If the buffer could not be
+ *         allocated, NULL will be returned.  This buffer must be
+ *         freed.
+ */
+uint8_t *utf8_to_latin1(char *utf8, size_t *size);
+
+
+/** Allocate and populate a character buffer with the Music Shift-JIS
+ *  translation of a string encoded using the UTF-8 codec.
+ *
+ * @note Characters which cannot be encoded in Music Shift-JIS will be replaced
+ *       with '?' before counting.
+ *
+ * @param utf8 a pointer to the string containing UTF-8 data
+ * @param size a pointer in which the number of bytes in the returned buffer
+ *             will be stored
+ * @return a newly allocated buffer containing a Music Shift-JIS
+ *         encoded version of the data in utf8.  If the buffer could
+ *         not be allocated, NULL will be returned.  This buffer must
+ *         be freed.
+ */
+uint8_t *utf8_to_msjis(char *utf8, size_t *size);
 
 #endif
