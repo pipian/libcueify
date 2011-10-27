@@ -51,41 +51,6 @@ static void SectorsToAddress(int sectors, int *m, int *s, int *f)
     *f = sectors % 75;
 }
 
-CDROM_TOC_CD_TEXT_DATA *ReadCDText(HANDLE hDevice)
-{
-    DWORD dwReturned;
-    CDROM_READ_TOC_EX toc_ex;
-    CDROM_TOC_CD_TEXT_DATA dummy;
-    CDROM_TOC_CD_TEXT_DATA *cdtext = NULL;
-    
-    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_CDTEXT;
-    toc_ex.Reserved1 = 0;
-    toc_ex.Msf = FALSE;
-    toc_ex.SessionTrack = 0;
-    toc_ex.Reserved2 = 0;
-    toc_ex.Reserved3 = 0;
-    
-    if (DeviceIoControl(hDevice,
-			IOCTL_CDROM_READ_TOC_EX,
-			&toc_ex, sizeof(CDROM_READ_TOC_EX),
-			&dummy, sizeof(dummy),
-			&dwReturned, NULL)) {
-	cdtext = calloc(1, ((dummy.Length[0] << 8) | dummy.Length[1]) + 2);
-	if (cdtext != NULL) {
-	    if (!DeviceIoControl(hDevice,
-				 IOCTL_CDROM_READ_TOC_EX,
-				 &toc_ex, sizeof(CDROM_READ_TOC_EX),
-				 cdtext, ((dummy.Length[0] << 8) | dummy.Length[1]) + 2,
-				 &dwReturned, NULL)) {
-		free(cdtext);
-		return NULL;
-	    }
-	}
-    }
-    
-    return cdtext;
-}
-
 BOOL ReadMCN(HANDLE hDevice, SUB_Q_CHANNEL_DATA *data)
 {
     DWORD dwReturned;

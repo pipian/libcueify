@@ -332,3 +332,47 @@ int cueify_device_read_full_toc_unportable(cueify_device_private *d,
 
     return CUEIFY_OK;
 }  /* cueify_device_read_full_toc_unportable */
+
+
+int cueify_device_read_cdtext_unportable(cueify_device_private *d,
+					 cueify_cdtext_private *t) {
+{
+    DWORD dwReturned;
+    CDROM_READ_TOC_EX toc_ex;
+    CDROM_TOC_CD_TEXT_DATA dummy;
+    CDROM_TOC_CD_TEXT_DATA *cdtext = NULL;
+
+    toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_CDTEXT;
+    toc_ex.Reserved1 = 0;
+    toc_ex.Msf = FALSE;
+    toc_ex.SessionTrack = 0;
+    toc_ex.Reserved2 = 0;
+    toc_ex.Reserved3 = 0;
+
+    if (DeviceIoControl(d->handle,
+			IOCTL_CDROM_READ_TOC_EX,
+			&toc_ex, sizeof(CDROM_READ_TOC_EX),
+			&dummy, sizeof(dummy),
+			&dwReturned, NULL)) {
+	cdtext = calloc(1, ((dummy.Length[0] << 8) | dummy.Length[1]) + 2);
+	if (cdtext != NULL) {
+	    if (!DeviceIoControl(d->handle,
+				 IOCTL_CDROM_READ_TOC_EX,
+				 &toc_ex, sizeof(CDROM_READ_TOC_EX),
+				 cdtext, ((dummy.Length[0] << 8) |
+					  dummy.Length[1]) + 2,
+				 &dwReturned, NULL)) {
+		free(cdtext);
+		return CUEIFY_ERR_INTERNAL;
+	    }
+	}
+    }
+
+    /* Can probably get away with this. */
+    cueify_cdtext_deserialize(t, cdtext,
+			      ((dummy.Length[0] << 8) |
+			       dummy.Length[1]) + 2);
+    free(cdtext);
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_cdtext_unportable */
