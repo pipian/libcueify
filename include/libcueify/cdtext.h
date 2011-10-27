@@ -27,6 +27,10 @@
 #ifndef _LIBCUEIFY_CDTEXT_H
 #define _LIBCUEIFY_CDTEXT_H
 
+#include <libcueify/device.h>
+#include <libcueify/constants.h>
+#include <libcueify/types.h>
+
 /**
  * A transparent handle for the CD-Text data of an audio CD.
  *
@@ -64,8 +68,8 @@ cueify_cdtext *cueify_cdtext_new();
  * @pre { d != NULL, t != NULL }
  * @param d an opened device handle
  * @param t a CD-Text instance to populate
- * @return CUEIFY_OK if the CD-Text data was successfully read; otherwise an error code is
- *         returned
+ * @return CUEIFY_OK if the CD-Text data was successfully read;
+ *         otherwise an error code is returned
  */
 int cueify_device_read_cdtext(cueify_device *d, cueify_cdtext *t);
 
@@ -143,10 +147,12 @@ uint8_t cueify_cdtext_get_toc_last_track(cueify_cdtext *t);
  * Get the time of the start address of a track in the TOC in a
  * CD-Text instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL,
+ *        cueify_cdtext_get_toc_first_track(t) <= track,
+ *        track <= cueify_cdtext_get_toc_last_track(t) }
  * @param t a CD-Text instance
  * @param track the number of the track for which the time of the
- *        start address should be returned
+ *              start address should be returned
  * @return the time of the start address of track number track in the TOC in t
  */
 cueify_msf_t cueify_cdtext_get_toc_track_offset(cueify_cdtext *t,
@@ -154,73 +160,69 @@ cueify_msf_t cueify_cdtext_get_toc_track_offset(cueify_cdtext *t,
 
 
 /**
- * Get the number of track intervals in the TOC in a CD-Text instance.
+ * Get the number of track intervals for a track in the TOC in a
+ * CD-Text instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL,
+ *        cueify_cdtext_get_toc_first_track(t) <= track,
+ *        track <= cueify_cdtext_get_toc_last_track(t) }
  * @param t a CD-Text instance
- * @return the number of track intervals in the TOC in t
+ * @param track the number of the track for which the number of track
+ *              intervals in the TOC
+ * @return the number of track intervals for track number track in the TOC in t
  */
-int cueify_cdtext_get_toc_num_track_intervals(cueify_cdtext *t);
-
-
-/**
- * Get the priority number of a track interval in the TOC in a CD-Text
- * instance.
- *
- * @pre { t != NULL }
- * @param t a CD-Text instance
- * @param interval the track interval for which the priority number
- *                 should be returned
- * @return the priority number of the track interval interval in the TOC in t
- */
-uint8_t cueify_cdtext_get_toc_track_interval_priority(cueify_cdtext *t,
-						      int interval);
-
-
-/**
- * Get the count of a track interval in the TOC in a CD-Text instance.
- *
- * @pre { t != NULL }
- * @param t a CD-Text instance
- * @param interval the track interval for which the count
- *                 should be returned
- * @return the count of the track interval interval in the TOC in t
- */
-uint8_t cueify_cdtext_get_toc_track_interval_count(cueify_cdtext *t,
-						   int interval);
+uint8_t cueify_cdtext_get_toc_num_track_intervals(cueify_cdtext *t,
+						  uint8_t track);
 
 
 /**
  * Get the start address of a track interval in the TOC in a CD-Text instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL,
+ *        cueify_cdtext_get_toc_first_track(t) <= track,
+ *        track <= cueify_cdtext_get_toc_last_track(t),
+ *        0 <= interval < cueify_cdtext_get_toc_num_track_intervals(t, track) }
  * @param t a CD-Text instance
- * @param interval the track interval for which the start address
- *                 should be returned
- * @return the start address of the track interval interval in the TOC in t
+ * @param track the number of the track to which the interval belongs
+ * @param interval the index of the interval in the track for which
+ *                 the start address should be returned
+ * @return the start address of the track interval number interval in
+ *         track number track in the TOC in t
  */
 cueify_msf_t cueify_cdtext_get_toc_track_interval_start(cueify_cdtext *t,
-							int interval);
+							uint8_t track,
+							uint8_t interval);
 
 
 /**
  * Get the end address of a track interval in the TOC in a CD-Text instance.
  *
- * @pre { t != NULL }
+ * @pre { t != NULL,
+ *        cueify_cdtext_get_toc_first_track(t) <= track,
+ *        track <= cueify_cdtext_get_toc_last_track(t),
+ *        0 <= interval < cueify_cdtext_get_toc_num_track_intervals(t, track) }
  * @param t a CD-Text instance
- * @param interval the track interval for which the end address
- *                 should be returned
- * @return the end address of the track interval interval in the TOC in t
+ * @param track the number of the track to which the interval belongs
+ * @param interval the index of the interval in the track for which
+ *                 the end address should be returned
+ * @return the end address of the track interval number interval in
+ *         track number track in the TOC in t
  */
 cueify_msf_t cueify_cdtext_get_toc_track_interval_end(cueify_cdtext *t,
-						      int interval);
+						      uint8_t track,
+						      uint8_t interval);
 
 
-#define CUEIFY_CDTEXT_CHARSET_ISO8859_1  0x00  /** CD-Text uses the ISO-8859-1 encoding. */
-#define CUEIFY_CDTEXT_CHARSET_ASCII      0x01  /** CD-Text uses the ASCII encoding. */
-#define CUEIFY_CDTEXT_CHARSET_MSJIS      0x80  /** CD-Text uses the MS-JIS encoding. */
-#define CUEIFY_CDTEXT_CHARSET_KOREAN     0x81  /** CD-Text uses a (undefined) Korean encoding. */
-#define CUEIFY_CDTEXT_CHARSET_CHINESE    0x82  /** CD-Text uses a (undefined) Chinese encoding. */
+/** CD-Text uses the ISO-8859-1 encoding. */
+#define CUEIFY_CDTEXT_CHARSET_ISO8859_1  0x00
+/** CD-Text uses the ASCII encoding. */
+#define CUEIFY_CDTEXT_CHARSET_ASCII      0x01
+/** CD-Text uses the MS-JIS encoding. */
+#define CUEIFY_CDTEXT_CHARSET_MSJIS      0x80
+/** CD-Text uses a (undefined) Korean encoding. */
+#define CUEIFY_CDTEXT_CHARSET_KOREAN     0x81
+/** CD-Text uses a (undefined) Chinese encoding. */
+#define CUEIFY_CDTEXT_CHARSET_CHINESE    0x82
 
 
 /** Language identifiers of CD-Text blocks */
@@ -349,7 +351,7 @@ uint8_t cueify_cdtext_get_num_blocks(cueify_cdtext *t);
  * @param block the number of the block to retrieve
  * @return an instance of block number CD-Text block in t
  */
-cueify_cdtext_block *cueify_cdtext_get_block(cueify_cdtext *t, uint8_t block)
+cueify_cdtext_block *cueify_cdtext_get_block(cueify_cdtext *t, uint8_t block);
 
 
 /**
@@ -373,14 +375,14 @@ uint8_t cueify_cdtext_block_get_language(cueify_cdtext_block *b);
 
 
 /**
- * Get whether or not CD-Text data is available in Mode 2 packets on this disc.
+ * Get whether or not CD-Text data is available in program data on this disc.
  *
  * @pre { b != NULL }
  * @param b a CD-Text block instance
- * @return TRUE if the data in b is available in Mode 2 packets on
- *         this disc, otherwise FALSE
+ * @return TRUE if the data in b is available in Mode 2 packets in
+ *         program data on this disc, otherwise FALSE
  */
-int cueify_cdtext_block_has_mode2(cueify_cdtext_block *b);
+uint8_t cueify_cdtext_block_has_program_data(cueify_cdtext_block *b);
 
 
 /**
@@ -391,7 +393,7 @@ int cueify_cdtext_block_has_mode2(cueify_cdtext_block *b);
  * @return TRUE if the data in b is copyrighted in the program data,
  *         otherwise FALSE
  */
-int cueify_cdtext_block_has_program_copyright(cueify_cdtext_block *b);
+uint8_t cueify_cdtext_block_has_program_copyright(cueify_cdtext_block *b);
 
 
 /**
@@ -401,7 +403,7 @@ int cueify_cdtext_block_has_program_copyright(cueify_cdtext_block *b);
  * @param b a CD-Text block instance
  * @return TRUE if the message data in b is copyrighted, otherwise FALSE
  */
-int cueify_cdtext_block_has_message_copyright(cueify_cdtext_block *b);
+uint8_t cueify_cdtext_block_has_message_copyright(cueify_cdtext_block *b);
 
 
 /**
@@ -411,7 +413,7 @@ int cueify_cdtext_block_has_message_copyright(cueify_cdtext_block *b);
  * @param b a CD-Text block instance
  * @return TRUE if the artist names in b is copyrighted, otherwise FALSE
  */
-int cueify_cdtext_block_has_name_copyright(cueify_cdtext_block *b);
+uint8_t cueify_cdtext_block_has_name_copyright(cueify_cdtext_block *b);
 
 
 /**
@@ -421,7 +423,7 @@ int cueify_cdtext_block_has_name_copyright(cueify_cdtext_block *b);
  * @param b a CD-Text block instance
  * @return TRUE if the titles in b are copyrighted, otherwise FALSE
  */
-int cueify_cdtext_block_has_title_copyright(cueify_cdtext_block *b);
+uint8_t cueify_cdtext_block_has_title_copyright(cueify_cdtext_block *b);
 
 
 #define CUEIFY_CDTEXT_ALBUM  0x00  /** Track number to represent the
@@ -514,6 +516,34 @@ const char *cueify_cdtext_block_get_message(cueify_cdtext_block *b,
 
 
 /**
+ * Get the message of a track in a CD-Text block.
+ *
+ * @pre { b != NULL }
+ * @param b a CD-Text block instance
+ * @param track the number of the track to retrieve the message for (or
+ *        CUEIFY_CDTEXT_ALBUM for the message of the album)
+ * @return NULL if no message has been set for the track, otherwise
+ *         the message in UTF-8 encoding.
+ */
+const char *cueify_cdtext_block_get_message(cueify_cdtext_block *b,
+					    uint8_t track);
+
+
+/**
+ * Get the private data of a track in a CD-Text block.
+ *
+ * @pre { b != NULL }
+ * @param b a CD-Text block instance
+ * @param track the number of the track to retrieve the private data for (or
+ *        CUEIFY_CDTEXT_ALBUM for the message of the album)
+ * @return NULL if no private data has been set for the track,
+ *         otherwise the private data in UTF-8 encoding.
+ */
+const char *cueify_cdtext_block_get_private(cueify_cdtext_block *b,
+					    uint8_t track);
+
+
+/**
  * Get the ISRC of a track or UPC of the album in a CD-Text block.
  *
  * @pre { b != NULL }
@@ -545,7 +575,7 @@ const char *cueify_cdtext_block_get_discid(cueify_cdtext_block *b);
  * @param b a CD-Text block instance
  * @return 0 if no genre code has been set.  Otherwise the code.
  */
-uint8_t cueify_cdtext_block_get_genre_code(cueify_cdtext_block *b);
+uint16_t cueify_cdtext_block_get_genre_code(cueify_cdtext_block *b);
 
 
 /**
