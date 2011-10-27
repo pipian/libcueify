@@ -30,9 +30,10 @@
 #include <libcueify/toc.h>
 #include <libcueify/sessions.h>
 #include <libcueify/full_toc.h>
+#include <libcueify/cdtext.h>
 #include <libcueify/types.h>
 
-const char * const genreNames[0x1D] = {
+const char * const genre_names[0x1D] = {
     "NULL",
     "Unknown",
     "Adult Contemporary",
@@ -64,8 +65,8 @@ const char * const genreNames[0x1D] = {
     "World Music"
 };
 
-const char * const languageNames[] = {
-    "UNKNOWN", /* 0X00 */
+const char * const language_names[] = {
+    "UNKNOWN", /* 0x00 */
     "ALBANIAN",
     "BRETON",
     "CATALAN",
@@ -81,7 +82,7 @@ const char * const languageNames[] = {
     "BASQUE",
     "FAROESE",
     "FRENCH",
-    "FRISIAN", /* 0X10 */
+    "FRISIAN", /* 0x10 */
     "IRISH",
     "GAELIC",
     "GALICIAN",
@@ -97,7 +98,7 @@ const char * const languageNames[] = {
     "DUTCH",
     "NORWEGIAN",
     "OCCITAN",
-    "POLISH", /* 0X20 */
+    "POLISH", /* 0x20 */
     "PORTUGUESE",
     "ROMANIAN",
     "ROMANSH",
@@ -113,7 +114,7 @@ const char * const languageNames[] = {
     "",
     "",
     "",
-    "", /* 0X30 */
+    "", /* 0x30 */
     "",
     "",
     "",
@@ -129,7 +130,7 @@ const char * const languageNames[] = {
     "",
     "",
     "",
-    "", /* 0X40 */
+    "", /* 0x40 */
     "",
     "",
     "",
@@ -267,9 +268,10 @@ int print_cuesheet(const char *device) {
     cueify_toc *toc;
     cueify_sessions *sessions;
     cueify_full_toc *fulltoc;
+    cueify_cdtext *cdtext;
     time_t t = time(NULL);
     char time_str[256];
-    int i;
+    int i, block_num;
     cueify_msf_t offset;
     uint8_t cur_session = 0;
 
@@ -345,207 +347,217 @@ int print_cuesheet(const char *device) {
 	    cueify_full_toc_free(fulltoc);
 	    fulltoc = NULL;
 	}
-	/* And the CD-Text. *
-	cdtext = ReadCDText(hDevice);
-	
-	* We can write out the CD-Text. *
-	if (cdtext != NULL &&
-	    ((cdtext->Length[0] << 8) | cdtext->Length[1]) > 2) {
-	    cdt = fopen(szCDTextFile, "wb");
-	    if (cdt == NULL) {
-		fclose(cdt);
-		goto error;
-	    }
-	    
-	    fwrite(cdtext, 1, ((cdtext->Length[0] << 8) | cdtext->Length[1]) + 2,
-		   cdt);
-	    
-	    fclose(cdt);
+
+	/* And the CD-Text. */
+	cdtext = cueify_cdtext_new();
+	if (cueify_device_read_cdtext(dev, cdtext) != CUEIFY_OK) {
+	    cueify_cdtext_free(cdtext);
+	    cdtext = NULL;
 	}
-	
-	* And actually parse the CD-Text. *
-	cdtextData = ParseCDText(cdtext);
-	
-	* Write out the MCN. *
+
+	/* Write out the MCN. *
 	if (ReadMCN(hDevice, &data) && data.MediaCatalog.Mcval) {
 	    char szMCN[16] = "";
 	    memcpy(szMCN, data.MediaCatalog.MediaCatalog, 15);
 	    
 	    fprintf(log, "CATALOG %s\n", szMCN);
 	}
-	
-	* Print any disc-level CD-Text strings. *
-	if (cdtextData != NULL) {
-	    for (iBlock = 0; iBlock < 8; iBlock++) {
-		if (cdtextData->blocks[iBlock].arrangers != NULL &&
-		    cdtextData->blocks[iBlock].arrangers[0] != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "REM ARRANGER \"%s\"\n",
-				cdtextData->blocks[iBlock].arrangers[0]);
+	*/
+
+	/* Print any disc-level CD-Text strings. */
+	if (cdtext != NULL) {
+	    const char *value = NULL;
+	    cueify_cdtext_block *block = NULL;
+	    for (i = 0; i < cueify_cdtext_get_num_blocks(cdtext); i++) {
+		block = cueify_cdtext_get_block(cdtext, i);
+
+		value = cueify_cdtext_block_get_arranger(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("REM ARRANGER \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM ARRANGER_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].arrangers[0]);
+			printf("REM ARRANGER_%d \"%s\"\n", i, value);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].composers != NULL &&
-		    cdtextData->blocks[iBlock].composers[0] != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "REM COMPOSER \"%s\"\n",
-				cdtextData->blocks[iBlock].composers[0]);
+
+		value = cueify_cdtext_block_get_composer(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("REM COMPOSER \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM COMPOSER_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].composers[0]);
+			printf("REM COMPOSER_%d \"%s\"\n", i, value);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].discID != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "REM DISK_ID \"%s\"\n",
-				cdtextData->blocks[iBlock].discID);
+
+		value = cueify_cdtext_block_get_discid(block);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("REM DISK_ID \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM DISK_ID_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].discID);
+			printf("REM DISK_ID_%d \"%s\"\n", i, value);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].genreName != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "REM GENRE \"%s\"\n",
-				genreNames[cdtextData->blocks[iBlock].genreCode]);
-			if (cdtextData->blocks[iBlock].genreName[0] != '\0') {
-			    fprintf(log, "REM SUPPLEMENTAL_GENRE \"%s\"\n",
-				    cdtextData->blocks[iBlock].genreName);
+
+		value = cueify_cdtext_block_get_genre_name(block);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("REM GENRE \"%s\"\n",
+			       genre_names[
+				   cueify_cdtext_block_get_genre_code(block)]);
+			if (cueify_cdtext_block_get_genre_name(block)[0] !=
+			    '\0') {
+			    printf("REM SUPPLEMENTAL_GENRE \"%s\"\n",
+				   value);
 			}
 		    } else {
-			fprintf(log, "REM GENRE_%d \"%s\"\n", iBlock,
-				genreNames[cdtextData->blocks[iBlock].genreCode]);
-			if (cdtextData->blocks[iBlock].genreName[0] != '\0') {
-			    fprintf(log, "REM SUPPLEMENTAL_GENRE_%d \"%s\"\n",
-				    iBlock,
-				    cdtextData->blocks[iBlock].genreName);
+			printf("REM GENRE_%d \"%s\"\n", i,
+			       genre_names[
+				   cueify_cdtext_block_get_genre_code(block)]);
+			if (cueify_cdtext_block_get_genre_name(block)[0] !=
+			    '\0') {
+			    printf("REM SUPPLEMENTAL_GENRE_%d \"%s\"\n", i,
+				   value);
 			}
 		    }
 		}
-		if (cdtextData->blocks[iBlock].messages != NULL &&
-		    cdtextData->blocks[iBlock].messages[0] != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "REM MESSAGE \"%s\"\n",
-				cdtextData->blocks[iBlock].messages[0]);
+
+		value = cueify_cdtext_block_get_message(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("REM MESSAGE \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM MESSAGE_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].messages[0]);
+			printf("REM MESSAGE_%d \"%s\"\n", i, value);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].performers != NULL &&
-		    cdtextData->blocks[iBlock].performers[0] != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "PERFORMER \"%s\"\n",
-				cdtextData->blocks[iBlock].performers[0]);
+
+		value = cueify_cdtext_block_get_private(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("REM PRIVATE \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM PERFORMER_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].performers[0]);
+			printf("REM PRIVATE_%d \"%s\"\n", i, value);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].songwriters != NULL &&
-		    cdtextData->blocks[iBlock].songwriters[0] != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "SONGWRITER \"%s\"\n",
-				cdtextData->blocks[iBlock].songwriters[0]);
+
+		value = cueify_cdtext_block_get_performer(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("PERFORMER \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM SONGWRITER_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].songwriters[0]);
+			printf("REM PERFORMER_%d \"%s\"\n", i, value);
 		    }
 		}
-		if (cdtextData->blocks[iBlock].titles != NULL &&
-		    cdtextData->blocks[iBlock].titles[0] != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "TITLE \"%s\"\n",
-				cdtextData->blocks[iBlock].titles[0]);
+
+		value = cueify_cdtext_block_get_songwriter(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("SONGWRITER \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM TITLE_%d \"%s\"\n", iBlock,
-				cdtextData->blocks[iBlock].titles[0]);
+			printf("REM SONGWRITER_%d \"%s\"\n", i, value);
 		    }
 		}
-		* Ignore TOC_INFO. *
-		* Ignore TOC_INFO2 (for now). *
-		if (cdtextData->blocks[iBlock].upc_ean_isrcs != NULL &&
-		    cdtextData->blocks[iBlock].upc_ean_isrcs[0] != NULL) {
-		    if (iBlock == 0) {
-			fprintf(log, "REM CATALOG %s\n",
-				cdtextData->blocks[iBlock].upc_ean_isrcs[0]);
+
+		value = cueify_cdtext_block_get_title(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("TITLE \"%s\"\n", value);
 		    } else {
-			fprintf(log, "REM CATALOG_%d %s\n", iBlock,
-				cdtextData->blocks[iBlock].upc_ean_isrcs[0]);
+			printf("REM TITLE_%d \"%s\"\n", i, value);
 		    }
 		}
-		* We ARE, however, interested in the sizeInfo. *
-		if (iBlock == 0 && cdtextData->blocks[iBlock].bValid) {
-		    switch (cdtextData->blocks[iBlock].charset) {
-		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
-			fprintf(log, "REM CHARSET ISO-8859-1\n");
-			break;
-		    case CDROM_CD_TEXT_CHARSET_ASCII:
-			fprintf(log, "REM CHARSET ASCII\n");
-			break;
-		    case CDROM_CD_TEXT_CHARSET_MSJIS:
-			fprintf(log, "REM CHARSET MS-JIS\n");
-			break;
-		    default:
-			fprintf(log, "REM CHARSET 0x%02X\n",
-				cdtextData->blocks[iBlock].charset);
-			break;
+
+		/* Ignore TOC_INFO. */
+		/* Ignore TOC_INFO2 (for now). */
+
+		value = cueify_cdtext_block_get_upc_isrc(
+		    block, CUEIFY_CDTEXT_ALBUM);
+		if (value != NULL) {
+		    if (i == 0) {
+			printf("REM CATALOG %s\n", value);
+		    } else {
+			printf("REM CATALOG_%d %s\n", i, value);
 		    }
-		    fprintf(log, "REM LANGUAGE %s\n",
-			    languageNames[cdtextData->blocks[iBlock].language]);
-		    if (cdtextData->blocks[iBlock].bMessageCopyright ||
-			cdtextData->blocks[iBlock].bNameCopyright ||
-			cdtextData->blocks[iBlock].bTitleCopyright) {
-			fprintf(log, "REM COPYRIGHT");
-			if (cdtextData->blocks[iBlock].bTitleCopyright) {
-			    fprintf(log, " TITLE");
-			}
-			if (cdtextData->blocks[iBlock].bNameCopyright) {
-			    fprintf(log, " NAMES");
-			}
-			if (cdtextData->blocks[iBlock].bMessageCopyright) {
-			    fprintf(log, " MESSAGE");
-			}
-			fprintf(log, "\n");
-		    }
-		} else if (cdtextData->blocks[iBlock].bValid) {
-		    switch (cdtextData->blocks[iBlock].charset) {
-		    case CDROM_CD_TEXT_CHARSET_ISO8859_1:
-			fprintf(log, "REM CHARSET_%d ISO-8859-1\n", iBlock);
+		}
+
+		/* We ARE, however, interested in the sizeInfo. */
+		if (i == 0) {
+		    switch (cueify_cdtext_block_get_charset(block)) {
+		    case CUEIFY_CDTEXT_CHARSET_ISO8859_1:
+			printf("REM CHARSET ISO-8859-1\n");
 			break;
-		    case CDROM_CD_TEXT_CHARSET_ASCII:
-			fprintf(log, "REM CHARSET_%d ASCII\n", iBlock);
+		    case CUEIFY_CDTEXT_CHARSET_ASCII:
+			printf("REM CHARSET ASCII\n");
 			break;
-		    case CDROM_CD_TEXT_CHARSET_MSJIS:
-			fprintf(log, "REM CHARSET_%d MS-JIS\n", iBlock);
+		    case CUEIFY_CDTEXT_CHARSET_MSJIS:
+			printf("REM CHARSET MS-JIS\n");
 			break;
 		    default:
-			fprintf(log, "REM CHARSET_%d 0x%02X\n", iBlock,
-				cdtextData->blocks[iBlock].charset);
+			printf("REM CHARSET 0x%02X\n",
+			       cueify_cdtext_block_get_charset(block));
 			break;
 		    }
-		    fprintf(log, "REM LANGUAGE_%d %s\n", iBlock,
-			    languageNames[cdtextData->blocks[iBlock].language]);
-		    if (cdtextData->blocks[iBlock].bMessageCopyright ||
-			cdtextData->blocks[iBlock].bNameCopyright ||
-			cdtextData->blocks[iBlock].bTitleCopyright) {
-			fprintf(log, "REM COPYRIGHT_%d", iBlock);
-			if (cdtextData->blocks[iBlock].bTitleCopyright) {
-			    fprintf(log, " TITLE");
+		    printf("REM LANGUAGE %s\n",
+			   language_names[
+			       cueify_cdtext_block_get_language(block)]);
+		    if (cueify_cdtext_block_has_message_copyright(block) ||
+			cueify_cdtext_block_has_name_copyright(block) ||
+			cueify_cdtext_block_has_title_copyright(block)) {
+			printf("REM COPYRIGHT");
+			if (cueify_cdtext_block_has_title_copyright(block)) {
+			    printf(" TITLE");
 			}
-			if (cdtextData->blocks[iBlock].bNameCopyright) {
-			    fprintf(log, " NAMES");
+			if (cueify_cdtext_block_has_name_copyright(block)) {
+			    printf(" NAMES");
 			}
-			if (cdtextData->blocks[iBlock].bMessageCopyright) {
-			    fprintf(log, " MESSAGE");
+			if (cueify_cdtext_block_has_message_copyright(block)) {
+			    printf(" MESSAGE");
 			}
-			fprintf(log, "\n");
+			printf("\n");
+		    }
+		} else {
+		    switch (cueify_cdtext_block_get_charset(block)) {
+		    case CUEIFY_CDTEXT_CHARSET_ISO8859_1:
+			printf("REM CHARSET_%d ISO-8859-1\n", i);
+			break;
+		    case CUEIFY_CDTEXT_CHARSET_ASCII:
+			printf("REM CHARSET_%d ASCII\n", i);
+			break;
+		    case CUEIFY_CDTEXT_CHARSET_MSJIS:
+			printf("REM CHARSET_%d MS-JIS\n", i);
+			break;
+		    default:
+			printf("REM CHARSET_%d 0x%02X\n", i,
+			       cueify_cdtext_block_get_charset(block));
+			break;
+		    }
+		    printf("REM LANGUAGE_%d %s\n", i,
+			   language_names[
+			       cueify_cdtext_block_get_language(block)]);
+		    if (cueify_cdtext_block_has_message_copyright(block) ||
+			cueify_cdtext_block_has_name_copyright(block) ||
+			cueify_cdtext_block_has_title_copyright(block)) {
+			printf("REM COPYRIGHT_%d", i);
+			if (cueify_cdtext_block_has_title_copyright(block)) {
+			    printf(" TITLE");
+			}
+			if (cueify_cdtext_block_has_name_copyright(block)) {
+			    printf(" NAMES");
+			}
+			if (cueify_cdtext_block_has_message_copyright(block)) {
+			    printf(" MESSAGE");
+			}
+			printf("\n");
 		    }
 		}
 	    }
-	}*/
+	}
 
 	if (fulltoc != NULL) {
 	    switch (cueify_full_toc_get_disc_type(fulltoc)) {
@@ -647,86 +659,118 @@ int print_cuesheet(const char *device) {
 		       i);
 	    }
 
-	    /*
-	    if (cdtextData != NULL) {
-		for (iBlock = 0; iBlock < 8; iBlock++) {
-		    if (cdtextData->blocks[iBlock].iTracks < iTrack) {
+	    if (cdtext != NULL) {
+		const char *value = NULL;
+		cueify_cdtext_block *block = NULL;
+		for (block_num = 0;
+		     block_num < cueify_cdtext_get_num_blocks(cdtext);
+		     block_num++) {
+		    block = cueify_cdtext_get_block(cdtext, i);
+
+		    if (i < cueify_cdtext_block_get_first_track(block) ||
+			cueify_cdtext_block_get_last_track(block) < i) {
 			continue;
 		    }
-		    
-		    if (cdtextData->blocks[iBlock].arrangers != NULL &&
-			cdtextData->blocks[iBlock].arrangers[iTrack] != NULL) {
-			if (iBlock == 0) {
-			    fprintf(log, "      REM ARRANGER \"%s\"\n",
-				    cdtextData->blocks[iBlock].arrangers[iTrack]);
+
+		    value = cueify_cdtext_block_get_arranger(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      REM ARRANGER \"%s\"\n", value);
 			} else {
-			    fprintf(log, "      REM ARRANGER_%d \"%s\"\n", iBlock,
-				    cdtextData->blocks[iBlock].arrangers[iTrack]);
+			    printf("      REM ARRANGER_%d \"%s\"\n", block_num,
+				   value);
 			}
 		    }
-		    if (cdtextData->blocks[iBlock].composers != NULL &&
-			cdtextData->blocks[iBlock].composers[iTrack] != NULL) {
-			if (iBlock == 0) {
-			    fprintf(log, "      REM COMPOSER \"%s\"\n",
-				    cdtextData->blocks[iBlock].composers[iTrack]);
+
+		    value = cueify_cdtext_block_get_composer(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      REM COMPOSER \"%s\"\n", value);
 			} else {
-			    fprintf(log, "      REM COMPOSER_%d \"%s\"\n", iBlock,
-				    cdtextData->blocks[iBlock].composers[iTrack]);
+			    printf("      REM COMPOSER_%d \"%s\"\n", block_num,
+				   value);
 			}
 		    }
-		    if (cdtextData->blocks[iBlock].messages != NULL &&
-			cdtextData->blocks[iBlock].messages[iTrack] != NULL) {
-			if (iBlock == 0) {
-			    fprintf(log, "      REM MESSAGE \"%s\"\n",
-				    cdtextData->blocks[iBlock].messages[iTrack]);
+
+		    value = cueify_cdtext_block_get_message(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      REM MESSAGE \"%s\"\n", value);
 			} else {
-			    fprintf(log, "      REM MESSAGE_%d \"%s\"\n", iBlock,
-				    cdtextData->blocks[iBlock].messages[iTrack]);
+			    printf("      REM MESSAGE_%d \"%s\"\n", block_num,
+				   value);
 			}
 		    }
-		    if (cdtextData->blocks[iBlock].performers != NULL &&
-			cdtextData->blocks[iBlock].performers[iTrack] != NULL) {
-			if (iBlock == 0) {
-			    fprintf(log, "      PERFORMER \"%s\"\n",
-				    cdtextData->blocks[iBlock].performers[iTrack]);
+
+		    value = cueify_cdtext_block_get_private(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      REM PRIVATE \"%s\"\n", value);
 			} else {
-			    fprintf(log, "      REM PERFORMER_%d \"%s\"\n", iBlock,
-				    cdtextData->blocks[iBlock].performers[iTrack]);
+			    printf("      REM PRIVATE_%d \"%s\"\n", block_num,
+				   value);
 			}
 		    }
-		    if (cdtextData->blocks[iBlock].songwriters != NULL &&
-			cdtextData->blocks[iBlock].songwriters[iTrack] != NULL) {
-			if (iBlock == 0) {
-			    fprintf(log, "      SONGWRITER \"%s\"\n",
-				    cdtextData->blocks[iBlock].songwriters[iTrack]);
+
+		    value = cueify_cdtext_block_get_performer(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      PERFORMER \"%s\"\n", value);
 			} else {
-			    fprintf(log, "      REM SONGWRITER_%d \"%s\"\n", iBlock,
-				    cdtextData->blocks[iBlock].songwriters[iTrack]);
+			    printf("      REM PERFORMER_%d \"%s\"\n",block_num,
+				   value);
 			}
 		    }
-		    if (cdtextData->blocks[iBlock].titles != NULL &&
-			cdtextData->blocks[iBlock].titles[iTrack] != NULL) {
-			if (iBlock == 0) {
-			    fprintf(log, "      TITLE \"%s\"\n",
-				    cdtextData->blocks[iBlock].titles[iTrack]);
+
+		    value = cueify_cdtext_block_get_songwriter(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      SONGWRITER \"%s\"\n", value);
 			} else {
-			    fprintf(log, "      REM TITLE_%d \"%s\"\n", iBlock,
-				    cdtextData->blocks[iBlock].titles[iTrack]);
+			    printf("      REM SONGWRITER_%d \"%s\"\n",
+				   block_num, value);
 			}
 		    }
-		    if (cdtextData->blocks[iBlock].upc_ean_isrcs != NULL &&
-			cdtextData->blocks[iBlock].upc_ean_isrcs[iTrack] != NULL) {
-			if (iBlock == 0) {
-			    fprintf(log, "      REM ISRC %s\n",
-				    cdtextData->blocks[iBlock].upc_ean_isrcs[iTrack]);
+
+		    value = cueify_cdtext_block_get_title(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      TITLE \"%s\"\n", value);
 			} else {
-			    fprintf(log, "      REM ISRC_%d %s\n", iBlock,
-				    cdtextData->blocks[iBlock].upc_ean_isrcs[iTrack]);
+			    printf("      REM TITLE_%d \"%s\"\n", block_num,
+				   value);
+			}
+		    }
+
+		    value = cueify_cdtext_block_get_title(block, i);
+		    if (value != NULL) {
+			if (block_num == 0) {
+			    printf("      REM ISRC %s\n", value);
+			} else {
+			    printf("      REM ISRC_%d %s\n", block_num,
+				   value);
 			}
 		    }
 		}
+		for (block_num = 0;
+		     block_num < cueify_cdtext_get_toc_num_track_intervals(
+			 cdtext, i);
+		     block_num++) {
+		    cueify_msf_t start, end;
+
+		    start = cueify_cdtext_get_toc_track_interval_start(
+			cdtext, i, block_num);
+		    end = cueify_cdtext_get_toc_track_interval_end(
+			cdtext, i, block_num);
+		    printf("      REM INTERVAL %d "
+			   "%02d:%02d:%02d-%02d:%02d:%02d\n",
+			   block_num + 1,
+			   start.min, start.sec, start.frm,
+			   end.min, end.sec, end.frm);
+		}
 	    }
-	    
+
+	    /*
 	    if (ReadISRC(hDevice, iTrack, &data) && data.TrackIsrc.Tcval) {
 		char szISRC[16] = "";
 		memcpy(szISRC, data.TrackIsrc.TrackIsrc, 15);
@@ -808,30 +852,9 @@ int print_cuesheet(const char *device) {
 	       offset.sec,
 	       offset.frm);
 
-	/* And finally, we can dump out intervals from TOC_INFO2. *
-	if (cdtextData != NULL) {
-	    if (cdtextData->tocInfo2.iIntervals > 0) {
-		fprintf(log, "REM INTERVALS:\n");
-	    }
-	    for (iBlock = 0;
-		 iBlock < cdtextData->tocInfo2.iIntervals;
-		 iBlock++) {
-		fprintf(log,
-			"  REM INTERVAL %d %02d:%02d:%02d-%02d:%02d:%02d\n",
-			cdtextData->tocInfo2.intervals[iBlock].priorityNumber,
-			cdtextData->tocInfo2.intervals[iBlock].start.M,
-			cdtextData->tocInfo2.intervals[iBlock].start.S,
-			cdtextData->tocInfo2.intervals[iBlock].start.F,
-			cdtextData->tocInfo2.intervals[iBlock].end.M,
-			cdtextData->tocInfo2.intervals[iBlock].end.S,
-			cdtextData->tocInfo2.intervals[iBlock].end.F);
-	    }
+	if (cdtext != NULL) {
+	    cueify_cdtext_free(cdtext);
 	}
-	
-	free(cdtext);
-	FreeCDText(cdtextData);
-	free(fulltoc);
-*/
 	if (fulltoc != NULL) {
 	    cueify_full_toc_free(fulltoc);
 	}

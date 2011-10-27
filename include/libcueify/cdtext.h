@@ -355,6 +355,26 @@ cueify_cdtext_block *cueify_cdtext_get_block(cueify_cdtext *t, uint8_t block);
 
 
 /**
+ * Get the number of the first track in a CD-Text block.
+ *
+ * @pre { b != NULL }
+ * @param b a CD-Text block instance
+ * @return the number of the first track in b
+ */
+uint8_t cueify_cdtext_block_get_first_track(cueify_cdtext_block *b);
+
+
+/**
+ * Get the number of the last track in a CD-Text block.
+ *
+ * @pre { b != NULL }
+ * @param b a CD-Text block instance
+ * @return the number of the last track in b
+ */
+uint8_t cueify_cdtext_block_get_last_track(cueify_cdtext_block *b);
+
+
+/**
  * Get the character set used to encode data in a CD-Text block.
  *
  * @pre { b != NULL }
