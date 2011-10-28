@@ -47,6 +47,7 @@
 #include "indices_private.h"
 
 #define READ_TOC  0x43  /** MMC op code for READ TOC/PMA/ATIP */
+#define READ_CD   0xBE  /** MMC op code for READ CD */
 
 /** Struct representing READ TOC/PMA/ATIP command structure */
 struct scsi_read_toc {
@@ -56,6 +57,21 @@ struct scsi_read_toc {
     uint8_t unused[3];    /** Unused bytes */
     uint8_t track;        /** Track number to fetch data for */
     uint8_t data_len[2];  /** Size of the structure to fill */
+    uint8_t control;      /** Control data */
+};
+
+/** Struct representing READ CD command structure */
+struct scsi_read_cd {
+    uint8_t op_code;      /** MMC op code (0xBE) */
+    uint8_t sector_type;  /** Expected sector type in bits 2-4 */
+    uint8_t address[4];   /** Starting logical block address */
+    uint8_t length[3];    /** Transfer length */
+    /**
+     * Sync bit in bit 7, Header Code in bits 6-5, User Data bit in bit 4,
+     * EDC/ECC bit in bit 3, Erro field in bits 2-1
+     */
+    uint8_t bitmask;
+    uint8_t subchannels;  /** Subchannel selection bits in bits 2-0 */
     uint8_t control;      /** Control data */
 };
 
@@ -425,41 +441,124 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 }  /* cueify_device_read_isrc_unportable */
 
 
+/** Raw size of a CD-ROM sector, plus 16 bits for the Q subchannel */
+#define RAW_SECTOR_SIZE 2352 + 16
+
+
+int cueify_device_read_raw_unportable(cueify_device_private *d,
+				      uint32_t lba, uint8_t *buffer) {
+    char link_path[1024];
+    struct cam_device *camdev;
+    union ccb *ccb;
+    struct ccb_scsiio *csio;
+    struct scsi_read_cd *scsi_cmd;
+    int result;
+
+    /* cam_open_device does not resolve symlinks. */
+    memset(link_path, 0, sizeof(link_path));
+    result = readlink(d->path, link_path, sizeof(link_path) - 1);
+    if (result < 0 && errno != EINVAL) {
+	return CUEIFY_ERR_INTERNAL;
+    } else if (result < 0) {  /* errno == EINVAL */
+	camdev = cam_open_device(d->path, O_RDWR);
+    } else {
+	camdev = cam_open_device(link_path, O_RDWR);
+    }
+
+    if (camdev == NULL) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    ccb = cam_getccb(camdev);
+    if (ccb == NULL) {
+	cam_close_device(camdev);
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    csio = &ccb->csio;
+    cam_fill_csio(csio,
+		  /* retries */ 4,
+		  /* cbfcnp */ NULL,
+		  /* flags */ CAM_DIR_IN,
+		  /* tag_action */ MSG_SIMPLE_Q_TAG,
+		  /* data_ptr */ buffer,
+		  /* dxfer_len */ RAW_SECTOR_SIZE,
+		  /* sense_len */ SSD_FULL_SIZE,
+		  sizeof(struct scsi_read_cd),
+		  /* timeout */ 50000);
+
+    scsi_cmd = (struct scsi_read_cd *)&csio->cdb_io.cdb_bytes;
+    bzero(scsi_cmd, sizeof(*scsi_cmd));
+
+    scsi_cmd->address[0] = (lba >> 24);
+    scsi_cmd->address[1] = (lba >> 16) & 0xFF;
+    scsi_cmd->address[2] = (lba >> 8) & 0xFF;
+    scsi_cmd->address[3] = lba & 0xFF;
+
+    scsi_cmd->length[0] = 0;
+    scsi_cmd->length[1] = 0;
+    scsi_cmd->length[2] = 1;
+
+    scsi_cmd->bitmask = 0xF8;  /* Read Sync bit, all headers, User Data, and ECC */
+    scsi_cmd->subchannels = 0x02;  /* Support the Q subchannel */
+
+    scsi_cmd->op_code = READ_CD;
+
+    result = cam_send_ccb(camdev, ccb);
+    if (result < 0) {
+	cam_freeccb(ccb);
+	cam_close_device(camdev);
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    cam_freeccb(ccb);
+    cam_close_device(camdev);
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_raw_unportable */
+
+
+/** Return the binary representation of a binary-coded decimal. */
+#define BCD2BIN(x)  (((x >> 4) & 0xF) * 10 + (x & 0xF))
+
+
 int cueify_device_read_position_unportable(cueify_device_private *d,
 					   uint8_t track, uint32_t lba,
 					   cueify_position_t *pos) {
-    struct ioc_play_blocks blocks;
-    struct ioc_read_subchannel subchannel;
-    struct cd_sub_channel_info info;
+    uint8_t buffer[RAW_SECTOR_SIZE];
 
-    /* Seek to the right position before trying to read the subchannel. */
-    blocks.blk = (lba == 0) ? lba : (lba - 1);
-    blocks.len = 1;
+    /* Do nothing, but remove error where track is unused! */
+    buffer[0] = track;
+    memset(buffer, 0, RAW_SECTOR_SIZE);
 
-    if (ioctl(d->handle, CDIOCPLAYBLOCKS, &blocks) < 0) {
+    /*
+     * We can actually get the position from reading the Q subchannel
+     * during our raw read, rather than doing a subchannel ioctl!
+     */
+    if (cueify_device_read_raw_unportable(d, lba, buffer) != CUEIFY_OK) {
 	return CUEIFY_ERR_INTERNAL;
     }
 
-    memset(&info, 0, sizeof(info));
+    /* TODO: Are these BCD as well? */
+    pos->track = BCD2BIN(buffer[2352 + 1]);
+    pos->index = BCD2BIN(buffer[2352 + 2]);
 
-    subchannel.address_format = CD_MSF_FORMAT;
-    subchannel.data_format = CD_CURRENT_POSITION;
-    subchannel.track = track;
-    subchannel.data_len = sizeof(info);
-    subchannel.data = &info;
+    /* Times are given in binary-coded decimal. */
+    pos->abs.min = BCD2BIN(buffer[2352 + 7]);
+    pos->abs.sec = BCD2BIN(buffer[2352 + 8]);
+    pos->abs.frm = BCD2BIN(buffer[2352 + 9]);
 
-    if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &subchannel) < 0) {
-	return CUEIFY_ERR_INTERNAL;
+    /* Adjust the absolute time by 2 seconds for the lead-in. */
+    if (pos->abs.sec < 2) {
+	pos->abs.sec += 75;
+	pos->abs.min--;
     }
+    pos->abs.sec -= 2;
 
-    pos->track = info.what.position.track_number;
-    pos->index = info.what.position.index_number;
-    pos->abs.min = info.what.position.absaddr.msf.minute;
-    pos->abs.sec = info.what.position.absaddr.msf.second;
-    pos->abs.frm = info.what.position.absaddr.msf.frame;
-    pos->rel.min = info.what.position.reladdr.msf.minute;
-    pos->rel.sec = info.what.position.reladdr.msf.second;
-    pos->rel.frm = info.what.position.reladdr.msf.frame;
+    /* I expect that relative times are in BCD as well. */
+    pos->rel.min = BCD2BIN(buffer[2352 + 3]);
+    pos->rel.sec = BCD2BIN(buffer[2352 + 4]);
+    pos->rel.frm = BCD2BIN(buffer[2352 + 5]);
 
     return CUEIFY_OK;
 }  /* cueify_device_read_position_unportable */
