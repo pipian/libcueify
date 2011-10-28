@@ -665,7 +665,7 @@ int print_cuesheet(const char *device) {
 		for (block_num = 0;
 		     block_num < cueify_cdtext_get_num_blocks(cdtext);
 		     block_num++) {
-		    block = cueify_cdtext_get_block(cdtext, i);
+		    block = cueify_cdtext_get_block(cdtext, block_num);
 
 		    if (i < cueify_cdtext_block_get_first_track(block) ||
 			cueify_cdtext_block_get_last_track(block) < i) {
