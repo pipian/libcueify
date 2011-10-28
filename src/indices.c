@@ -229,7 +229,7 @@ uint8_t cueify_indices_get_num_indices(cueify_indices *i) {
 	return 0;
     }
 
-    return indices->num_indices + indices->has_pregap;
+    return indices->num_indices;
 }  /* cueify_indices_get_num_indices */
 
 
@@ -238,11 +238,12 @@ uint8_t cueify_indices_get_index_number(cueify_indices *i, uint8_t index) {
 
     if (i == NULL) {
 	return 0;
-    } else if (index >= indices->num_indices + indices->has_pregap) {
+    } else if (index >= indices->num_indices) {
 	return 0;
     }
 
-    return (index == indices->num_indices) ? 0 : index + 1;
+    return (index == indices->num_indices - 1 &&
+	    indices->has_pregap) ? 0 : index + 1;
 }  /* cueify_indices_get_index_number */
 
 
@@ -254,7 +255,7 @@ cueify_msf_t cueify_indices_get_index_offset(cueify_indices *i, uint8_t index){
 
     if (i == NULL) {
 	return zero;
-    } else if (index >= indices->num_indices + indices->has_pregap) {
+    } else if (index >= indices->num_indices) {
 	return zero;
     }
 
