@@ -51,36 +51,6 @@ static void SectorsToAddress(int sectors, int *m, int *s, int *f)
     *f = sectors % 75;
 }
 
-BOOL ReadMCN(HANDLE hDevice, SUB_Q_CHANNEL_DATA *data)
-{
-    DWORD dwReturned;
-    CDROM_SUB_Q_DATA_FORMAT format;
-    
-    format.Track = 0;
-    format.Format = IOCTL_CDROM_MEDIA_CATALOG;
-    
-    return DeviceIoControl(hDevice,
-			   IOCTL_CDROM_READ_Q_CHANNEL,
-			   &format, sizeof(format),
-			   data, sizeof(*data),
-			   &dwReturned, NULL);
-}
-
-BOOL ReadISRC(HANDLE hDevice, int iTrack, SUB_Q_CHANNEL_DATA *data)
-{
-    DWORD dwReturned;
-    CDROM_SUB_Q_DATA_FORMAT format;
-    
-    format.Track = iTrack;
-    format.Format = IOCTL_CDROM_TRACK_ISRC;
-    
-    return DeviceIoControl(hDevice,
-			   IOCTL_CDROM_READ_Q_CHANNEL,
-			   &format, sizeof(format),
-			   data, sizeof(*data),
-			   &dwReturned, NULL);
-}
-
 BOOL ReadCurrentPosition(HANDLE hDevice, int iTrack,
 			 int iMinute, int iSecond, int iFrame,
 			 SUB_Q_CHANNEL_DATA *data)

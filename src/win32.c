@@ -336,7 +336,6 @@ int cueify_device_read_full_toc_unportable(cueify_device_private *d,
 
 int cueify_device_read_cdtext_unportable(cueify_device_private *d,
 					 cueify_cdtext_private *t) {
-{
     DWORD dwReturned;
     CDROM_READ_TOC_EX toc_ex;
     CDROM_TOC_CD_TEXT_DATA dummy;
@@ -376,3 +375,55 @@ int cueify_device_read_cdtext_unportable(cueify_device_private *d,
 
     return CUEIFY_OK;
 }  /* cueify_device_read_cdtext_unportable */
+
+
+int cueify_device_read_mcn_unportable(cueify_device_private *d,
+				      char *buffer, size_t *size) {
+    DWORD dwReturned;
+    CDROM_SUB_Q_DATA_FORMAT format;
+    SUB_Q_CHANNEL_DATA data;
+
+    format.Track = 0;
+    format.Format = IOCTL_CDROM_MEDIA_CATALOG;
+
+    if (!DeviceIoControl(d->handle,
+			 IOCTL_CDROM_READ_Q_CHANNEL,
+			 &format, sizeof(format),
+			 &data, sizeof(data),
+			 &dwReturned, NULL)) {
+	return CUEIFY_ERR_INTERNAL;
+    } else if (!data.MediaCatalog.Mcval) {
+	return CUEIFY_NO_DATA;
+    } else {
+	*size = min(sizeof(data.MediaCatalog.MediaCatalog), *size);
+	memcpy(buffer, data.MediaCatalog.MediaCatalog, *size);
+
+	return CUEIFY_OK;
+    }
+}  /* cueify_device_read_mcn_unportable */
+
+
+int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
+				       char *buffer, size_t *size) {
+    DWORD dwReturned;
+    CDROM_SUB_Q_DATA_FORMAT format;
+    SUB_Q_CHANNEL_DATA data;
+
+    format.Track = track;
+    format.Format = IOCTL_CDROM_TRACK_ISRC;
+
+    if (!DeviceIoControl(d->handle,
+			 IOCTL_CDROM_READ_Q_CHANNEL,
+			 &format, sizeof(format),
+			 &data, sizeof(data),
+			 &dwReturned, NULL)) {
+	return CUEIFY_ERR_INTERNAL;
+    } else if (!data.TrackIsrc.Tcval) {
+	return CUEIFY_NO_DATA;
+    } else {
+	*size = min(sizeof(data.TrackIsrc.TrackIsrc), *size);
+	memcpy(buffer, data.TrackIsrc.TrackIsrc, *size);
+
+	return CUEIFY_OK;
+    }
+}  /* cueify_device_read_isrc_unportable */
