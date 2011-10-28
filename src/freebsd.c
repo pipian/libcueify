@@ -401,7 +401,7 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
     struct ioc_read_subchannel subchannel;
     struct cd_sub_channel_info info;
 
-    memset(&info, 0, sizeof(subchannel));
+    memset(&info, 0, sizeof(info));
 
     subchannel.address_format = CD_MSF_FORMAT;
     subchannel.data_format = CD_TRACK_INFO;
@@ -409,7 +409,7 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
     subchannel.data_len = sizeof(info);
     subchannel.data = &info;
 
-    if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &info) < 0) {
+    if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &subchannel) < 0) {
 	return CUEIFY_ERR_INTERNAL;
     } else if (!info.what.track_info.ti_valid) {
 	return CUEIFY_NO_DATA;
