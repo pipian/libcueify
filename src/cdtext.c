@@ -1328,9 +1328,9 @@ cueify_msf_t cueify_cdtext_get_toc_track_offset(cueify_cdtext *t,
     zero.min = zero.sec = zero.frm = 0;
 
     if (t == NULL ||
-	track < cdtext->toc.first_track_number ||
-	track > cdtext->toc.last_track_number ||
-	track == CUEIFY_LEAD_OUT_TRACK) {
+	((track < cdtext->toc.first_track_number ||
+	  track > cdtext->toc.last_track_number) &&
+	 track != CUEIFY_LEAD_OUT_TRACK)) {
 	return zero;
     }
 
@@ -1540,9 +1540,9 @@ const char *cueify_cdtext_block_get_title(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
@@ -1555,9 +1555,9 @@ const char *cueify_cdtext_block_get_performer(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
@@ -1570,9 +1570,9 @@ const char *cueify_cdtext_block_get_songwriter(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
@@ -1585,9 +1585,9 @@ const char *cueify_cdtext_block_get_composer(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
@@ -1600,9 +1600,9 @@ const char *cueify_cdtext_block_get_arranger(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
@@ -1615,9 +1615,9 @@ const char *cueify_cdtext_block_get_message(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
@@ -1630,9 +1630,9 @@ const char *cueify_cdtext_block_get_private(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
@@ -1645,9 +1645,9 @@ const char *cueify_cdtext_block_get_upc_isrc(cueify_cdtext_block *b,
     cueify_cdtext_block_private *block = (cueify_cdtext_block_private *)b;
 
     if (b == NULL ||
-	track < block->first_track_number ||
-	track > block->last_track_number ||
-	track == CUEIFY_CDTEXT_ALBUM) {
+	((track < block->first_track_number ||
+	  track > block->last_track_number) &&
+	 track != CUEIFY_CDTEXT_ALBUM)) {
 	return NULL;
     }
 
