@@ -32,6 +32,7 @@
 #include <libcueify/full_toc.h>
 #include <libcueify/cdtext.h>
 #include <libcueify/mcn_isrc.h>
+#include <libcueify/indices.h>
 #include <libcueify/types.h>
 
 const char * const genre_names[0x1D] = {
@@ -270,13 +271,14 @@ int print_cuesheet(const char *device) {
     cueify_sessions *sessions;
     cueify_full_toc *fulltoc;
     cueify_cdtext *cdtext;
+    cueify_indices *indices;
     char mcn_isrc[16] = "";
     size_t size;
     time_t t = time(NULL);
     char time_str[256];
     int i, block_num;
-    cueify_msf_t offset;
-    uint8_t cur_session = 0;
+    cueify_msf_t offset, pregap;
+    uint8_t cur_session = 0, has_pregap = 0;
 
     dev = cueify_device_new();
     if (dev == NULL) {
@@ -793,52 +795,57 @@ int print_cuesheet(const char *device) {
 		printf("\n");
 	    }
 
-	    /*
-	    if (bHasPregap) {
-		pregap = RemoveDiscPregap(pregap);
-		fprintf(log,
-			"      INDEX 00 %02d:%02d:%02d\n",
-			pregap.M,
-			pregap.S,
-			pregap.F);
-		bHasPregap = FALSE;
-	    } else if (iTrack == 1 &&
-		       (toc.TrackData[iTrack - 1].Address[1] != 0 ||
-			toc.TrackData[iTrack - 1].Address[2] > 2 ||
-			toc.TrackData[iTrack - 1].Address[3] != 0)) {
-		fprintf(log, "      INDEX 00 00:00:00\n");
-	    }
-	    */
-
 	    offset = lba_to_msf(cueify_toc_get_track_address(toc, i));
+
+	    if (has_pregap) {
+		printf("      INDEX 00 %02d:%02d:%02d\n",
+		       pregap.min,
+		       pregap.sec,
+		       pregap.frm);
+		has_pregap = 0;
+	    } else if (i == 1 &&
+		       (offset.min != 0 ||
+			offset.sec != 0 ||
+			offset.frm != 0)) {
+		printf("      INDEX 00 00:00:00\n");
+	    }
 
 	    printf("      INDEX 01 %02d:%02d:%02d\n",
 		   offset.min,
 		   offset.sec,
 		   offset.frm);
 
-	    /* Detect any other indices. *
-	    if (DetectTrackIndices(hDevice, &toc, iTrack, &indices)) {
-		for (iIndex = 1; iIndex < indices.iIndices; iIndex++) {
-		    if (iIndex + 1 == indices.iIndices &&
-			indices.bHasPregap) {
-			pregap = indices.indices[iIndex];
-			bHasPregap = TRUE;
+	    /* Detect any other indices. */
+	    indices = cueify_indices_new();
+	    if (indices != NULL &&
+		cueify_device_read_track_indices(dev,
+						 indices, i) == CUEIFY_OK) {
+		for (block_num = 0;
+		     block_num < cueify_indices_get_num_indices(indices);
+		     block_num++) {
+		    if (cueify_indices_get_index_number(indices,
+							block_num) == 0) {
+			pregap = cueify_indices_get_index_offset(indices,
+								 block_num);
+			has_pregap = 1;
+			continue;
+		    } else if (cueify_indices_get_index_number(indices,
+							       block_num) == 1) {
+			/* Ignore index 1 (as it should be the TOC offset. */
 			continue;
 		    }
-		    
-		    offset = RemoveDiscPregap(indices.indices[iIndex]);
-		    
-		    fprintf(log,
-			    "      INDEX %02d %02d:%02d:%02d\n",
-			    iIndex + 1,
-			    offset.M,
-			    offset.S,
-			    offset.F);
+
+		    offset = cueify_indices_get_index_offset(indices,
+							     block_num);
+
+		    printf("      INDEX %02d %02d:%02d:%02d\n",
+			   block_num + 2,
+			   offset.min,
+			   offset.sec,
+			   offset.frm);
 		}
-		free(indices.indices);
+		cueify_indices_free(indices);
 	    }
-	    */
 	}
 
 	offset = lba_to_msf(cueify_toc_get_disc_length(toc));
