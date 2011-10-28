@@ -742,7 +742,7 @@ int print_cuesheet(const char *device) {
 			}
 		    }
 
-		    value = cueify_cdtext_block_get_title(block, i);
+		    value = cueify_cdtext_block_get_upc_isrc(block, i);
 		    if (value != NULL) {
 			if (block_num == 0) {
 			    printf("      REM ISRC %s\n", value);
