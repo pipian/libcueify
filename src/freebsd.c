@@ -37,12 +37,14 @@
 #include <libcueify/sessions.h>
 #include <libcueify/full_toc.h>
 #include <libcueify/cdtext.h>
+#include <libcueify/indices.h>
 #include <libcueify/error.h>
 #include "device_private.h"
 #include "toc_private.h"
 #include "sessions_private.h"
 #include "full_toc_private.h"
 #include "cdtext_private.h"
+#include "indices_private.h"
 
 #define READ_TOC  0x43  /** MMC op code for READ TOC/PMA/ATIP */
 
@@ -421,3 +423,43 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 
     return CUEIFY_OK;
 }  /* cueify_device_read_isrc_unportable */
+
+
+int cueify_device_read_position_unportable(cueify_device_private *d,
+					   uint8_t track, uint32_t lba,
+					   cueify_position_t *pos) {
+    struct ioc_play_blocks blocks;
+    struct ioc_read_subchannel subchannel;
+    struct cd_sub_channel_info info;
+
+    /* Seek to the right position before trying to read the subchannel. */
+    blocks.blk = (lba == 0) ? lba : (lba - 1);
+    blocks.len = 1;
+
+    if (ioctl(d->handle, CDIOCPLAYBLOCKS, &blocks) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    memset(&info, 0, sizeof(info));
+
+    subchannel.address_format = CD_MSF_FORMAT;
+    subchannel.data_format = CD_CURRENT_POSITION;
+    subchannel.track = track;
+    subchannel.data_len = sizeof(info);
+    subchannel.data = &info;
+
+    if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &subchannel) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    pos->track = info.what.position.track_number;
+    pos->index = info.what.position.index_number;
+    pos->abs.min = info.what.position.absaddr.msf.minute;
+    pos->abs.sec = info.what.position.absaddr.msf.second;
+    pos->abs.frm = info.what.position.absaddr.msf.frame;
+    pos->rel.min = info.what.position.reladdr.msf.minute;
+    pos->rel.sec = info.what.position.reladdr.msf.second;
+    pos->rel.frm = info.what.position.reladdr.msf.frame;
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_position_unportable */
