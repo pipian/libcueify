@@ -76,7 +76,8 @@ int cueify_device_read_track_indices(cueify_device *d, cueify_indices *i,
 	    lba = (left_lba + last_lba) / 2;
 	}
 
-	lba_to_msf(lba, &msf);
+	/* And the MSF of the first. */
+	lba_to_msf(first_lba, &msf);
 
 	if (cueify_device_read_position_unportable(
 		dev, track, lba, &pos) != CUEIFY_OK) {
