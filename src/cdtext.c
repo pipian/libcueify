@@ -195,7 +195,7 @@ int cueify_cdtext_deserialize(cueify_cdtext *t, uint8_t *buffer,
 	}
 
 	block = BLOCK_NUMBER(descriptor->block_number);
-	pack_type = descriptor->pack_type;
+	pack_type = descriptor->pack_type - 0x80;
 
 	pack = pack_data[block][pack_type];
 	pack_size = pack_sizes[block][pack_type];
