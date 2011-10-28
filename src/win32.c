@@ -427,3 +427,48 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 	return CUEIFY_OK;
     }
 }  /* cueify_device_read_isrc_unportable */
+
+
+int cueify_device_read_position_unportable(cueify_device_private *d,
+					   uint8_t track, uint8_t lba,
+					   cueify_position_t *pos) {
+    DWORD dwReturned;
+    CDROM_SEEK_AUDIO_MSF seek;
+    CDROM_SUB_Q_DATA_FORMAT format;
+    SUB_Q_CHANNEL_DATA data;
+
+    /* First, seek to the desired absolute position. */
+    seek.M = lba / 75 / 60;
+    seek.S = lba / 75 % 60;
+    seek.F = lba % 75;
+    if (DeviceIoControl(d->handle,
+			IOCTL_CDROM_SEEK_AUDIO_MSF,
+			&seek, sizeof(seek),
+			NULL, 0,
+			&dwReturned, NULL)) {
+	/* Next, get the "current" position. */
+	format.Track = track;
+	format.Format = IOCTL_CDROM_CURRENT_POSITION;
+
+	if (!DeviceIoControl(d->handle,
+			     IOCTL_CDROM_READ_Q_CHANNEL,
+			     &format, sizeof(format),
+			     &data, sizeof(data),
+			     &dwReturned, NULL)) {
+	    return CUEIFY_ERR_INTERNAL;
+	} else {
+	    pos->track = data.CurrentPosition.TrackNumber;
+	    pos->index = data.CurrentPosition.IndexNumber;
+	    pos->abs.min = data.CurrentPosition.AbsoluteAddress[1];
+	    pos->abs.sec = data.CurrentPosition.AbsoluteAddress[2];
+	    pos->abs.frm = data.CurrentPosition.AbsoluteAddress[3];
+	    pos->rel.min = data.CurrentPosition.TrackRelativeAddress[1];
+	    pos->rel.sec = data.CurrentPosition.TrackRelativeAddress[2];
+	    pos->rel.frm = data.CurrentPosition.TrackRelativeAddress[3];
+
+	    return CUEIFY_OK;
+	}
+    }
+    
+    return CUEIFY_ERR_INTERNAL;
+}
