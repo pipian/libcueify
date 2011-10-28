@@ -54,17 +54,21 @@ int cueify_device_read_track_indices(cueify_device *d, cueify_indices *i,
 	return CUEIFY_ERR_INTERNAL;
     }
 
-    if ((track < toc.first_track_number ||
-	 track > toc.last_track_number) &&
-	track != CUEIFY_LEAD_OUT_TRACK) {
+    if ((track >= toc.first_track_number &&
+	 track <= toc.last_track_number) ||
+	track == CUEIFY_LEAD_OUT_TRACK) {
 	/* First, see if there appears to be more than one index. */
 	cueify_msf_t msf;
 	cueify_position_t pos;
 	int lba, first_lba, left_lba, right_lba, last_lba;
 	int index;
 
-	first_lba = left_lba = toc.tracks[track - 1].lba;
-	last_lba = right_lba = toc.tracks[track].lba;
+	first_lba = left_lba = toc.tracks[track].lba;
+	if (track == toc.last_track_number) {
+	    last_lba = right_lba = toc.tracks[0].lba;
+	} else {
+	    last_lba = right_lba = toc.tracks[track + 1].lba;
+	}
 
 	/* Get the index of the penultimate second of the track. */
 	lba = last_lba - 1;
