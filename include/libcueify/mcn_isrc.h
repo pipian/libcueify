@@ -27,6 +27,10 @@
 #ifndef _LIBCUEIFY_MCN_ISRC_H
 #define _LIBCUEIFY_MCN_ISRC_H
 
+#include <libcueify/device.h>
+#include <libcueify/constants.h>
+#include <libcueify/types.h>
+
 /**
  * Read the Media Catalog Number of the disc in the optical disc device
  * associated with a device handle.
