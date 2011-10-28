@@ -1426,7 +1426,7 @@ cueify_cdtext_block *cueify_cdtext_get_block(cueify_cdtext *t, uint8_t block) {
     for (i = 0; i < MAX_BLOCKS; i++) {
 	if (cdtext->blocks[i].valid) {
 	    num_blocks++;
-	    if (num_blocks == block) {
+	    if (num_blocks > block) {
 		return (cueify_cdtext_block *)&(cdtext->blocks[i]);
 	    }
 	}
