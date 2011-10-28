@@ -478,7 +478,8 @@ struct cueify_cdtext_writer {
     uint8_t pack_type;  /** The type of PACK currently being written. */
     uint8_t charpos;  /** The character position/offset of the PACK. */
     uint8_t pack_count[16];  /** Counts of various PACKs written. */
-    uint16_t block_descriptors[MAX_BLOCKS];  /** Expected descriptors per block. */
+    /** Expected descriptors per block. */
+    uint16_t block_descriptors[MAX_BLOCKS];
 };
 
 
