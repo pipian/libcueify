@@ -31,6 +31,7 @@
 #include <libcueify/sessions.h>
 #include <libcueify/full_toc.h>
 #include <libcueify/cdtext.h>
+#include <libcueify/mcn_isrc.h>
 #include <libcueify/types.h>
 
 const char * const genre_names[0x1D] = {
@@ -269,6 +270,8 @@ int print_cuesheet(const char *device) {
     cueify_sessions *sessions;
     cueify_full_toc *fulltoc;
     cueify_cdtext *cdtext;
+    char mcn_isrc[16] = "";
+    size_t size;
     time_t t = time(NULL);
     char time_str[256];
     int i, block_num;
@@ -355,14 +358,11 @@ int print_cuesheet(const char *device) {
 	    cdtext = NULL;
 	}
 
-	/* Write out the MCN. *
-	if (ReadMCN(hDevice, &data) && data.MediaCatalog.Mcval) {
-	    char szMCN[16] = "";
-	    memcpy(szMCN, data.MediaCatalog.MediaCatalog, 15);
-	    
-	    fprintf(log, "CATALOG %s\n", szMCN);
+	/* Write out the MCN. */
+	size = 16;
+	if (cueify_device_read_mcn(dev, mcn_isrc, &size) == CUEIFY_OK) {
+	    printf("CATALOG %s\n", mcn_isrc);
 	}
-	*/
 
 	/* Print any disc-level CD-Text strings. */
 	if (cdtext != NULL) {
@@ -770,14 +770,10 @@ int print_cuesheet(const char *device) {
 		}
 	    }
 
-	    /*
-	    if (ReadISRC(hDevice, iTrack, &data) && data.TrackIsrc.Tcval) {
-		char szISRC[16] = "";
-		memcpy(szISRC, data.TrackIsrc.TrackIsrc, 15);
-		
-		fprintf(log, "      ISRC %s\n", szISRC);
+	    size = 16;
+	    if (cueify_device_read_isrc(dev, i, mcn_isrc, &size) == CUEIFY_OK){
+		printf("      ISRC %s\n", mcn_isrc);
 	    }
-	    */
 
 	    if ((cueify_toc_get_track_control_flags(toc, i) &
 		 ~CUEIFY_TOC_TRACK_IS_DATA) != 0) {
