@@ -27,6 +27,29 @@
 #ifndef _LIBCUEIFY_INDICES_H
 #define _LIBCUEIFY_INDICES_H
 
+#include <libcueify/device.h>
+#include <libcueify/constants.h>
+#include <libcueify/types.h>
+
+/**
+ * A transparent handle for the track indices of track on an audio CD.
+ *
+ * This is returned by cueify_indices_new() and is passed as the first
+ * parameter to all cueify_indices_*() functions.
+ */
+typedef void *cueify_indices;
+
+
+/**
+ * Create a new track indices instance. The instance is created with
+ * no data, and should be populated using cueify_device_read_indices(),
+ *
+ * @return NULL if there was an error allocating memory, else the new
+ *         track indices instance
+ */
+cueify_indices *cueify_indices_new();
+
+
 /**
  * Read the track indices of a track on a disc in an optical disc
  * (CD-ROM) device associated with a device handle.
@@ -39,9 +62,17 @@
  * @return CUEIFY_OK if the indices were successfully
  *         read; otherwise an error code is returned
  */
-int cueify_device_read_track_indices(cueify_device *d,
-				     cueify_indices *i,
+int cueify_device_read_track_indices(cueify_device *d, cueify_indices *i,
 				     uint8_t track);
+
+
+/**
+ * Free a track indices instance. Deletes the object pointed to by i.
+ *
+ * @pre { i != NULL }
+ * @param i a cueify_indices object created by cueify_indices_new()
+ */
+void cueify_indices_free(cueify_indices *i);
 
 
 /**
@@ -57,12 +88,16 @@ uint8_t cueify_indices_get_num_indices(cueify_indices *i);
 /**
  * Get the number of an index in a track indices instance
  *
+ * @note A track index of 0 represents the index of the start of the
+ *       pregap for the following track.
+ *
  * @pre { i != NULL }
  * @param i the track indices instance to get the number of indices from
  * @param index the offset of the index to get the index number for
  * @return the number of the track index index in i
  */
 uint8_t cueify_indices_get_index_number(cueify_indices *i, uint8_t index);
+
 
 /**
  * Get the offset of an index in a track indices instance

@@ -115,7 +115,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer, size_t *size);
 
 
 /**
- * Free a CD-Text instance. Deletes the object pointed to by s.
+ * Free a CD-Text instance. Deletes the object pointed to by t.
  *
  * @pre { t != NULL }
  * @param t a cueify_cdtext object created by cueify_cdtext_new()

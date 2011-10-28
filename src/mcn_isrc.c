@@ -1,4 +1,4 @@
-/* mcn_isrc.h - CD-ROM functions which read the Media Catalog Number
+/* mcn_isrc.c - CD-ROM functions which read the Media Catalog Number
  * or ISRCs from a CD.
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
