@@ -57,6 +57,8 @@ struct scsi_read_toc {
     uint8_t control;      /** Control data */
 };
 
+#define min(x, y)  ((x > y) ? y : x)  /** Return the minimum of x and y. */
+
 int cueify_device_open_unportable(cueify_device_private *d,
 				  const char *device) {
     int fd;
@@ -365,3 +367,57 @@ int cueify_device_read_cdtext_unportable(cueify_device_private *d,
 
     return CUEIFY_OK;
 }  /* cueify_device_read_cdtext_unportable */
+
+
+int cueify_device_read_mcn_unportable(cueify_device_private *d,
+				      char *buffer, size_t *size) {
+    struct ioc_read_subchannel subchannel;
+    struct cd_sub_channel_info info;
+
+    memset(&info, 0, sizeof(info));
+
+    subchannel.address_format = CD_MSF_FORMAT;
+    subchannel.data_format = CD_MEDIA_CATALOG;
+    subchannel.track = 0;
+    subchannel.data_len = sizeof(info);
+    subchannel.data = &info;
+
+    if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &subchannel) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    } else if (!info.what.media_catalog.mc_valid) {
+	return CUEIFY_NO_DATA;
+    }
+
+    *size = min(sizeof(info.what.media_catalog.mc_number) + 1, *size);
+    memcpy(buffer, info.what.media_catalog.mc_number, *size - 1);
+    buffer[*size - 1] = '\0';
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_mcn_unportable */
+
+
+int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
+				       char *buffer, size_t *size) {
+    struct ioc_read_subchannel subchannel;
+    struct cd_sub_channel_info info;
+
+    memset(&info, 0, sizeof(subchannel));
+
+    subchannel.address_format = CD_MSF_FORMAT;
+    subchannel.data_format = CD_TRACK_INFO;
+    subchannel.track = track;
+    subchannel.data_len = sizeof(info);
+    subchannel.data = &info;
+
+    if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &info) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    } else if (!info.what.track_info.ti_valid) {
+	return CUEIFY_NO_DATA;
+    }
+
+    *size = min(sizeof(info.what.track_info.ti_number) + 1, *size);
+    memcpy(buffer, info.what.track_info.ti_number, *size - 1);
+    buffer[*size - 1] = '\0';
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_isrc_unportable */

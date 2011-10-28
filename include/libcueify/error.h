@@ -29,6 +29,7 @@
 /** Possible return values for functions in libcueify. */
 enum cueify_error {
     CUEIFY_OK = 0,              /** The last function returned successfully. */
+    CUEIFY_NO_DATA,             /** The data requested is not present. */
     CUEIFY_ERR_INTERNAL,        /**
 				 * An internal error occured. Ideally,
 				 * this should never be returned.
