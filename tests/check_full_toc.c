@@ -39,7 +39,7 @@
 
 uint8_t serialized_mock_full_toc[] = {
     (((13 + 2 * 3) * 11 + 2) >> 8), (((13 + 2 * 3) * 11 + 2) & 0xFF), 1, 2,
-    TRACK_DESCRIPTOR(1, 1, 4, 0xA0, 0, 0, 0, 1, 0x10, 0),
+    TRACK_DESCRIPTOR(1, 1, 4, 0xA0, 0, 0, 0, 1, CUEIFY_DISC_MODE_1, 0),
     TRACK_DESCRIPTOR(1, 1, 4, 0xA1, 0, 0, 0, 12, 0, 0),
     TRACK_DESCRIPTOR(1, 1, 4, 0xA2, 0, 0, 0, 51, 44, 26),
     TRACK_DESCRIPTOR(1, 1, 4, 1, 0, 0, 0, 0, 2, 0),
@@ -106,7 +106,7 @@ void setup() {
 	mock_full_toc.sessions[1].pseudotracks[i].atime.frm = 0;
 	if (i == 0) {
 	    mock_full_toc.sessions[1].pseudotracks[i].offset =
-		(cueify_msf_t){1, 0x10, 0};
+		(cueify_msf_t){1, CUEIFY_DISC_MODE_1, 0};
 	} else if (i == 1) {
 	    mock_full_toc.sessions[1].pseudotracks[i].offset =
 		(cueify_msf_t){12, 0, 0};

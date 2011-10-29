@@ -340,9 +340,9 @@ uint8_t cueify_full_toc_get_session_last_track(cueify_full_toc *t,
 /** The disc is a CD-DA disc, or CD Data with the first track in Mode 1. */
 #define CUEIFY_DISC_MODE_1  0x00
 /** The disc is a CD-I disc. */
-#define CUEIFY_DISC_CDI     0x01
+#define CUEIFY_DISC_CDI     0x10
 /** The disc is CD-XA disc with the first track in Mode 2. */
-#define CUEIFY_DISC_MODE_2  0x02
+#define CUEIFY_DISC_MODE_2  0x20
 
 
 /**
