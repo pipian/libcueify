@@ -384,7 +384,7 @@ cueify_msf_t cueify_full_toc_get_session_leadout_address(cueify_full_toc *t,
  */
 #define cueify_full_toc_get_disc_length(t)        \
     cueify_full_toc_get_session_leadout_address(  \
-        cueify_full_toc_get_last_session(t))
+        t, cueify_full_toc_get_last_session(t))
 
 
 /**
