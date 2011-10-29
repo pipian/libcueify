@@ -64,6 +64,8 @@ void setup() {
     };
     int i;
 
+    memset(&mock_toc, 0, sizeof(mock_toc));
+
     mock_toc.first_track_number = 1;
     mock_toc.last_track_number = 13;
     for (i = 0; i < 14; i++) {
@@ -108,13 +110,12 @@ START_TEST (test_deserialize)
     cueify_toc_private deserialized_mock_toc;
     cueify_toc *toc = (cueify_toc *)&deserialized_mock_toc;
 
-    fail_unless(cueify_toc_deserialize(toc,
-				       serialized_mock_toc,
+    fail_unless(cueify_toc_deserialize(toc, serialized_mock_toc,
 				       sizeof(serialized_mock_toc)) ==
 		CUEIFY_OK,
 		"Could not deserialize TOC");
-    fail_unless(memcmp(&deserialized_mock_toc, &mock_toc, sizeof(mock_toc)) ==
-		0,
+    fail_unless(memcmp(&deserialized_mock_toc, &mock_toc,
+		       sizeof(mock_toc)) == 0,
 		"Deserialized TOC incorrect");
 }
 END_TEST

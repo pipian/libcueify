@@ -24,6 +24,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <libcueify/toc.h>
 #include <libcueify/error.h>
 #include "device_private.h"
@@ -67,6 +68,8 @@ int cueify_toc_deserialize(cueify_toc *t, uint8_t *buffer, size_t size) {
     if ((toc_length - 2) % 8 != 0) {
 	return CUEIFY_ERR_CORRUPTED;
     }
+
+    memset(toc, 0, sizeof(cueify_toc_private));
 
     /* First Track Number */
     toc->first_track_number = buffer[2];
