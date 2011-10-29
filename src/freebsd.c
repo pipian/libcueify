@@ -441,12 +441,53 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 }  /* cueify_device_read_isrc_unportable */
 
 
-/** Raw size of a CD-ROM sector, plus 16 bits for the Q subchannel */
-#define RAW_SECTOR_SIZE 2352 + 16
+/** Return the binary representation of a binary-coded decimal. */
+#define BCD2BIN(x)  (((x >> 4) & 0xF) * 10 + (x & 0xF))
 
 
-int cueify_device_read_raw_unportable(cueify_device_private *d,
-				      uint32_t lba, uint8_t *buffer) {
+int cueify_device_read_position_unportable(cueify_device_private *d,
+					   uint8_t track, uint32_t lba,
+					   cueify_position_t *pos) {
+    cueify_raw_read_private buffer;
+
+    /* Do nothing, but remove error where track is unused! */
+    buffer.data_mode = track;
+    memset(&buffer, 0, sizeof(buffer));
+
+    /*
+     * We can actually get the position from reading the Q subchannel
+     * during our raw read, rather than doing a subchannel ioctl!
+     */
+    if (cueify_device_read_raw_unportable(d, lba, &buffer) != CUEIFY_OK) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    pos->track = BCD2BIN(buffer.track);
+    pos->index = BCD2BIN(buffer.index);
+
+    /* Times are given in binary-coded decimal. */
+    pos->abs.min = BCD2BIN(buffer.amin);
+    pos->abs.sec = BCD2BIN(buffer.asec);
+    pos->abs.frm = BCD2BIN(buffer.afrm);
+
+    /* Adjust the absolute time by 2 seconds for the lead-in. */
+    if (pos->abs.sec < 2) {
+	pos->abs.sec += 75;
+	pos->abs.min--;
+    }
+    pos->abs.sec -= 2;
+
+    /* I expect that relative times are in BCD as well. */
+    pos->rel.min = BCD2BIN(buffer.min);
+    pos->rel.sec = BCD2BIN(buffer.sec);
+    pos->rel.frm = BCD2BIN(buffer.frm);
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_position_unportable */
+
+
+int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
+				      cueify_raw_read_private *buffer) {
     char link_path[1024];
     struct cam_device *camdev;
     union ccb *ccb;
@@ -481,8 +522,8 @@ int cueify_device_read_raw_unportable(cueify_device_private *d,
 		  /* cbfcnp */ NULL,
 		  /* flags */ CAM_DIR_IN,
 		  /* tag_action */ MSG_SIMPLE_Q_TAG,
-		  /* data_ptr */ buffer,
-		  /* dxfer_len */ RAW_SECTOR_SIZE,
+		  /* data_ptr */ (unsigned char *)&buffer,
+		  /* dxfer_len */ sizeof(cueify_raw_read_private),
 		  /* sense_len */ SSD_FULL_SIZE,
 		  sizeof(struct scsi_read_cd),
 		  /* timeout */ 50000);
@@ -516,49 +557,3 @@ int cueify_device_read_raw_unportable(cueify_device_private *d,
 
     return CUEIFY_OK;
 }  /* cueify_device_read_raw_unportable */
-
-
-/** Return the binary representation of a binary-coded decimal. */
-#define BCD2BIN(x)  (((x >> 4) & 0xF) * 10 + (x & 0xF))
-
-
-int cueify_device_read_position_unportable(cueify_device_private *d,
-					   uint8_t track, uint32_t lba,
-					   cueify_position_t *pos) {
-    uint8_t buffer[RAW_SECTOR_SIZE];
-
-    /* Do nothing, but remove error where track is unused! */
-    buffer[0] = track;
-    memset(buffer, 0, RAW_SECTOR_SIZE);
-
-    /*
-     * We can actually get the position from reading the Q subchannel
-     * during our raw read, rather than doing a subchannel ioctl!
-     */
-    if (cueify_device_read_raw_unportable(d, lba, buffer) != CUEIFY_OK) {
-	return CUEIFY_ERR_INTERNAL;
-    }
-
-    /* TODO: Are these BCD as well? */
-    pos->track = BCD2BIN(buffer[2352 + 1]);
-    pos->index = BCD2BIN(buffer[2352 + 2]);
-
-    /* Times are given in binary-coded decimal. */
-    pos->abs.min = BCD2BIN(buffer[2352 + 7]);
-    pos->abs.sec = BCD2BIN(buffer[2352 + 8]);
-    pos->abs.frm = BCD2BIN(buffer[2352 + 9]);
-
-    /* Adjust the absolute time by 2 seconds for the lead-in. */
-    if (pos->abs.sec < 2) {
-	pos->abs.sec += 75;
-	pos->abs.min--;
-    }
-    pos->abs.sec -= 2;
-
-    /* I expect that relative times are in BCD as well. */
-    pos->rel.min = BCD2BIN(buffer[2352 + 3]);
-    pos->rel.sec = BCD2BIN(buffer[2352 + 4]);
-    pos->rel.frm = BCD2BIN(buffer[2352 + 5]);
-
-    return CUEIFY_OK;
-}  /* cueify_device_read_position_unportable */

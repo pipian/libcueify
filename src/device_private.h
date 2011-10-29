@@ -26,6 +26,8 @@
 #ifndef _LIBCUEIFY_DEVICE_PRIVATE_H
 #define _LIBCUEIFY_DEVICE_PRIVATE_H
 
+#include <libcueify/types.h>
+
 /** OS-specific device handle types. */
 #ifdef _WIN32
 #define device_handle HANDLE  /* HANDLE to an OpenVolume */
@@ -39,6 +41,33 @@ typedef struct {
     char *path;  /** OS-specific identifier used to open the handle. */
 } cueify_device_private;
 
+#define RAW_SECTOR_SIZE  2352  /** Number of bytes in a raw CD sector. */
+
+/** Format of data returned from a raw CD read. */
+typedef struct {
+    uint8_t reserved1[0xF];  /** Header data before the data mode. */
+    uint8_t data_mode;  /** The data mode flag. */
+    /** Sector data after the data mode. */
+    uint8_t reserved2[RAW_SECTOR_SIZE - 0x10];
+#ifdef __FreeBSD__
+    /*
+     * Subchannel Q data used to construct current position from READ
+     * CD call. All values in binary-coded decimal.
+     */
+    uint8_t control_adr;  /** Control data in bits 7-4, ADR data in bits 3-0 */
+    uint8_t track;  /** Track number of the current position */
+    uint8_t index;  /** Index number of the current position */
+    uint8_t min;  /** Minute offset of the current position relative to track */
+    uint8_t sec;  /** Second offset of the current position relative to track */
+    uint8_t frm;  /** Frame offset of the current position relative to track */
+    uint8_t zero;  /** Zero */
+    uint8_t amin;  /** Minute offset of the absolute position */
+    uint8_t asec;  /** Second offset of the absolute position */
+    uint8_t afrm;  /** Frame offset of the absolute position */
+    uint8_t padding[6];  /** Padding (maybe some other irrelevant bits) */
+#endif
+} cueify_raw_read_private;
+
 /** Unportable version of cueify_device_open().
  *
  * @param d the cueify device handle to open
@@ -50,6 +79,25 @@ typedef struct {
  */
 int cueify_device_open_unportable(cueify_device_private *d,
 				  const char *device);
+
+
+/** Unportable read of a raw sector from a disc in an optical disc drive.
+ *
+ * @note This should always return a complete 2352-byte raw sector
+ *       regardless of the mode of the track.  In practice, this may
+ *       be accomplished by invoking the MMC-3 READ CD call with the
+ *       sync bits, all headers, user data, and ECC bits.  Some OS's
+ *       (e.g. FreeBSD) may also support reading 16 extra bytes for
+ *       data from subchannel Q, which is used to construct the
+ *       "current position" of the track.
+ *
+ * @param d the cueify device handle to read from
+ * @param lba the absolute address (LBA) of the sector to read
+ * @param buffer the buffer of data to read the raw sector into
+ * @return CUEIFY_OK if the read succeeded; otherwise, an appropriate error code.
+ */
+int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
+				      cueify_raw_read_private *buffer);
 
 
 /** Unportable version of cueify_device_close().
