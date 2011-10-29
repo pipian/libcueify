@@ -333,7 +333,7 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
 	    /* TNO */
 	    *bp++ = 0;
 	    /* POINT */
-	    *bp++ = 0xA1;
+	    *bp++ = 0xA2;
 	    /* Min */
 	    *bp++ = toc->sessions[cur_session].pseudotracks[0].atime.min;
 	    /* Sec */
