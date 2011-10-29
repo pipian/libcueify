@@ -1,6 +1,9 @@
 all:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make all
 
+check:
+	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check
+
 docs:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make docs
 

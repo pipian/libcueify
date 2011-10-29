@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.6)
 PROJECT(libcueify)
 SET(PROJECT_VERSION 0.1.0)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
+
 # Follow libmusicbrainz-style so-versioning:
 # 
 # 1. If the library source code has changed at all since the last
@@ -30,6 +32,7 @@ SET(LIB_INSTALL_DIR ${EXEC_INSTALL_PREFIX}/lib${LIB_SUFFIX} CACHE PATH
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
+ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
 	       ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
