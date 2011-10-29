@@ -30,6 +30,7 @@
 #include <libcueify/error.h>
 #include <libcueify/device.h>
 #include <libcueify/toc.h>
+#include <libcueify/sessions.h>
 
 /* Create a binary track descriptor from a TOC. */
 #define TRACK_DESCRIPTOR(adr, ctrl, track, address) \
@@ -55,6 +56,13 @@ uint8_t expected_toc[] = {
 		     244076),
     TRACK_DESCRIPTOR(CUEIFY_SUB_Q_POSITION, CUEIFY_TOC_TRACK_IS_DATA, 0xAA,
 		     258988)
+};
+
+
+uint8_t expected_sessions[] = {
+    (10 >> 8), (10 & 0xFF), 1, 2,
+    TRACK_DESCRIPTOR(CUEIFY_SUB_Q_POSITION, CUEIFY_TOC_TRACK_IS_DATA, 13,
+		     244076),
 };
 
 
@@ -96,12 +104,36 @@ START_TEST (test_toc)
 END_TEST
 
 
+START_TEST (test_sessions)
+{
+    cueify_sessions *sessions;
+    size_t size = sizeof(expected_sessions);
+    uint8_t buffer[sizeof(expected_sessions)];
+
+    sessions = cueify_sessions_new();
+    fail_unless(sessions != NULL, "Failed to create cueify_sessions object");
+    fail_unless(cueify_device_read_sessions(dev, sessions) == CUEIFY_OK,
+		"Failed to read multisession data from device");
+    fail_unless(cueify_sessions_serialize(sessions, buffer, 
+					  &size) == CUEIFY_OK,
+		"Could not serialize multisession data");
+    fail_unless(size == sizeof(expected_sessions),
+		"Multisession data size incorrect");
+    fail_unless(memcmp(buffer, expected_sessions,
+		       sizeof(expected_sessions)) == 0,
+		"Multisession data incorrect");
+    cueify_sessions_free(sessions);
+}
+END_TEST
+
+
 Suite *toc_suite() {
     Suite *s = suite_create("unportable");
     TCase *tc_core = tcase_create("core");
 
     tcase_add_checked_fixture(tc_core, setup, teardown);
     tcase_add_test(tc_core, test_toc);
+    tcase_add_test(tc_core, test_sessions);
     suite_add_tcase(s, tc_core);
 
     return s;
