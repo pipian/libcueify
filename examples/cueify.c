@@ -33,6 +33,7 @@
 #include <libcueify/cdtext.h>
 #include <libcueify/mcn_isrc.h>
 #include <libcueify/indices.h>
+#include <libcueify/data_mode.h>
 #include <libcueify/types.h>
 
 const char * const genre_names[0x1D] = {
@@ -611,54 +612,30 @@ int print_cuesheet(const char *device) {
 
 	    if (cueify_toc_get_track_control_flags(toc, i) &
 		CUEIFY_TOC_TRACK_IS_DATA) {
-		/*
-		if (trackMode == 0x10) {
-		    * CD-I...  We special case. *
-		    fprintf(log,
-			    "    TRACK %02d CDI/2352\n",
-			    iTrack);
+		if (cueify_full_toc_get_disc_type(fulltoc) == CUEIFY_DISC_CDI) {
+		    /* CD-I...  We special case. */
+		    printf("    TRACK %02d CDI/2352\n", i);
 		} else {
-		    * Best way to detect the data mode is a raw read. *
-		    raw = ReadRawSector(
-			hDevice,
-			toc.TrackData[iTrack - 1].Address[1] * 60 * 75 +
-			toc.TrackData[iTrack - 1].Address[2] * 75 +
-			toc.TrackData[iTrack - 1].Address[3],
-			trackMode);
-		    if (raw != NULL) {
-			switch (raw[15]) {
-			case 0x01:
-		*/
-			    printf("    TRACK %02d MODE1/2352\n",
-				   i);
-			    /*
-			    break;
-			case 0x02:
-			    fprintf(log,
-				    "    TRACK %02d MODE2/2352\n",
-				    iTrack);
-			    break;
-			case 0x0F:
-			    * Unknown *
-			default:
-			    fprintf(log,
-				    "    TRACK %02d MODE1/2352\n",
-				    iTrack);
-			    break;
-			}
-			free(raw);
-			raw = NULL;
-		    } else {
-			* Dunno :-/ *
-			fprintf(log,
-				"    TRACK %02d MODE1/2352\n",
-				iTrack);
+		    switch (cueify_device_read_data_mode(dev, i)) {
+		    case CUEIFY_DATA_MODE_CDDA:
+			/* We shouldn't be here, but okay... */
+			printf("    TRACK %02d AUDIO\n", i);
+			break;
+		    case CUEIFY_DATA_MODE_MODE_1:
+			printf("    TRACK %02d MODE1/2352\n", i);
+			break;
+		    case CUEIFY_DATA_MODE_MODE_2:
+			printf("    TRACK %02d MODE2/2352\n", i);
+			break;
+		    case CUEIFY_DATA_MODE_UNKNOWN:
+		    case CUEIFY_DATA_MODE_ERROR:
+		    default:
+			printf("    TRACK %02d MODE1/2352\n", i);
+			break;
 		    }
 		}
-			    */
 	    } else {
-		printf("    TRACK %02d AUDIO\n",
-		       i);
+		printf("    TRACK %02d AUDIO\n", i);
 	    }
 
 	    if (cdtext != NULL) {
