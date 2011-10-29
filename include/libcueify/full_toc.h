@@ -219,8 +219,8 @@ uint8_t cueify_full_toc_get_session_control_flags(cueify_full_toc *t,
 
 
 /**
- * Get the format of the sub-Q-channel of the block in which a track
- * in a full TOC instance was found.
+ * Get the format of the sub-Q-channel of the block in which the point
+ * in a session of a full TOC instance was found.
  *
  * @note In most cases, this function will return
  *       CUEIFY_SUB_Q_POSITION, however it is provided for completeness.
@@ -238,9 +238,9 @@ uint8_t cueify_full_toc_get_session_control_flags(cueify_full_toc *t,
  * @return the format of the contents of the sub-Q-channel for track
  *         number track in t
  */
-uint8_t cueify_full_toc_get_point_sub_q_channel_format(cueify_full_toc *t,
-						       uint8_t session,
-						       uint8_t point);
+uint8_t cueify_full_toc_get_session_sub_q_channel_format(cueify_full_toc *t,
+							 uint8_t session,
+							 uint8_t point);
 
 
 /**
