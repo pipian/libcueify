@@ -236,7 +236,6 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
     uint16_t toc_length;
     uint8_t *bp;
     uint8_t cur_session = 0;
-    uint8_t track_number;
     int i;
 
     if (t == NULL || buffer == NULL || size == NULL) {
@@ -265,9 +264,9 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
     /* TOC Track Descriptor(s) */
     bp = buffer + 4;
     for (i = toc->first_track_number; i <= toc->last_track_number; i++) {
-	if (toc->tracks[track_number].session != cur_session) {
+	if (toc->tracks[i].session != cur_session) {
 	    /* New session.  Add session-specific lines first. */
-	    cur_session = toc->tracks[track_number].session;
+	    cur_session = toc->tracks[i].session;
 
 	    /* POINT = 0xA0 */
 	    /* Session Number */
@@ -351,30 +350,30 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
 	}
 
 	/* Session Number */
-	*bp++ = toc->tracks[track_number].session;
+	*bp++ = toc->tracks[i].session;
 	/* ADR */
 	*bp = 0;
-	*bp |= toc->tracks[track_number].adr << 4;
+	*bp |= toc->tracks[i].adr << 4;
 	/* CONTROL */
-	*bp++ |= toc->tracks[track_number].control & 0x0F;
+	*bp++ |= toc->tracks[i].control & 0x0F;
 	/* TNO */
 	*bp++ = 0;
 	/* POINT */
-	*bp++ = track_number;
+	*bp++ = i;
 	/* Min */
-	*bp++ = toc->tracks[track_number].atime.min;
+	*bp++ = toc->tracks[i].atime.min;
 	/* Sec */
-	*bp++ = toc->tracks[track_number].atime.sec;
+	*bp++ = toc->tracks[i].atime.sec;
 	/* Frame */
-	*bp++ = toc->tracks[track_number].atime.frm;
+	*bp++ = toc->tracks[i].atime.frm;
 	/* Zero */
 	*bp++ = 0;
 	/* PMIN */
-	*bp++ = toc->tracks[track_number].offset.min;
+	*bp++ = toc->tracks[i].offset.min;
 	/* PSEC */
-	*bp++ = toc->tracks[track_number].offset.sec;
+	*bp++ = toc->tracks[i].offset.sec;
 	/* PFRAME */
-	*bp++ = toc->tracks[track_number].offset.frm;
+	*bp++ = toc->tracks[i].offset.frm;
     }
 
     return CUEIFY_OK;
