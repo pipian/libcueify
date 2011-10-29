@@ -78,6 +78,12 @@ void setup() {
     }
 }
 
+
+void teardown() {
+    /* Not needed. */
+}
+
+
 START_TEST (test_serialize)
 {
     cueify_toc *toc = (cueify_toc *)&mock_toc;
@@ -143,8 +149,6 @@ START_TEST (test_getters)
 		"Disc length did not match");
     fail_unless(cueify_toc_get_track_length(toc, 13) == 258988 - 244076,
 		"Track length did not match");
-
-    fail_unless(0, "This should always fail");
 }
 END_TEST
 
@@ -153,6 +157,7 @@ Suite *toc_suite() {
     Suite *s = suite_create("toc");
     TCase *tc_core = tcase_create("core");
 
+    tcase_add_checked_fixture(tc_core, setup, teardown);
     tcase_add_test(tc_core, test_serialize);
     tcase_add_test(tc_core, test_deserialize);
     tcase_add_test(tc_core, test_getters);
