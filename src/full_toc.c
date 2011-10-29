@@ -140,18 +140,22 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
 	    toc->sessions[offset].pseudotracks[1].atime.frm = *bp++;
 	    /* Zero */
 	    bp++;
-	    /* First Track Number */
-	    toc->sessions[offset].first_track_number = *bp++;
+	    /* PMIN == First Track Number */
+	    toc->sessions[offset].pseudotracks[1].offset.min = *bp++;
+	    toc->sessions[offset].first_track_number =
+		toc->sessions[offset].pseudotracks[1].offset.min;
 	    if (toc->first_track_number == 0 ||
 		toc->sessions[offset].first_track_number <
 		toc->first_track_number) {
 		toc->first_track_number =
 		    toc->sessions[offset].first_track_number;
 	    }
-	    /* Disc Type */
-	    toc->sessions[offset].session_type = *bp++;
-	    /* Reserved */
-	    bp++;
+	    /* PSEC == Disc Type */
+	    toc->sessions[offset].pseudotracks[1].offset.sec = *bp++;
+	    toc->sessions[offset].session_type =
+		toc->sessions[offset].pseudotracks[1].offset.sec;
+	    /* PFRAME == Reserved */
+	    toc->sessions[offset].pseudotracks[1].offset.frm = *bp++;
 	} else if (offset == 0xA1) {
 	    /* POINT == 0xA1 */
 	    offset = *bp++;
@@ -174,16 +178,20 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
 	    toc->sessions[offset].pseudotracks[2].atime.frm = *bp++;
 	    /* Zero */
 	    bp++;
-	    /* Last Track Number */
-	    toc->sessions[offset].last_track_number = *bp++;
+	    /* PMIN == Last Track Number */
+	    toc->sessions[offset].pseudotracks[2].offset.min = *bp++;
+	    toc->sessions[offset].last_track_number =
+		toc->sessions[offset].pseudotracks[2].offset.min;
 	    if (toc->last_track_number == 0 ||
 		toc->sessions[offset].last_track_number >
 		toc->last_track_number) {
 		toc->last_track_number =
 		    toc->sessions[offset].last_track_number;
 	    }
-	    /* Reserved */
-	    bp += 2;
+	    /* PSEC == Reserved */
+	    toc->sessions[offset].pseudotracks[2].offset.sec = *bp++;
+	    /* PFRAME == Reserved */
+	    toc->sessions[offset].pseudotracks[2].offset.frm = *bp++;
 	} else if (offset == 0xA2) {
 	    /* POINT == 0xA2 */
 	    /* Session Number */
