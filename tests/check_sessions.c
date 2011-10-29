@@ -53,7 +53,7 @@ void setup() {
     mock_sessions.track_adr = CUEIFY_SUB_Q_POSITION;
     mock_sessions.track_control = CUEIFY_TOC_TRACK_IS_DATA;
     mock_sessions.track_number = 13;
-    mock_sessions.track_lba = 258988;
+    mock_sessions.track_lba = 244076;
 }
 
 
