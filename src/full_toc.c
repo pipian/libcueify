@@ -142,7 +142,7 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
 	    bp++;
 	    /* First Track Number */
 	    toc->sessions[offset].first_track_number = *bp++;
-	    if (toc->sessions[offset].first_track_number == 0 ||
+	    if (toc->first_track_number == 0 ||
 		toc->sessions[offset].first_track_number <
 		toc->first_track_number) {
 		toc->first_track_number =
@@ -176,7 +176,7 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
 	    bp++;
 	    /* Last Track Number */
 	    toc->sessions[offset].last_track_number = *bp++;
-	    if (toc->sessions[offset].last_track_number == 0 ||
+	    if (toc->last_track_number == 0 ||
 		toc->sessions[offset].last_track_number >
 		toc->last_track_number) {
 		toc->last_track_number =
