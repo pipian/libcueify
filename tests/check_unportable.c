@@ -31,6 +31,7 @@
 #include <libcueify/device.h>
 #include <libcueify/toc.h>
 #include <libcueify/sessions.h>
+#include <libcueify/full_toc.h>
 
 /* Create a binary track descriptor from a TOC. */
 #define TRACK_DESCRIPTOR(adr, ctrl, track, address) \
@@ -63,6 +64,37 @@ uint8_t expected_sessions[] = {
     (10 >> 8), (10 & 0xFF), 1, 2,
     TRACK_DESCRIPTOR(CUEIFY_SUB_Q_POSITION, CUEIFY_TOC_TRACK_IS_DATA, 13,
 		     244076),
+};
+
+
+/* Create a binary track descriptor from a full TOC. */
+#define FULL_TOC_TRACK_DESCRIPTOR(session, adr, ctrl, track,		\
+				  abs_min, abs_sec, abs_frm, min, sec, frm) \
+    session, (((adr & 0xF) << 4) | (ctrl & 0xF)), 0, track,		\
+	abs_min, abs_sec, abs_frm, 0, min, sec, frm
+
+
+uint8_t expected_full_toc[] = {
+    (((13 + 2 * 3) * 11 + 2) >> 8), (((13 + 2 * 3) * 11 + 2) & 0xFF), 1, 2,
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 0xA0, 0, 0, 0, 1, CUEIFY_DISC_MODE_1,0),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 0xA1, 0, 0, 0, 12, 0, 0),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 0xA2, 0, 0, 0, 51, 44, 26),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 1, 0, 0, 0, 0, 2, 0),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 2, 0, 0, 0, 4, 47, 70),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 3, 0, 0, 0, 7, 42, 57),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 4, 0, 0, 0, 13, 47, 28),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 5, 0, 0, 0, 18, 28, 50),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 6, 0, 0, 0, 21, 56, 70),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 7, 0, 0, 0, 24, 56, 74),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 8, 0, 0, 0, 30, 10, 55),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 9, 0, 0, 0, 34, 17, 20),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 10, 0, 0, 0, 39, 18, 66),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 11, 0, 0, 0, 43, 16, 40),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 12, 0, 0, 0, 47, 27, 61),
+    FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 0xA0, 0, 0, 0, 13,CUEIFY_DISC_MODE_2,0),
+    FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 0xA1, 0, 0, 0, 13, 0, 0),
+    FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 0xA2, 0, 0, 0, 57, 35, 13),
+    FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 13, 0, 0, 0, 54, 16, 26)
 };
 
 
@@ -127,6 +159,29 @@ START_TEST (test_sessions)
 END_TEST
 
 
+START_TEST (test_full_toc)
+{
+    cueify_full_toc *full_toc;
+    size_t size = sizeof(expected_full_toc);
+    uint8_t buffer[sizeof(expected_full_toc)];
+
+    full_toc = cueify_full_toc_new();
+    fail_unless(full_toc != NULL, "Failed to create cueify_full_toc object");
+    fail_unless(cueify_device_read_full_toc(dev, full_toc) == CUEIFY_OK,
+		"Failed to read full TOC from device");
+    fail_unless(cueify_full_toc_serialize(full_toc, buffer, 
+					  &size) == CUEIFY_OK,
+		"Could not serialize full TOC");
+    fail_unless(size == sizeof(expected_full_toc),
+		"Full TOC size incorrect");
+    fail_unless(memcmp(buffer, expected_full_toc,
+		       sizeof(expected_full_toc)) == 0,
+		"Full TOC incorrect");
+    cueify_full_toc_free(full_toc);
+}
+END_TEST
+
+
 Suite *toc_suite() {
     Suite *s = suite_create("unportable");
     TCase *tc_core = tcase_create("core");
@@ -134,6 +189,7 @@ Suite *toc_suite() {
     tcase_add_checked_fixture(tc_core, setup, teardown);
     tcase_add_test(tc_core, test_toc);
     tcase_add_test(tc_core, test_sessions);
+    tcase_add_test(tc_core, test_full_toc);
     suite_add_tcase(s, tc_core);
 
     return s;
