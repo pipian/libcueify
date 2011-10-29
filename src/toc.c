@@ -43,6 +43,8 @@ int cueify_device_read_toc(cueify_device *d, cueify_toc *t) {
 	return CUEIFY_ERR_BADARG;
     }
 
+    memset(toc, 0, sizeof(cueify_toc_private));
+
     return cueify_device_read_toc_unportable(dev, toc);
 }  /* cueify_device_read_toc */
 
