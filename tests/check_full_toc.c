@@ -106,13 +106,13 @@ void setup() {
 	mock_full_toc.sessions[1].pseudotracks[i].atime.frm = 0;
 	if (i == 0) {
 	    mock_full_toc.sessions[1].pseudotracks[i].offset =
-		(cueify_msf_t){1, CUEIFY_DISC_MODE_1, 0};
+		(cueify_msf_t){51, 44, 26};
 	} else if (i == 1) {
 	    mock_full_toc.sessions[1].pseudotracks[i].offset =
-		(cueify_msf_t){12, 0, 0};
+		(cueify_msf_t){1, CUEIFY_DISC_MODE_1, 0};
 	} else {
 	    mock_full_toc.sessions[1].pseudotracks[i].offset =
-		(cueify_msf_t){51, 44, 26};
+		(cueify_msf_t){12, 0, 0};
 	}
     }
 
@@ -121,7 +121,7 @@ void setup() {
     mock_full_toc.sessions[2].session_type = 0;
     mock_full_toc.sessions[2].leadout = (cueify_msf_t){57, 35, 13};
     for (i = 0; i < 3; i++) {
-	mock_full_toc.sessions[2].pseudotracks[i].session = 1;
+	mock_full_toc.sessions[2].pseudotracks[i].session = 2;
 	mock_full_toc.sessions[2].pseudotracks[i].adr = 1;
 	mock_full_toc.sessions[2].pseudotracks[i].control = 6;
 	mock_full_toc.sessions[2].pseudotracks[i].atime.min = 0;
@@ -129,13 +129,13 @@ void setup() {
 	mock_full_toc.sessions[2].pseudotracks[i].atime.frm = 0;
 	if (i == 0) {
 	    mock_full_toc.sessions[2].pseudotracks[i].offset =
-		(cueify_msf_t){13, 0, 0};
+		(cueify_msf_t){57, 35, 13};
 	} else if (i == 1) {
 	    mock_full_toc.sessions[2].pseudotracks[i].offset =
 		(cueify_msf_t){13, 0, 0};
 	} else {
 	    mock_full_toc.sessions[2].pseudotracks[i].offset =
-		(cueify_msf_t){57, 35, 13};
+		(cueify_msf_t){13, 0, 0};
 	}
     }
 }
