@@ -128,7 +128,7 @@ void setup() {
     mock_full_toc.sessions[2].first_track_number = 13;
     mock_full_toc.sessions[2].last_track_number = 13;
     mock_full_toc.sessions[2].session_type = 0;
-    mock_full_toc.sessions[2].leadout = (cueify_msf_t){54, 16, 26};
+    mock_full_toc.sessions[2].leadout = (cueify_msf_t){57, 35, 13};
     for (i = 0; i < 3; i++) {
 	mock_full_toc.sessions[2].pseudotracks[i].session = 1;
 	mock_full_toc.sessions[2].pseudotracks[i].adr = 1;
@@ -144,7 +144,7 @@ void setup() {
 		(cueify_msf_t){13, 0, 0};
 	} else {
 	    mock_full_toc.sessions[2].pseudotracks[i].offset =
-		(cueify_msf_t){54, 16, 26};
+		(cueify_msf_t){57, 35, 13};
 	}
     }
     mock_full_toc.sessions[2].pseudotracks[13].adr = 1;
