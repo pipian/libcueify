@@ -471,4 +471,42 @@ int cueify_device_read_position_unportable(cueify_device_private *d,
     }
     
     return CUEIFY_ERR_INTERNAL;
-}
+}  /* cueify_device_read_position_unportable */
+
+
+int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
+				      cueify_raw_read_private *buffer) {
+    DWORD dwReturned;
+    RAW_READ_INFO read_info;
+    cueify_full_toc_private full_toc;
+
+    /* What mode should I probably read this in? */
+    if (cueify_device_read_full_toc_unportable(d, full_toc) != CUEIFY_OK) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    read_info.DiskOffset.QuadPart = lba * 2048;
+    read_info.SectorCount = 1;
+    switch (full_toc.sessions[full_toc.first_session_number].session_type) {
+    case CUEIFY_DISC_MODE_1:
+	read_info.TrackMode = YellowMode2;
+	break;
+    case CUEIFY_DISC_CDI:
+    case CUEIFY_DISC_MODE_2:
+	read_info.TrackMode = XAForm2;
+	break;
+    default:
+	read_info.TrackMode = YellowMode2;
+	break;
+    }
+
+    if (!DeviceIoControl(d->handle,
+			 IOCTL_CDROM_RAW_READ,
+			 &read_info, sizeof(read_info),
+			 buffer, sizeof(cueify_raw_read_private),
+			 &dwReturned, NULL)) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    return CUEIFY_OK;
+}  /* cueify_device_read_raw_unportable */
