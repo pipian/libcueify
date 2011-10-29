@@ -616,7 +616,11 @@ cueify_msf_t cueify_full_toc_get_track_length(cueify_full_toc *t,
 	return diff;
     } else if (track >= toc->first_track_number &&
 	       track < toc->last_track_number) {
-	diff = toc->tracks[track + 1].offset;
+	if (toc->tracks[track + 1].session != toc->tracks[track].session) {
+	    diff = toc->sessions[toc->tracks[track].session].leadout;
+	} else {
+	    diff = toc->tracks[track + 1].offset;
+	}
 	diff.min -= toc->tracks[track].offset.min;
 	if (diff.sec < toc->tracks[track].offset.sec) {
 	    diff.sec += 60;
@@ -634,7 +638,7 @@ cueify_msf_t cueify_full_toc_get_track_length(cueify_full_toc *t,
 	diff.frm -= toc->tracks[track].offset.frm;
 	return diff;
     } else if (track == toc->last_track_number) {
-	diff = toc->tracks[0].offset;
+	diff = toc->sessions[toc->tracks[track].session].leadout;
 	diff.min -= toc->tracks[track].offset.min;
 	if (diff.sec < toc->tracks[track].offset.sec) {
 	    diff.sec += 60;
