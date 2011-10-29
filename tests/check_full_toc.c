@@ -115,15 +115,6 @@ void setup() {
 		(cueify_msf_t){51, 44, 26};
 	}
     }
-    for (i = 1; i < 13; i++) {
-	mock_full_toc.sessions[1].pseudotracks[i].session = 1;
-	mock_full_toc.sessions[1].pseudotracks[i].adr = 1;
-	mock_full_toc.sessions[1].pseudotracks[i].control = 4;
-	mock_full_toc.sessions[1].pseudotracks[i].atime.min = 0;
-	mock_full_toc.sessions[1].pseudotracks[i].atime.sec = 0;
-	mock_full_toc.sessions[1].pseudotracks[i].atime.frm = 0;
-	mock_full_toc.sessions[1].pseudotracks[i].offset = offsets[i - 1];
-    }
 
     mock_full_toc.sessions[2].first_track_number = 13;
     mock_full_toc.sessions[2].last_track_number = 13;
@@ -147,13 +138,6 @@ void setup() {
 		(cueify_msf_t){57, 35, 13};
 	}
     }
-    mock_full_toc.sessions[2].pseudotracks[13].adr = 1;
-    mock_full_toc.sessions[2].pseudotracks[13].session = 2;
-    mock_full_toc.sessions[2].pseudotracks[13].control = 6;
-    mock_full_toc.sessions[2].pseudotracks[13].atime.min = 1;
-    mock_full_toc.sessions[2].pseudotracks[13].atime.sec = 2;
-    mock_full_toc.sessions[2].pseudotracks[13].atime.frm = 3;
-    mock_full_toc.sessions[2].pseudotracks[13].offset = offsets[12];
 }
 
 
