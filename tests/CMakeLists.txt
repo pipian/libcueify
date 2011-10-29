@@ -17,6 +17,9 @@ IF(LIBCHECK_FOUND)
     ADD_EXECUTABLE(check_toc check_toc.c)
     ADD_TEST(check_toc check_toc)
     ADD_DEPENDENCIES(check check_toc)
+    
+    ADD_EXECUTABLE(check_unportable check_unportable.c)
+    ADD_DEPENDENCIES(check check_unportable)
 ENDIF(LIBCHECK_FOUND)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
