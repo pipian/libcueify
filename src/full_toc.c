@@ -24,6 +24,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <libcueify/full_toc.h>
 #include <libcueify/error.h>
 #include "device_private.h"
@@ -41,6 +42,8 @@ int cueify_device_read_full_toc(cueify_device *d, cueify_full_toc *t) {
     if (d == NULL || t == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
+
+    memset(toc, 0, sizeof(cueify_full_toc_private));
 
     return cueify_device_read_full_toc_unportable(dev, toc);
 }  /* cueify_device_read_full_toc */
@@ -68,6 +71,8 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
     if ((toc_length - 2) % 11 != 0) {
 	return CUEIFY_ERR_CORRUPTED;
     }
+
+    memset(toc, 0, sizeof(cueify_full_toc_private));
 
     /* First Complete Session Number */
     toc->first_session_number = buffer[2];

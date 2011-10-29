@@ -25,6 +25,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <libcueify/sessions.h>
 #include <libcueify/error.h>
 #include "device_private.h"
@@ -42,6 +43,8 @@ int cueify_device_read_sessions(cueify_device *d, cueify_sessions *s) {
     if (d == NULL || s == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
+
+    memset(sessions, 0, sizeof(cueify_sessions_private));
 
     return cueify_device_read_sessions_unportable(dev, sessions);
 }  /* cueify_device_read_sessions */
@@ -68,6 +71,8 @@ int cueify_sessions_deserialize(cueify_sessions *s, uint8_t *buffer,
     if (sessions_length != 10) {
 	return CUEIFY_ERR_CORRUPTED;
     }
+
+    memset(sessions, 0, sizeof(cueify_sessions_private));
 
     /* First Complete Session Number */
     sessions->first_session_number = buffer[2];
