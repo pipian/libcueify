@@ -88,14 +88,14 @@ START_TEST (test_serialize)
 {
     cueify_toc *toc = (cueify_toc *)&mock_toc;
     size_t size;
-    uint8_t buffer[sizeof(serialized_mock_toc)];
+    uint8_t buffer[sizeof(serialized_mock_toc) + 10];
 
-    fail_unless(cueify_toc_serialize(toc, NULL, &size) == CUEIFY_OK,
-		"Could not pre-serialize TOC");
-    fail_unless(size == sizeof(mock_toc),
-		"Pre-serialized TOC size incorrect");
+    size = sizeof(buffer);
+
     fail_unless(cueify_toc_serialize(toc, buffer, &size) == CUEIFY_OK,
 		"Could not serialize TOC");
+    fail_unless(size == sizeof(serialized_mock_toc),
+		"Serialized TOC size incorrect");
     fail_unless(memcmp(buffer, serialized_mock_toc,
 		       sizeof(serialized_mock_toc)) == 0,
 		"Serialized TOC incorrect");
