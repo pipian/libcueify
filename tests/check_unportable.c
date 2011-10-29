@@ -76,7 +76,8 @@ uint8_t expected_sessions[] = {
 
 uint8_t expected_full_toc[] = {
     (((13 + 2 * 3) * 11 + 2) >> 8), (((13 + 2 * 3) * 11 + 2) & 0xFF), 1, 2,
-    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 0xA0, 0, 0, 0, 1, CUEIFY_DISC_MODE_1,0),
+    FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 0xA0, 0, 0, 0, 1,
+			      CUEIFY_SESSION_MODE_1, 0),
     FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 0xA1, 0, 0, 0, 12, 0, 0),
     FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 0xA2, 0, 0, 0, 51, 44, 26),
     FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 1, 0, 0, 0, 0, 2, 0),
@@ -91,7 +92,8 @@ uint8_t expected_full_toc[] = {
     FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 10, 0, 0, 0, 39, 18, 66),
     FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 11, 0, 0, 0, 43, 16, 40),
     FULL_TOC_TRACK_DESCRIPTOR(1, 1, 0, 12, 0, 0, 0, 47, 27, 61),
-    FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 0xA0, 0, 0, 0, 13,CUEIFY_DISC_MODE_2,0),
+    FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 0xA0, 0, 0, 0, 13,
+			      CUEIFY_SESSION_MODE_2, 0),
     FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 0xA1, 0, 0, 0, 13, 0, 0),
     FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 0xA2, 0, 0, 0, 57, 35, 13),
     FULL_TOC_TRACK_DESCRIPTOR(2, 1, 4, 13, 0, 0, 0, 54, 16, 26)

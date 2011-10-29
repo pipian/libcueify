@@ -39,7 +39,7 @@
 
 uint8_t serialized_mock_full_toc[] = {
     (((13 + 2 * 3) * 11 + 2) >> 8), (((13 + 2 * 3) * 11 + 2) & 0xFF), 1, 2,
-    TRACK_DESCRIPTOR(1, 1, 4, 0xA0, 0, 0, 0, 1, CUEIFY_DISC_MODE_1, 0),
+    TRACK_DESCRIPTOR(1, 1, 4, 0xA0, 0, 0, 0, 1, CUEIFY_SESSION_MODE_1, 0),
     TRACK_DESCRIPTOR(1, 1, 4, 0xA1, 0, 0, 0, 12, 0, 0),
     TRACK_DESCRIPTOR(1, 1, 4, 0xA2, 0, 0, 0, 51, 44, 26),
     TRACK_DESCRIPTOR(1, 1, 4, 1, 0, 0, 0, 0, 2, 0),
@@ -54,7 +54,7 @@ uint8_t serialized_mock_full_toc[] = {
     TRACK_DESCRIPTOR(1, 1, 4, 10, 0, 0, 0, 39, 18, 66),
     TRACK_DESCRIPTOR(1, 1, 4, 11, 0, 0, 0, 43, 16, 40),
     TRACK_DESCRIPTOR(1, 1, 4, 12, 0, 0, 0, 47, 27, 61),
-    TRACK_DESCRIPTOR(2, 1, 6, 0xA0, 0, 0, 0, 13, 0, 0),
+    TRACK_DESCRIPTOR(2, 1, 6, 0xA0, 0, 0, 0, 13, CUEIFY_SESSION_MODE_2, 0),
     TRACK_DESCRIPTOR(2, 1, 6, 0xA1, 0, 0, 0, 13, 0, 0),
     TRACK_DESCRIPTOR(2, 1, 6, 0xA2, 0, 0, 0, 57, 35, 13),
     TRACK_DESCRIPTOR(2, 1, 6, 13, 1, 2, 3, 54, 16, 26)
@@ -95,7 +95,7 @@ void setup() {
 
     mock_full_toc.sessions[1].first_track_number = 1;
     mock_full_toc.sessions[1].last_track_number = 12;
-    mock_full_toc.sessions[1].session_type = CUEIFY_DISC_MODE_1;
+    mock_full_toc.sessions[1].session_type = CUEIFY_SESSION_MODE_1;
     mock_full_toc.sessions[1].leadout = (cueify_msf_t){51, 44, 26};
     for (i = 0; i < 3; i++) {
 	mock_full_toc.sessions[1].pseudotracks[i].session = 1;
@@ -109,7 +109,7 @@ void setup() {
 		(cueify_msf_t){51, 44, 26};
 	} else if (i == 1) {
 	    mock_full_toc.sessions[1].pseudotracks[i].offset =
-		(cueify_msf_t){1, CUEIFY_DISC_MODE_1, 0};
+		(cueify_msf_t){1, CUEIFY_SESSION_MODE_1, 0};
 	} else {
 	    mock_full_toc.sessions[1].pseudotracks[i].offset =
 		(cueify_msf_t){12, 0, 0};
@@ -118,7 +118,7 @@ void setup() {
 
     mock_full_toc.sessions[2].first_track_number = 13;
     mock_full_toc.sessions[2].last_track_number = 13;
-    mock_full_toc.sessions[2].session_type = 0;
+    mock_full_toc.sessions[2].session_type = CUEIFY_SESSION_MODE_2;
     mock_full_toc.sessions[2].leadout = (cueify_msf_t){57, 35, 13};
     for (i = 0; i < 3; i++) {
 	mock_full_toc.sessions[2].pseudotracks[i].session = 2;
@@ -132,7 +132,7 @@ void setup() {
 		(cueify_msf_t){57, 35, 13};
 	} else if (i == 1) {
 	    mock_full_toc.sessions[2].pseudotracks[i].offset =
-		(cueify_msf_t){13, 0, 0};
+		(cueify_msf_t){13, CUEIFY_SESSION_MODE_2, 0};
 	} else {
 	    mock_full_toc.sessions[2].pseudotracks[i].offset =
 		(cueify_msf_t){13, 0, 0};
@@ -261,8 +261,12 @@ START_TEST (test_getters)
 		"First track in full TOC did not match");
     fail_unless(cueify_full_toc_get_last_track(full_toc) == 13,
 		"Last track in full TOC did not match");
-    fail_unless(cueify_full_toc_get_disc_type(full_toc) == CUEIFY_DISC_MODE_1,
-		"Disc type in full TOC did not match");
+    fail_unless(cueify_full_toc_get_session_type(full_toc, 1) ==
+		CUEIFY_SESSION_MODE_1,
+		"Session type in full TOC did not match");
+    fail_unless(cueify_full_toc_get_session_type(full_toc, 2) ==
+		CUEIFY_SESSION_MODE_2,
+		"Session type in full TOC did not match");
     fail_unless(cueify_full_toc_get_session_leadout_address(
 		    full_toc, 2).min == 57 &&
 		cueify_full_toc_get_session_leadout_address(

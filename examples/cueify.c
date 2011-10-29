@@ -562,23 +562,6 @@ int print_cuesheet(const char *device) {
 	    }
 	}
 
-	if (fulltoc != NULL) {
-	    switch (cueify_full_toc_get_disc_type(fulltoc)) {
-	    case CUEIFY_DISC_MODE_1:
-		printf("REM ORIGINAL MEDIA-TYPE: CD\n");
-		break;
-	    case CUEIFY_DISC_CDI:
-		printf("REM ORIGINAL MEDIA-TYPE: CD-I\n");
-		break;
-	    case CUEIFY_DISC_MODE_2:
-		printf("REM ORIGINAL MEDIA-TYPE: CD-XA\n");
-		break;
-	    default:
-		printf("REM ORIGINAL MEDIA-TYPE: UNKNOWN\n");
-		break;
-	    }
-	}
-
 	/* And lastly the track stuff. */
 	printf("FILE \"disc.bin\" BINARY\n");
 	for (i = cueify_toc_get_first_track(toc);
@@ -608,11 +591,28 @@ int print_cuesheet(const char *device) {
 		cur_session = cueify_full_toc_get_track_session(fulltoc, i);
 		printf("  REM SESSION %02d\n",
 		       cur_session);
+
+		switch (cueify_full_toc_get_session_type(fulltoc,
+							 cur_session)) {
+		case CUEIFY_SESSION_MODE_1:
+		    printf("  REM SESSION TYPE: CD\n");
+		    break;
+		case CUEIFY_SESSION_CDI:
+		    printf("  REM SESSION TYPE: CD-I\n");
+		    break;
+		case CUEIFY_SESSION_MODE_2:
+		    printf("  REM SESSION TYPE: CD-XA\n");
+		    break;
+		default:
+		    printf("  REM SESSION TYPE: UNKNOWN\n");
+		    break;
+		}
 	    }
 
 	    if (cueify_toc_get_track_control_flags(toc, i) &
 		CUEIFY_TOC_TRACK_IS_DATA) {
-		if (cueify_full_toc_get_disc_type(fulltoc) == CUEIFY_DISC_CDI) {
+		if (cueify_full_toc_get_session_type(fulltoc, cur_session) ==
+		    CUEIFY_SESSION_CDI) {
 		    /* CD-I...  We special case. */
 		    printf("    TRACK %02d CDI/2352\n", i);
 		} else {

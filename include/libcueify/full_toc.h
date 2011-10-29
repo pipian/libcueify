@@ -337,24 +337,25 @@ uint8_t cueify_full_toc_get_session_last_track(cueify_full_toc *t,
 	t, cueify_full_toc_get_last_session(t))
 
 
-/** The disc is a CD-DA disc, or CD Data with the first track in Mode 1. */
-#define CUEIFY_DISC_MODE_1  0x00
-/** The disc is a CD-I disc. */
-#define CUEIFY_DISC_CDI     0x10
-/** The disc is CD-XA disc with the first track in Mode 2. */
-#define CUEIFY_DISC_MODE_2  0x20
+/** The session is CD-DA, or CD Data with the first track in Mode 1. */
+#define CUEIFY_SESSION_MODE_1  0x00
+/** The session is a CD-I session. */
+#define CUEIFY_SESSION_CDI     0x10
+/** The session is a CD-XA session with the first track in Mode 2. */
+#define CUEIFY_SESSION_MODE_2  0x20
 
 
 /**
- * Get the disc type in a full TOC instance.
+ * Get the session type of a session in a full TOC instance.
  *
  * @pre { t != NULL,
  *        cueify_full_toc_get_first_session(t) <= session AND
  *        session <= cueify_full_toc_get_last_session(t) }
  * @param t a full TOC instance
- * @return the disc type of t
+ * @param session the number of the session to get the session type for
+ * @return the session type of session number session in t
  */
-uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t);
+uint8_t cueify_full_toc_get_session_type(cueify_full_toc *t, uint8_t session);
 
 
 /**

@@ -584,15 +584,18 @@ uint8_t cueify_full_toc_get_session_last_track(cueify_full_toc *t,
 }  /* cueify_full_toc_get_session_last_track */
 
 
-uint8_t cueify_full_toc_get_disc_type(cueify_full_toc *t) {
+uint8_t cueify_full_toc_get_session_type(cueify_full_toc *t, uint8_t session) {
     cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
 
     if (toc == NULL) {
 	return 0;
+    } else if (session >= toc->first_session_number &&
+	       session <= toc->last_session_number) {
+	return toc->sessions[session].session_type;
     } else {
-	return toc->sessions[toc->first_session_number].session_type;
+	return 0;
     }
-}  /* cueify_full_toc_get_disc_type */
+}  /* cueify_full_toc_get_session_type */
 
 
 cueify_msf_t cueify_full_toc_get_session_leadout_address(cueify_full_toc *t,
