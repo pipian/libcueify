@@ -140,7 +140,7 @@ int cueify_toc_serialize(cueify_toc *t, uint8_t *buffer, size_t *size) {
 	    /* Lead-out */
 	    track_number = 0;
 	} else {
-	    track_number = i;
+	    track_number = i + 1;
 	}
 
 	/* Reserved */

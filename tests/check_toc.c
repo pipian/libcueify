@@ -30,7 +30,7 @@
 #include <libcueify/toc.h>
 #include "toc_private.h"
 
-/** Create a binary track descriptor from a TOC. */
+/* Create a binary track descriptor from a TOC. */
 #define TRACK_DESCRIPTOR(adr, ctrl, track, address) \
     0, (((adr & 0xF) << 4) | (ctrl & 0xF)), track, 0,			\
 	(address >> 24), ((address >> 16) & 0xFF),			\
