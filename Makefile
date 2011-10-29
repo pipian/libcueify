@@ -4,6 +4,9 @@ all:
 check:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check
 
+check-unportable:
+	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check-unportable
+
 docs:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make docs
 
