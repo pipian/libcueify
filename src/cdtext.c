@@ -29,6 +29,7 @@
 #include <libcueify/error.h>
 #include "device_private.h"
 #include "cdtext_private.h"
+#include "cdtext_crc.h"
 #include "charsets.h"
 
 cueify_cdtext *cueify_cdtext_new() {
@@ -489,6 +490,8 @@ struct cueify_cdtext_writer {
  * @return CUEIFY_OK if the flush was successful
  */
 static int flush_cdtext_writer(struct cueify_cdtext_writer *writer) {
+    cdtext_crc_t crc;
+
     /* There's nothing to flush! */
     if (writer->size == 0) {
 	return CUEIFY_OK;
@@ -511,7 +514,13 @@ static int flush_cdtext_writer(struct cueify_cdtext_writer *writer) {
 	 ((writer->block & 0x7) << 4) |
 	 (writer->charpos));
     memcpy(writer->bp + 4, writer->buffer, 12);
-    /* TODO: CRC */
+
+    /* CRC */
+    crc = cdtext_crc_init();
+    crc = cdtext_crc_update(crc, writer->bp, 16);
+    crc = cdtext_crc_finalize(crc);
+    writer->bp[16] = crc >> 8;
+    writer->bp[17] = crc & 0xFF;
 
     writer->bp += 18;
 
