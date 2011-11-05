@@ -33,6 +33,7 @@
 #include <libcueify/sessions.h>
 #include <libcueify/full_toc.h>
 #include <libcueify/cdtext.h>
+#include <libcueify/mcn_isrc.h>
 
 #include "check_unportable.cdt.h"
 
@@ -197,15 +198,41 @@ START_TEST (test_cdtext)
     fail_unless(cdtext != NULL, "Failed to create cueify_cdtext object");
     fail_unless(cueify_device_read_cdtext(dev, cdtext) == CUEIFY_OK,
 		"Failed to read CD-Text from device");
-    fail_unless(cueify_cdtext_serialize(cdtext, buffer, 
-					  &size) == CUEIFY_OK,
+    fail_unless(cueify_cdtext_serialize(cdtext, buffer, &size) == CUEIFY_OK,
 		"Could not serialize CD-Text");
     fail_unless(size == sizeof(expected_cdtext),
 		"CD-Text size incorrect");
-    fail_unless(memcmp(buffer, expected_cdtext,
-		       sizeof(expected_cdtext)) == 0,
+    fail_unless(memcmp(buffer, expected_cdtext, sizeof(expected_cdtext)) == 0,
 		"CD-Text incorrect");
     cueify_cdtext_free(cdtext);
+}
+END_TEST
+
+
+START_TEST (test_mcn_isrc)
+{
+    char *isrcs[] = {
+	"USRF30200001", "USRF30200002", "USRF30200003", "USRF30200004",
+	"USRF30200005", "USRF30200006", "USRF30200007", "USRF30200008",
+	"USRF30200009", "USRF30200010", "USRF30200011", "USRF30200012"
+    };
+    char buffer[32];  /* This is a reasonable buffer size */
+    size_t size = sizeof(buffer);
+    int i;
+
+    fail_unless(cueify_device_read_mcn(dev, buffer, &size) == CUEIFY_NO_DATA,
+		"Failed to (not) read media catalog number from device");
+    fail_unless(size == 0, "Media catalog number size incorrect");
+    fail_unless(strcmp(buffer, "") == 0, "Media catalog number not empty");
+
+    for (i = 0; i < 12; i++) {
+	size = sizeof(buffer);
+	fail_unless(cueify_device_read_isrc(dev, i + 1, buffer,
+					    &size) == CUEIFY_OK,
+		    "Failed to read ISRC from device");
+	fail_unless(size == 12, "ISRC size incorrect");
+	fail_unless(strcmp(buffer, isrcs[i]) == 0, "ISRC not correct");
+    }
 }
 END_TEST
 
@@ -219,6 +246,7 @@ Suite *toc_suite() {
     tcase_add_test(tc_core, test_sessions);
     tcase_add_test(tc_core, test_full_toc);
     tcase_add_test(tc_core, test_cdtext);
+    tcase_add_test(tc_core, test_mcn_isrc);
     suite_add_tcase(s, tc_core);
 
     return s;
