@@ -165,25 +165,52 @@ size_t msjis_byte_count(char *utf8) {
 
 	/* Convert the character to MS-JIS (or wait for another
 	 * character I guess) */
-	/* TODO: What about successor characters (e.g. variation selectors)? */
 	hi = (character >> 16) & 0xFF;
 	mid = (character >> 8) & 0xFF;
 	lo = character & 0xFF;
+    retry_encoding:
 	if (master_table[hi] == NULL) {
 	    /* No MS-JIS encoding. */
-	    codepoint = reverse_table0000['?'];
+	    if (codepoint.successor_master_table != NULL) {
+		/* We must have been trying to find a successor. */
+		size++;
+		/* Reset to look at the master table and try again. */
+		codepoint.successor_master_table = NULL;
+		master_table = reverse_master_table;
+		goto retry_encoding;
+	    } else {
+		codepoint = reverse_table0000['?'];
+	    }
 	} else {
 	    subtable = master_table[hi];
 
 	    if (subtable[mid] == NULL) {
 		/* No MS-JIS encoding. */
-		codepoint = reverse_table0000['?'];
+		if (codepoint.successor_master_table != NULL) {
+		    /* We must have been trying to find a successor. */
+		    size++;
+		    /* Reset to look at the master table and try again. */
+		    codepoint.successor_master_table = NULL;
+		    master_table = reverse_master_table;
+		    goto retry_encoding;
+		} else {
+		    codepoint = reverse_table0000['?'];
+		}
 	    } else {
 		table = subtable[mid];
 		if (table[lo].has_encoding == 0 &&
 		    table[lo].successor_master_table == NULL) {
 		    /* No MS-JIS encoding. */
-		    codepoint = reverse_table0000['?'];
+		    if (codepoint.successor_master_table != NULL) {
+			/* We must have been trying to find a successor. */
+			size++;
+			/* Reset to look at the master table and try again. */
+			codepoint.successor_master_table = NULL;
+			master_table = reverse_master_table;
+			goto retry_encoding;
+		    } else {
+			codepoint = reverse_table0000['?'];
+		    }
 		} else {
 		    codepoint = table[lo];
 		}
@@ -274,21 +301,52 @@ uint8_t *utf8_to_msjis(char *utf8, size_t *size) {
 	hi = (character >> 16) & 0xFF;
 	mid = (character >> 8) & 0xFF;
 	lo = character & 0xFF;
+    retry_encoding:
 	if (master_table[hi] == NULL) {
 	    /* No MS-JIS encoding. */
-	    codepoint = reverse_table0000['?'];
+	    if (codepoint.successor_master_table != NULL) {
+		/* We must have been trying to find a successor. */
+		memcpy(output_ptr, codepoint.value, 2);
+		output_ptr += 2;
+		/* Reset to look at the master table and try again. */
+		codepoint.successor_master_table = NULL;
+		master_table = reverse_master_table;
+		goto retry_encoding;
+	    } else {
+		codepoint = reverse_table0000['?'];
+	    }
 	} else {
 	    subtable = master_table[hi];
 
 	    if (subtable[mid] == NULL) {
 		/* No MS-JIS encoding. */
-		codepoint = reverse_table0000['?'];
+		if (codepoint.successor_master_table != NULL) {
+		    /* We must have been trying to find a successor. */
+		    memcpy(output_ptr, codepoint.value, 2);
+		    output_ptr += 2;
+		    /* Reset to look at the master table and try again. */
+		    codepoint.successor_master_table = NULL;
+		    master_table = reverse_master_table;
+		    goto retry_encoding;
+		} else {
+		    codepoint = reverse_table0000['?'];
+		}
 	    } else {
 		table = subtable[mid];
 		if (table[lo].has_encoding == 0 &&
 		    table[lo].successor_master_table == NULL) {
 		    /* No MS-JIS encoding. */
-		    codepoint = reverse_table0000['?'];
+		    if (codepoint.successor_master_table != NULL) {
+			/* We must have been trying to find a successor. */
+			memcpy(output_ptr, codepoint.value, 2);
+			output_ptr += 2;
+			/* Reset to look at the master table and try again. */
+			codepoint.successor_master_table = NULL;
+			master_table = reverse_master_table;
+			goto retry_encoding;
+		    } else {
+			codepoint = reverse_table0000['?'];
+		    }
 		} else {
 		    codepoint = table[lo];
 		}
