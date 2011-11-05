@@ -905,6 +905,10 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 
     /* Iterate through each block and PACK type in turn. */
     for (block = 0; block < MAX_BLOCKS; block++) {
+	if (!cdtext->blocks[block].valid) {
+	    continue;
+	}
+
 	writer.block = block;
 	writer.seq_number = 0;
 	for (pack_type = 0; pack_type < 16; pack_type++) {
