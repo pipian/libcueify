@@ -1148,6 +1148,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 			(cdtext->blocks[block].genre_code >> 8) & 0xFF;
 		    terminator[1] =
 			(cdtext->blocks[block].genre_code) & 0xFF;
+		    data = terminator;
 		    if (write_cdtext_track_data(&writer, data, 2, 0) !=
 			CUEIFY_OK) {
 			goto error;
