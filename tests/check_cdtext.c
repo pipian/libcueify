@@ -53,7 +53,7 @@ void setup() {
 
     b = &(mock_cdtext.blocks[0]);
     b->valid = 1;
-    b->charset = CUEIFY_CDTEXT_CHARSET_ISO8859_1;
+    b->charset = CUEIFY_CDTEXT_CHARSET_ASCII;
     b->language = CUEIFY_CDTEXT_LANG_ENGLISH;
     b->first_track_number = 1;
     b->last_track_number = 12;

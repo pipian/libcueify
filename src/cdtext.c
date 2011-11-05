@@ -518,6 +518,7 @@ static int flush_cdtext_writer(struct cueify_cdtext_writer *writer) {
     /* Finish flushing state. */
     writer->size = 0;
     writer->charpos = 0;
+    writer->pack_count[writer->pack_type - 0x80]++;
 
     return CUEIFY_OK;
 }  /* flush_cdtext_writer */
@@ -1017,6 +1018,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 				    if (write_cdtext_track_data(
 					    &writer, data, 1, trk) !=
 					CUEIFY_OK) {
+					data = NULL;
 					goto error;
 				    }
 				    if (trk == 0) {
