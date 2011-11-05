@@ -91,7 +91,7 @@ cueify_msf_t expected_indices[15][11] = {
 	{15, 53, 57},
 	{17, 2, 42},
 	{17, 9, 62},
-	{18, 2, 27},
+	{18, 3, 27},
 	ZERO, ZERO, ZERO, ZERO, ZERO
     },
     {
@@ -101,7 +101,7 @@ cueify_msf_t expected_indices[15][11] = {
     {
 	{22, 0, 50},
 	{24, 38, 0},
-	{25, 48, 47},
+	{25, 50, 33},  /* This is off by 2 seconds from the online report?? */
 	ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO
     },
     {

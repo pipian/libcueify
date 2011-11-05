@@ -41,6 +41,13 @@ static inline void lba_to_msf(uint32_t lba, cueify_msf_t *msf) {
     msf->min = lba / 75 / 60;
     msf->sec = lba / 75 % 60;
     msf->frm = lba % 75;
+
+    /* It really should be the MSF value. */
+    msf->sec += 2;
+    if (msf->sec > 59) {
+	msf->min++;
+	msf->sec -= 60;
+    }
 }
 
 
