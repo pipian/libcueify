@@ -37,10 +37,11 @@ size_t ascii_byte_count(char *utf8) {
 	character = 0;
 	if (*bp <= 0x7F) {
 	    /* 1-byte codepoint */
-	    character = *bp;
+	    character = *bp++;
 	} else if (*bp <= 0xBF) {
 	    /* Invalid codepoint */
 	    character = '?';
+	    bp++;
 	} else if (*bp <= 0xDF) {
 	    /* 2-byte codepoint */
 	    character  = (*bp++ & 0x1F) << 6;
@@ -103,10 +104,11 @@ uint8_t *utf8_to_ascii(char *utf8, size_t *size) {
 	character = 0;
 	if (*bp <= 0x7F) {
 	    /* 1-byte codepoint */
-	    character = *bp;
+	    character = *bp++;
 	} else if (*bp <= 0xBF) {
 	    /* Invalid codepoint */
 	    character = '?';
+	    bp++;
 	} else if (*bp <= 0xDF) {
 	    /* 2-byte codepoint */
 	    character  = (*bp++ & 0x1F) << 6;
