@@ -139,11 +139,12 @@ void setup() {
     b->titles[4] = b->titles[5] = b->titles[6] = b->titles[7] = b->titles[8] =
 	b->titles[9] = b->titles[10] = b->titles[11] = b->titles[12] = "";
     b->performers[0] = "\xE3\x83\x87\xE3\x83\xB4\xE3\x82\xA3\xE3\x83\x83"
-	"\xE3\x83\x89\xE3\x83\xBB\xE3\x89\x9C\xE3\x82\xA6\xE3\x82\xA4";
+	"\xE3\x83\x89\xE3\x83\xBB\xE3\x83\x9C\xE3\x82\xA6\xE3\x82\xA4";
     b->performers[1] = b->performers[2] = b->performers[3] = b->performers[4] =
 	b->performers[5] = b->performers[6] = b->performers[7] =
-	b->performers[8] = b->performers[9] = b->performers[10] =
-	b->performers[11] = b->performers[12] = "\t";
+	b->performers[8] = b->performers[9] = b->performers[10] = "\t";
+    b->performers[11] = "\xF0\x9F\x8E\xA4";
+    b->performers[12] = "\xE2\x84\x97\xF3\xA0\x87\xAF";
 
     mock_cdtext.toc.first_track_number = 1;
     mock_cdtext.toc.last_track_number = 13;
