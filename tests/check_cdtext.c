@@ -151,6 +151,9 @@ void setup() {
     for (i = 0; i < 13; i++) {
 	mock_cdtext.toc.offsets[i + 1] = offsets[i];
     }
+    mock_cdtext.toc.offsets[0].min = 57;
+    mock_cdtext.toc.offsets[0].sec = 35;
+    mock_cdtext.toc.offsets[0].frm = 13;
     mock_cdtext.toc.num_intervals[2] = 2;
     mock_cdtext.toc.intervals[2] = mock_cdtext_intervals;
 }

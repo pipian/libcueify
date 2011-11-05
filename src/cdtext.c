@@ -1207,6 +1207,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 			track_data[1] = cdtext->toc.offsets[track].sec;
 			track_data[2] = cdtext->toc.offsets[track].frm;
 
+			data = track_data;
 			if (write_cdtext_track_data(&writer, data, 3, track) !=
 			    CUEIFY_OK) {
 			    goto error;
