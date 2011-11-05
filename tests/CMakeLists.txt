@@ -35,8 +35,14 @@ IF(LIBCHECK_FOUND)
     ADD_EXECUTABLE(check_unportable check_unportable.c)
     ADD_DEPENDENCIES(check check_unportable)
     ADD_DEPENDENCIES(check-unportable check_unportable)
+
+    ADD_CUSTOM_TARGET(check-indices
+		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_indices)
+    ADD_EXECUTABLE(check_indices check_indices.c)
+    ADD_DEPENDENCIES(check check_indices)
+    ADD_DEPENDENCIES(check-indices check_indices)
 ENDIF(LIBCHECK_FOUND)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -g")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)

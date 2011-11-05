@@ -7,6 +7,9 @@ check:
 check-unportable:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check-unportable
 
+check-indices:
+	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check-indices
+
 docs:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make docs
 
