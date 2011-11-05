@@ -313,12 +313,16 @@ START_TEST (test_deserialize)
 			"Deserialized CD-Text UPCs/ISRCs incorrect");
 	}
 
-	fail_unless(strcmp(deserialized_block->discid,
+	fail_unless((deserialized_block->discid == NULL &&
+		     mock_block->discid == NULL) ||
+		    strcmp(deserialized_block->discid,
 			   mock_block->discid) == 0,
 		    "Deserialized CD-Text block discid incorrect");
 	fail_unless(deserialized_block->genre_code == mock_block->genre_code,
 		    "Deserialized CD-Text block genre code incorrect");
-	fail_unless(strcmp(deserialized_block->genre_name,
+	fail_unless((deserialized_block->genre_name == NULL &&
+		     mock_block->genre_name == NULL) ||
+		    strcmp(deserialized_block->genre_name,
 			   mock_block->genre_name) == 0,
 		    "Deserialized CD-Text block genre name incorrect");
     }
