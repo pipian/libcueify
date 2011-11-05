@@ -135,9 +135,9 @@ void setup() {
     b->titles[0] = "\xE3\x83\x92\xE3\x83\xBC\xE3\x82\xBC\xE3\x83\xB3";
     b->titles[1] = "\t";
     b->titles[2] = "\xE3\x82\xAB\xE3\x82\xAF\xE3\x82\xBF\xE3\x82\xB9";
-    b->titles[3] = b->titles[4] = b->titles[5] = b->titles[6] = b->titles[7] =
-	b->titles[8] = b->titles[9] = b->titles[10] = b->titles[11] =
-	b->titles[12] = "\t";
+    b->titles[3] = "\t";
+    b->titles[4] = b->titles[5] = b->titles[6] = b->titles[7] = b->titles[8] =
+	b->titles[9] = b->titles[10] = b->titles[11] = b->titles[12] = "";
     b->performers[0] = "\xE3\x83\x87\xE3\x83\xB4\xE3\x82\xA3\xE3\x83\x83"
 	"\xE3\x83\x89\xE3\x83\xBB\xE3\x89\x9C\xE3\x82\xA6\xE3\x82\xA4";
     b->performers[1] = b->performers[2] = b->performers[3] = b->performers[4] =
