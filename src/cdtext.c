@@ -729,7 +729,8 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 		     track++) {
 		    /* Count the number of bytes we'd need to encode
 		     * the value. */
-		    if (datum[track][0] != '\0' || pack_type_len > 0) {
+		    if (datum[track] &&
+			(datum[track][0] != '\0' || pack_type_len > 0)) {
 			switch (cdtext->blocks[block].charset) {
 			case CUEIFY_CDTEXT_CHARSET_ASCII:
 			    if (pack_type_len == 0) {
@@ -980,7 +981,8 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 		     track++) {
 		    /* Count the number of bytes we'd need to encode
 		     * the value. */
-		    if (datum[track][0] != '\0' || already_wrote_track) {
+		    if (datum[track] &&
+			(datum[track][0] != '\0' || already_wrote_track)) {
 			switch (cdtext->blocks[block].charset) {
 			case CUEIFY_CDTEXT_CHARSET_ASCII:
 			    if (!already_wrote_track) {
