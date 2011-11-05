@@ -34,6 +34,7 @@
 #include <libcueify/full_toc.h>
 #include <libcueify/cdtext.h>
 #include <libcueify/mcn_isrc.h>
+#include <libcueify/data_mode.h>
 
 #include "check_unportable.cdt.h"
 
@@ -237,6 +238,25 @@ START_TEST (test_mcn_isrc)
 END_TEST
 
 
+START_TEST (test_data_mode)
+{
+    int data_modes[] = {
+	CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA,
+	CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA,
+	CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA,
+	CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA, CUEIFY_DATA_MODE_CDDA,
+	CUEIFY_DATA_MODE_MODE_2
+    };
+    int i;
+
+    for (i = 0; i < 13; i++) {
+	fail_unless(cueify_device_read_data_mode(dev, i + 1) == data_modes[i],
+		    "Failed to read data mode from device");
+    }
+}
+END_TEST
+
+
 Suite *toc_suite() {
     Suite *s = suite_create("unportable");
     TCase *tc_core = tcase_create("core");
@@ -253,6 +273,7 @@ Suite *toc_suite() {
     tcase_set_timeout(tc_seekbased, 10);
     tcase_add_checked_fixture(tc_seekbased, setup, teardown);
     tcase_add_test(tc_seekbased, test_mcn_isrc);
+    tcase_add_test(tc_seekbased, test_data_mode);
     suite_add_tcase(s, tc_seekbased);
 
     return s;
