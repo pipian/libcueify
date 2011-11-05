@@ -222,7 +222,7 @@ START_TEST (test_mcn_isrc)
 
     fail_unless(cueify_device_read_mcn(dev, buffer, &size) == CUEIFY_NO_DATA,
 		"Failed to (not) read media catalog number from device");
-    fail_unless(size == 0, "Media catalog number size incorrect");
+    fail_unless(size == 1, "Media catalog number size incorrect");
     fail_unless(strcmp(buffer, "") == 0, "Media catalog number not empty");
 
     for (i = 0; i < 12; i++) {
@@ -230,7 +230,7 @@ START_TEST (test_mcn_isrc)
 	fail_unless(cueify_device_read_isrc(dev, i + 1, buffer,
 					    &size) == CUEIFY_OK,
 		    "Failed to read ISRC from device");
-	fail_unless(size == 12, "ISRC size incorrect");
+	fail_unless(size == 13, "ISRC size incorrect");
 	fail_unless(strcmp(buffer, isrcs[i]) == 0, "ISRC not correct");
     }
 }

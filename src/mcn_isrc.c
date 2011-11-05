@@ -34,7 +34,7 @@
 int cueify_device_read_mcn(cueify_device *d, char *buffer, size_t *size) {
     cueify_device_private *dev = (cueify_device_private *)d;
 
-    if (d == NULL) {
+    if (d == NULL || buffer == NULL || size == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
 
@@ -46,7 +46,7 @@ int cueify_device_read_isrc(cueify_device *d, uint8_t track,
 			    char *buffer, size_t *size) {
     cueify_device_private *dev = (cueify_device_private *)d;
 
-    if (d == NULL) {
+    if (d == NULL || buffer == NULL || size == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
 

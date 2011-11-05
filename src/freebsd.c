@@ -403,12 +403,18 @@ int cueify_device_read_mcn_unportable(cueify_device_private *d,
     if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &subchannel) < 0) {
 	return CUEIFY_ERR_INTERNAL;
     } else if (!info.what.media_catalog.mc_valid) {
+	if (*size > 0) {
+	    *size = 1;
+	    buffer[0] = '\0';
+	}
 	return CUEIFY_NO_DATA;
     }
 
     *size = min(sizeof(info.what.media_catalog.mc_number) + 1, *size);
-    memcpy(buffer, info.what.media_catalog.mc_number, *size - 1);
-    buffer[*size - 1] = '\0';
+    if (*size > 0) {
+	memcpy(buffer, info.what.media_catalog.mc_number, *size - 1);
+	buffer[*size - 1] = '\0';
+    }
 
     return CUEIFY_OK;
 }  /* cueify_device_read_mcn_unportable */
@@ -430,12 +436,18 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
     if (ioctl(d->handle, CDIOCREADSUBCHANNEL, &subchannel) < 0) {
 	return CUEIFY_ERR_INTERNAL;
     } else if (!info.what.track_info.ti_valid) {
+	if (*size > 0) {
+	    *size = 1;
+	    buffer[0] = '\0';
+	}
 	return CUEIFY_NO_DATA;
     }
 
     *size = min(sizeof(info.what.track_info.ti_number) + 1, *size);
-    memcpy(buffer, info.what.track_info.ti_number, *size - 1);
-    buffer[*size - 1] = '\0';
+    if (*size > 0) {
+	memcpy(buffer, info.what.track_info.ti_number, *size - 1);
+	buffer[*size - 1] = '\0';
+    }
 
     return CUEIFY_OK;
 }  /* cueify_device_read_isrc_unportable */
