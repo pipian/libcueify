@@ -1033,6 +1033,8 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 			    if (!already_wrote_track) {
 				/* We must encode terminators for
 				 * everything we don't care about. */
+				already_wrote_track = 1;
+				data = terminator;
 				for (trk = 0; trk < track; trk++) {
 				    if (write_cdtext_track_data(
 					    &writer, data, 1, trk) !=
@@ -1066,6 +1068,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 				/* We must encode terminators for
 				 * everything we don't care about. */
 				already_wrote_track = 1;
+				data = terminator;
 				for (trk = 0; trk < track; trk++) {
 				    if (write_cdtext_track_data(
 					    &writer, data, 2, trk) !=
