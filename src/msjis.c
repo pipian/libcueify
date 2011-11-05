@@ -247,6 +247,13 @@ uint8_t *utf8_to_msjis(char *utf8, size_t *size) {
     const struct multibyte_codepoint * const *subtable;
     const struct multibyte_codepoint *table;
 
+    *size = (strlen(utf8) + 1) * 2;
+    output = malloc(*size);
+    if (output == NULL) {
+	return NULL;
+    }
+    output_ptr = output;
+
     master_table = reverse_master_table;
     while (*bp != 0) {
 	character = 0;
