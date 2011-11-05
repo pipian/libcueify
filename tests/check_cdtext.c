@@ -34,7 +34,8 @@
 #include "check_cdtext.cdt.h"
 
 cueify_cdtext_private mock_cdtext;
-cueify_cdtext_toc_track_interval_private mock_cdtext_intervals[2] = {
+cueify_cdtext_toc_track_interval_private mock_cdtext_intervals[3] = {
+    {{0, 0, 0}, {0, 0, 0}},  /* Index 0 is not used. */
     {{3, 4, 5}, {3, 4, 6}},
     {{4, 5, 6}, {4, 5, 10}}
 };

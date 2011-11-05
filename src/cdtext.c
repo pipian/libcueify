@@ -1258,6 +1258,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 				    cdtext->toc.intervals[track][interval]
 				    .end.frm;
 
+				data = interval_data;
 				if (write_cdtext_track_data(&writer, data,
 							    12, track) !=
 				    CUEIFY_OK) {
@@ -1267,6 +1268,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 			}
 		    }
 		}
+		break;
 	    case 15:  /* 0x8F = SIZEINFO */
 		/* Three descriptors. */
 		if (finish_writing_cdtext_block(&writer) != CUEIFY_OK) {
