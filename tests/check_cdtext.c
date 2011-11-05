@@ -189,6 +189,7 @@ START_TEST (test_deserialize)
 {
     cueify_cdtext_private deserialized_mock_cdtext;
     cueify_cdtext *cdtext = (cueify_cdtext *)&deserialized_mock_cdtext;
+    int i, j;
 
     memset(&deserialized_mock_cdtext, 0, sizeof(deserialized_mock_cdtext));
 
@@ -196,9 +197,132 @@ START_TEST (test_deserialize)
 					  sizeof(serialized_mock_cdtext)) ==
 		CUEIFY_OK,
 		"Could not deserialize CD-Text");
-    fail_unless(memcmp(&deserialized_mock_cdtext, &mock_cdtext,
-		       sizeof(mock_cdtext)) == 0,
-		"Deserialized CD-Text incorrect");
+    /*
+     * Because of pointers, we can no longer do a memcmp between the
+     * two objects.
+     */
+    /* Start by comparing the toc field */
+    fail_unless(deserialized_mock_cdtext.toc.first_track_number ==
+		mock_cdtext.toc.first_track_number,
+		"Deserialized CD-Text TOC first track number incorrect");
+    fail_unless(deserialized_mock_cdtext.toc.last_track_number ==
+		mock_cdtext.toc.last_track_number,
+		"Deserialized CD-Text TOC last track number incorrect");
+    for (i = 0; i < MAX_TRACKS; i++) {
+	fail_unless(memcmp(&deserialized_mock_cdtext.toc.offsets[i],
+			   &mock_cdtext.toc.offsets[i],
+			   sizeof(cueify_msf_t)) == 0,
+		    "Deserialized CD-Text TOC offsets incorrect");
+	fail_unless(deserialized_mock_cdtext.toc.num_intervals[i] ==
+		    mock_cdtext.toc.num_intervals[i],
+		    "Deserialized CD-Text interval counts incorrect");
+	if (deserialized_mock_cdtext.toc.num_intervals[i] ==
+	    mock_cdtext.toc.num_intervals[i] &&
+	    deserialized_mock_cdtext.toc.num_intervals[i] != 0) {
+	    for (j = 0;
+		 j <= deserialized_mock_cdtext.toc.num_intervals[i];
+		 j++) {
+		fail_unless(
+		    memcmp(
+			&deserialized_mock_cdtext.toc.intervals[i][j],
+			&mock_cdtext.toc.intervals[i][j],
+			sizeof(cueify_cdtext_toc_track_interval_private)) == 0,
+		    "Deserialized CD-Text intervals incorrect");
+	    }
+	} else if (deserialized_mock_cdtext.toc.num_intervals[i] ==
+		   mock_cdtext.toc.num_intervals[i]) {
+	    fail_unless(deserialized_mock_cdtext.toc.intervals[i] == NULL,
+			"Deserialized CD-Text intervals incorrect");
+	}
+    }
+
+    /* Now test the blocks. */
+    for (i = 0; i < MAX_BLOCKS; i++) {
+	cueify_cdtext_block_private *deserialized_block =
+	    &deserialized_mock_cdtext.blocks[i];
+	cueify_cdtext_block_private *mock_block =
+	    &mock_cdtext.blocks[i];
+
+	fail_unless(deserialized_block->valid == mock_block->valid,
+		    "Deserialized CD-Text block validities incorrect");
+	fail_unless(deserialized_block->charset == mock_block->charset,
+		    "Deserialized CD-Text block character sets incorrect");
+	fail_unless(deserialized_block->language == mock_block->language,
+		    "Deserialized CD-Text block languages incorrect");
+	fail_unless(deserialized_block->first_track_number ==
+		    mock_block->first_track_number,
+		    "Deserialized CD-Text block first track number incorrect");
+	fail_unless(deserialized_block->last_track_number ==
+		    mock_block->last_track_number,
+		    "Deserialized CD-Text block last track number incorrect");
+	fail_unless(deserialized_block->program_cdtext ==
+		    mock_block->program_cdtext,
+		    "Deserialized CD-Text block program CD-Text incorrect");
+	fail_unless(deserialized_block->program_copyright ==
+		    mock_block->program_copyright,
+		    "Deserialized CD-Text block program copyright incorrect");
+	fail_unless(deserialized_block->message_copyright ==
+		    mock_block->message_copyright,
+		    "Deserialized CD-Text block message copyright incorrect");
+	fail_unless(deserialized_block->name_copyright ==
+		    mock_block->name_copyright,
+		    "Deserialized CD-Text block name copyright incorrect");
+	fail_unless(deserialized_block->title_copyright ==
+		    mock_block->title_copyright,
+		    "Deserialized CD-Text block title copyright incorrect");
+
+	for (j = 0; j < MAX_TRACKS; j++) {
+	    fail_unless((deserialized_block->titles[i] == NULL &&
+			 mock_block->titles[i] == NULL) ||
+			strcmp(deserialized_block->titles[i],
+			       mock_block->titles[i]) == 0,
+			"Deserialized CD-Text titles incorrect");
+	    fail_unless((deserialized_block->performers[i] == NULL &&
+			 mock_block->performers[i] == NULL) ||
+			strcmp(deserialized_block->performers[i],
+			       mock_block->performers[i]) == 0,
+			"Deserialized CD-Text performers incorrect");
+	    fail_unless((deserialized_block->songwriters[i] == NULL &&
+			 mock_block->songwriters[i] == NULL) ||
+			strcmp(deserialized_block->songwriters[i],
+			       mock_block->songwriters[i]) == 0,
+			"Deserialized CD-Text songwriters incorrect");
+	    fail_unless((deserialized_block->composers[i] == NULL &&
+			 mock_block->composers[i] == NULL) ||
+			strcmp(deserialized_block->composers[i],
+			       mock_block->composers[i]) == 0,
+			"Deserialized CD-Text composers incorrect");
+	    fail_unless((deserialized_block->arrangers[i] == NULL &&
+			 mock_block->arrangers[i] == NULL) ||
+			strcmp(deserialized_block->arrangers[i],
+			       mock_block->arrangers[i]) == 0,
+			"Deserialized CD-Text arrangers incorrect");
+	    fail_unless((deserialized_block->messages[i] == NULL &&
+			 mock_block->messages[i] == NULL) ||
+			strcmp(deserialized_block->messages[i],
+			       mock_block->messages[i]) == 0,
+			"Deserialized CD-Text messages incorrect");
+	    fail_unless((deserialized_block->private[i] == NULL &&
+			 mock_block->private[i] == NULL) ||
+			strcmp(deserialized_block->private[i],
+			       mock_block->private[i]) == 0,
+			"Deserialized CD-Text private data incorrect");
+	    fail_unless((deserialized_block->upc_isrcs[i] == NULL &&
+			 mock_block->upc_isrcs[i] == NULL) ||
+			strcmp(deserialized_block->upc_isrcs[i],
+			       mock_block->upc_isrcs[i]) == 0,
+			"Deserialized CD-Text UPCs/ISRCs incorrect");
+	}
+
+	fail_unless(strcmp(deserialized_block->discid,
+			   mock_block->discid) == 0,
+		    "Deserialized CD-Text block discid incorrect");
+	fail_unless(deserialized_block->genre_code == mock_block->genre_code,
+		    "Deserialized CD-Text block genre code incorrect");
+	fail_unless(strcmp(deserialized_block->genre_name,
+			   mock_block->genre_name) == 0,
+		    "Deserialized CD-Text block genre name incorrect");
+    }
 }
 END_TEST
 
