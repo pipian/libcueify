@@ -547,13 +547,24 @@ static int write_cdtext_track_data(struct cueify_cdtext_writer *writer,
 	if (flush_cdtext_writer(writer) != CUEIFY_OK) {
 	    return CUEIFY_ERR_INTERNAL;
 	}
+	/* Need to reset charpos and track if we are still writing... */
+	if (size >= 12 - writer->size) {
+	    writer->track = track;
+	    writer->charpos = data_ptr - data;
+	    if (writer->charpos > 15) {
+		writer->charpos = 15;
+	    }
+	}
     }
     if (size > 0) {
 	memcpy(writer->buffer + writer->size, data_ptr, size);
-	writer->track = track;
-	writer->charpos = data_ptr - data;
-	if (writer->charpos > 15) {
-	    writer->charpos = 15;
+	/* Only set track and charpos if we haven't yet done so. */
+	if (writer->size == 0) {
+	    writer->track = track;
+	    writer->charpos = data_ptr - data;
+	    if (writer->charpos > 15) {
+		writer->charpos = 15;
+	    }
 	}
 	writer->size += size;
     }
