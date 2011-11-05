@@ -325,18 +325,7 @@ int cueify_cdtext_deserialize(cueify_cdtext *t, uint8_t *buffer,
 			     track++) {
 			    /* Skip to next track entry. */
 			    data_ptr += strlen(data_ptr) + 1;
-			    /* Handle the TAB character/repeating values. */
-			    if (strcmp(data_ptr, "\t") == 0) {
-				if (track ==
-				    cdtext->blocks[block].first_track_number) {
-				    /* Dup the album-wide value. */
-				    datum[track] = strdup(datum[0]);
-				} else {
-				    datum[track] = strdup(datum[track - 1]);
-				}
-			    } else {
-				datum[track] = strdup(data_ptr);
-			    }
+			    datum[track] = strdup(data_ptr);
 			    if (datum[track] == NULL) {
 				/* Failed to strdup */
 				goto error;
@@ -1595,6 +1584,11 @@ const char *cueify_cdtext_block_get_title(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->titles[track] != NULL &&
+	   strcmp(block->titles[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->titles[track];
 }  /* cueify_cdtext_block_get_title */
 
@@ -1610,6 +1604,11 @@ const char *cueify_cdtext_block_get_performer(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->performers[track] != NULL &&
+	   strcmp(block->performers[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->performers[track];
 }  /* cueify_cdtext_block_get_performer */
 
@@ -1625,6 +1624,11 @@ const char *cueify_cdtext_block_get_songwriter(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->songwriters[track] != NULL &&
+	   strcmp(block->songwriters[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->songwriters[track];
 }  /* cueify_cdtext_block_get_songwriter */
 
@@ -1640,6 +1644,11 @@ const char *cueify_cdtext_block_get_composer(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->composers[track] != NULL &&
+	   strcmp(block->composers[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->composers[track];
 }  /* cueify_cdtext_block_get_composer */
 
@@ -1655,6 +1664,11 @@ const char *cueify_cdtext_block_get_arranger(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->arrangers[track] != NULL &&
+	   strcmp(block->arrangers[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->arrangers[track];
 }  /* cueify_cdtext_block_get_arranger */
 
@@ -1670,6 +1684,11 @@ const char *cueify_cdtext_block_get_message(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->messages[track] != NULL &&
+	   strcmp(block->messages[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->messages[track];
 }  /* cueify_cdtext_block_get_message */
 
@@ -1685,6 +1704,11 @@ const char *cueify_cdtext_block_get_private(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->private[track] != NULL &&
+	   strcmp(block->private[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->private[track];
 }  /* cueify_cdtext_block_get_private */
 
@@ -1700,6 +1724,11 @@ const char *cueify_cdtext_block_get_upc_isrc(cueify_cdtext_block *b,
 	return NULL;
     }
 
+    while (block->upc_isrcs[track] != NULL &&
+	   strcmp(block->upc_isrcs[track], "\t") == 0 &&
+	   track > 0) {
+	track--;
+    }
     return block->upc_isrcs[track];
 }  /* cueify_cdtext_block_get_upc_isrc */
 
