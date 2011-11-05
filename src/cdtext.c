@@ -1242,12 +1242,12 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 			 track <= cdtext->toc.last_track_number;
 			 track++) {
 			if (cdtext->toc.num_intervals[track] != 0) {
-			    for (interval = 1;
-				 interval <= cdtext->toc.num_intervals[track];
+			    for (interval = 0;
+				 interval < cdtext->toc.num_intervals[track];
 				 interval++) {
 				uint8_t interval_data[12];
 
-				interval_data[0] = (uint8_t)interval;
+				interval_data[0] = (uint8_t)interval + 1;
 				interval_data[1] =
 				    cdtext->toc.num_intervals[track];
 				interval_data[2] = 0;
@@ -1414,11 +1414,12 @@ cueify_msf_t cueify_cdtext_get_toc_track_interval_start(cueify_cdtext *t,
     if (t == NULL ||
 	track < cdtext->toc.first_track_number ||
 	track > cdtext->toc.last_track_number ||
-	interval < cdtext->toc.num_intervals[track]) {
+	interval == 0 ||
+	interval > cdtext->toc.num_intervals[track]) {
 	return zero;
     }
 
-    return cdtext->toc.intervals[track][interval].start;
+    return cdtext->toc.intervals[track][interval - 1].start;
 }  /* cueify_cdtext_get_toc_track_interval_start */
 
 
@@ -1433,11 +1434,12 @@ cueify_msf_t cueify_cdtext_get_toc_track_interval_end(cueify_cdtext *t,
     if (t == NULL ||
 	track < cdtext->toc.first_track_number ||
 	track > cdtext->toc.last_track_number ||
-	interval < cdtext->toc.num_intervals[track]) {
+	interval == 0 ||
+	interval > cdtext->toc.num_intervals[track]) {
 	return zero;
     }
 
-    return cdtext->toc.intervals[track][interval].end;
+    return cdtext->toc.intervals[track][interval - 1].end;
 }  /* cueify_cdtext_get_toc_track_interval_end */
 
 
