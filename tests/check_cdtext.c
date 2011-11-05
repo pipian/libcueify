@@ -377,7 +377,7 @@ START_TEST (test_block_getters)
     fail_unless(cueify_cdtext_block_get_last_track(block) == 12,
 		"Last track in CD-Text block did not match");
     fail_unless(cueify_cdtext_block_get_charset(block) ==
-		CUEIFY_CDTEXT_CHARSET_ISO8859_1,
+		CUEIFY_CDTEXT_CHARSET_ASCII,
 		"Character set of CD-Text block did not match");
     fail_unless(cueify_cdtext_block_get_language(block) ==
 		CUEIFY_CDTEXT_LANG_ENGLISH,
@@ -403,39 +403,46 @@ START_TEST (test_block_getters)
 							 CUEIFY_CDTEXT_ALBUM),
 		       "David Bowie") == 0,
 		"Album performer in CD-Text block did not match");
-    fail_unless(cueify_cdtext_block_get_performer(block, 1) == NULL,
-		"Track performer in CD-Text block did not match");
+    fail_unless(strcmp(cueify_cdtext_block_get_performer(block, 1),
+		       "David Bowie") == 0,
+		"Track performer in CD-Text block did not match (with tab)");
     fail_unless(strcmp(cueify_cdtext_block_get_songwriter(block,
 							  CUEIFY_CDTEXT_ALBUM),
-		       "David Bowie") == 0,
+		       "ASongwriter") == 0,
 		"Album songwriter in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_songwriter(block, 1),
-		       "") == 0,
+		       "TSongwriter") == 0,
 		"Track songwriter in CD-Text block did not match");
+    fail_unless(strcmp(cueify_cdtext_block_get_songwriter(block, 2),
+		       "TSongwriter") == 0,
+		"Track songwriter in CD-Text block did not match (with tab)");
     fail_unless(strcmp(cueify_cdtext_block_get_composer(block,
 							CUEIFY_CDTEXT_ALBUM),
-		       "") == 0,
+		       "AlbComposer") == 0,
 		"Album composer in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_composer(block, 1),
-		       "") == 0,
+		       "TrkComposer") == 0,
 		"Track composer in CD-Text block did not match");
+    fail_unless(strcmp(cueify_cdtext_block_get_composer(block, 9),
+		       "Tk2Composer") == 0,
+		"Track composer in CD-Text block did not match (with tab)");
     fail_unless(strcmp(cueify_cdtext_block_get_arranger(block,
 							CUEIFY_CDTEXT_ALBUM),
-		       "") == 0,
+		       "AlbArranger") == 0,
 		"Album arranger in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_arranger(block, 1),
-		       "") == 0,
+		       "TrkArranger") == 0,
 		"Track arranger in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_message(block,
 						       CUEIFY_CDTEXT_ALBUM),
-		       "") == 0,
+		       "AlbMessages") == 0,
 		"Album message in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_message(block, 1),
-		       "") == 0,
+		       "TrkMessages") == 0,
 		"Track message in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_private(block,
 						       CUEIFY_CDTEXT_ALBUM),
-		       "") == 0,
+		       "OnlyPrivate") == 0,
 		"Album private data in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_private(block, 1),
 		       "") == 0,
@@ -445,15 +452,15 @@ START_TEST (test_block_getters)
 		       "") == 0,
 		"Album UPC data in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_upc_isrc(block, 1),
-		       "") == 0,
+		       "US-RF3-02-00001") == 0,
 		"Track ISRC data in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_discid(block),
-		       "") == 0,
+		       "CK86630") == 0,
 		"DiscID in CD-Text block did not match");
-    fail_unless(cueify_cdtext_block_get_genre_code(block) == 20,
+    fail_unless(cueify_cdtext_block_get_genre_code(block) == 32,
 		"Genre code in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_genre_name(block),
-		       "") == 0,
+		       "Genre #32") == 0,
 		"Genre name in CD-Text block did not match");
 }
 END_TEST
@@ -473,10 +480,12 @@ START_TEST (test_japanese)
 		"Language of Japanese CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_title(block,
 						     CUEIFY_CDTEXT_ALBUM),
-		       "Heathen") == 0,
+		       "\xE3\x83\x92\xE3\x83\xBC\xE3\x82\xBC\xE3\x83\xB3")
+		== 0,
 		"Album title in CD-Text block did not match");
     fail_unless(strcmp(cueify_cdtext_block_get_title(block, 1),
-		       "") == 0,
+		       "\xE3\x83\x92\xE3\x83\xBC\xE3\x82\xBC\xE3\x83\xB3")
+		== 0,
 		"Track title in CD-Text block did not match");
 }
 END_TEST
