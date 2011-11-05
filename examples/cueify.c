@@ -775,6 +775,13 @@ int print_cuesheet(const char *device) {
 	    offset = lba_to_msf(cueify_toc_get_track_address(toc, i));
 
 	    if (has_pregap) {
+		/* Adjust the pregap */
+		if (pregap.sec < 2) {
+		    pregap.min--;
+		    pregap.sec += 60;
+		}
+		pregap.sec -= 2;
+
 		printf("      INDEX 00 %02d:%02d:%02d\n",
 		       pregap.min,
 		       pregap.sec,
@@ -806,17 +813,23 @@ int print_cuesheet(const char *device) {
 								 block_num);
 			has_pregap = 1;
 			continue;
-		    } else if (cueify_indices_get_index_number(indices,
-							       block_num) == 1) {
+		    } else if (cueify_indices_get_index_number(
+				   indices, block_num) == 1) {
 			/* Ignore index 1 (as it should be the TOC offset. */
 			continue;
 		    }
 
 		    offset = cueify_indices_get_index_offset(indices,
 							     block_num);
+		    /* Adjust the index offset */
+		    if (offset.sec < 2) {
+			offset.min--;
+			offset.sec += 60;
+		    }
+		    offset.sec -= 2;
 
 		    printf("      INDEX %02d %02d:%02d:%02d\n",
-			   block_num + 2,
+			   block_num + 1,
 			   offset.min,
 			   offset.sec,
 			   offset.frm);
