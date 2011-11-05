@@ -220,18 +220,18 @@ START_TEST (test_getters)
     fail_unless(cueify_cdtext_get_toc_num_track_intervals(cdtext, 2) == 2,
 		"Number of intervals of track in CD-Text TOC did not match");
     fail_unless(cueify_cdtext_get_toc_track_interval_start(cdtext,
-							   2, 0).min == 4 &&
+							   2, 2).min == 4 &&
 		cueify_cdtext_get_toc_track_interval_start(cdtext,
-							   2, 0).sec == 5 &&
+							   2, 2).sec == 5 &&
 		cueify_cdtext_get_toc_track_interval_start(cdtext,
-							   2, 0).frm == 6,
+							   2, 2).frm == 6,
 		"Interval start in CD-Text TOC did not match");
     fail_unless(cueify_cdtext_get_toc_track_interval_end(cdtext,
-							 2, 0).min == 4 &&
+							 2, 2).min == 4 &&
 		cueify_cdtext_get_toc_track_interval_end(cdtext,
-							 2, 0).sec == 5 &&
+							 2, 2).sec == 5 &&
 		cueify_cdtext_get_toc_track_interval_end(cdtext,
-							 2, 0).frm == 10,
+							 2, 2).frm == 10,
 		"Interval start in CD-Text TOC did not match");
     fail_unless(cueify_cdtext_get_num_blocks(cdtext) == 2,
 		"Number of blocks in CD-Text did not match");
