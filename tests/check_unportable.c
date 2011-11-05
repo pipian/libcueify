@@ -32,6 +32,9 @@
 #include <libcueify/toc.h>
 #include <libcueify/sessions.h>
 #include <libcueify/full_toc.h>
+#include <libcueify/cdtext.h>
+
+#include "check_unportable.cdt.h"
 
 /* Create a binary track descriptor from a TOC. */
 #define TRACK_DESCRIPTOR(adr, ctrl, track, address) \
@@ -184,6 +187,29 @@ START_TEST (test_full_toc)
 END_TEST
 
 
+START_TEST (test_cdtext)
+{
+    cueify_cdtext *cdtext;
+    size_t size = sizeof(expected_cdtext);
+    uint8_t buffer[sizeof(expected_cdtext)];
+
+    cdtext = cueify_cdtext_new();
+    fail_unless(cdtext != NULL, "Failed to create cueify_cdtext object");
+    fail_unless(cueify_device_read_cdtext(dev, cdtext) == CUEIFY_OK,
+		"Failed to read CD-Text from device");
+    fail_unless(cueify_cdtext_serialize(cdtext, buffer, 
+					  &size) == CUEIFY_OK,
+		"Could not serialize CD-Text");
+    fail_unless(size == sizeof(expected_cdtext),
+		"CD-Text size incorrect");
+    fail_unless(memcmp(buffer, expected_cdtext,
+		       sizeof(expected_cdtext)) == 0,
+		"CD-Text incorrect");
+    cueify_cdtext_free(cdtext);
+}
+END_TEST
+
+
 Suite *toc_suite() {
     Suite *s = suite_create("unportable");
     TCase *tc_core = tcase_create("core");
@@ -192,6 +218,7 @@ Suite *toc_suite() {
     tcase_add_test(tc_core, test_toc);
     tcase_add_test(tc_core, test_sessions);
     tcase_add_test(tc_core, test_full_toc);
+    tcase_add_test(tc_core, test_cdtext);
     suite_add_tcase(s, tc_core);
 
     return s;
