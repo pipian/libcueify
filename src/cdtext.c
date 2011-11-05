@@ -384,10 +384,10 @@ int cueify_cdtext_deserialize(cueify_cdtext *t, uint8_t *buffer,
 			cdtext->toc.offsets[track].min =
 			    pack_data[block][pack_type]
 			    [12+(track - cdtext->toc.first_track_number)*3];
-			cdtext->toc.offsets[track].min =
+			cdtext->toc.offsets[track].sec =
 			    pack_data[block][pack_type]
 			    [12+(track - cdtext->toc.first_track_number)*3+1];
-			cdtext->toc.offsets[track].min =
+			cdtext->toc.offsets[track].frm =
 			    pack_data[block][pack_type]
 			    [12+(track - cdtext->toc.first_track_number)*3+2];
 		    }
