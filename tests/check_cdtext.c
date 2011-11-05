@@ -185,6 +185,8 @@ START_TEST (test_deserialize)
     cueify_cdtext_private deserialized_mock_cdtext;
     cueify_cdtext *cdtext = (cueify_cdtext *)&deserialized_mock_cdtext;
 
+    memset(&deserialized_mock_cdtext, 0, sizeof(deserialized_mock_cdtext));
+
     fail_unless(cueify_cdtext_deserialize(cdtext, serialized_mock_cdtext,
 					  sizeof(serialized_mock_cdtext)) ==
 		CUEIFY_OK,
