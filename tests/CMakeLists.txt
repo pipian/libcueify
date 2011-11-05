@@ -26,6 +26,10 @@ IF(LIBCHECK_FOUND)
     ADD_TEST(check_full_toc check_full_toc)
     ADD_DEPENDENCIES(check check_full_toc)
     
+    ADD_EXECUTABLE(check_cdtext check_cdtext.c)
+    ADD_TEST(check_cdtext check_cdtext)
+    ADD_DEPENDENCIES(check check_cdtext)
+    
     ADD_CUSTOM_TARGET(check-unportable
 		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_unportable)
     ADD_EXECUTABLE(check_unportable check_unportable.c)
