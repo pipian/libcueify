@@ -822,13 +822,25 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
 	    num_descriptors += 3;
 	    block_descriptors[0] += 3;
 	}
-	/* Encode the TOCINFO with one descriptor plus one for each track. */
-	num_descriptors += (
-	    cdtext->toc.last_track_number -
-	    cdtext->toc.first_track_number + 2);
-	block_descriptors[0] += (
-	    cdtext->toc.last_track_number -
-	    cdtext->toc.first_track_number + 2);
+	/*
+	 * Encode the TOCINFO with one descriptor plus one for every
+	 * four tracks.
+	 */
+	num_descriptors++;
+	num_descriptors += (cdtext->toc.last_track_number -
+			    cdtext->toc.first_track_number + 1) / 4;
+	if ((cdtext->toc.last_track_number -
+	     cdtext->toc.first_track_number + 1) % 4 > 0) {
+	    num_descriptors++;
+	}
+	block_descriptors[0]++;
+	block_descriptors[0] += (cdtext->toc.last_track_number -
+				 cdtext->toc.first_track_number + 1) / 4;
+	if ((cdtext->toc.last_track_number -
+	     cdtext->toc.first_track_number + 1) % 4 > 0) {
+	    block_descriptors[0]++;
+	}
+
 	/* Encode the TOCINFO2 with one descriptor per interval. */
 	for (track = cdtext->toc.first_track_number;
 	     track <= cdtext->toc.last_track_number;
