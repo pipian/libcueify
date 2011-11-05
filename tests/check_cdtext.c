@@ -103,10 +103,10 @@ void setup() {
 	b->messages[6] = b->messages[7] = b->messages[8] = b->messages[9] =
 	b->messages[10] = b->messages[11] = b->messages[12] = "\t";
     b->private[0] = "OnlyPrivate";
-    b->messages[1] = b->messages[2] = b->messages[3] = b->messages[4] =
-	b->messages[5] = b->messages[6] = b->messages[7] = b->messages[8] =
-	b->messages[9] = b->messages[10] = b->messages[11] =
-	b->messages[12] = "";
+    b->private[1] = b->private[2] = b->private[3] = b->private[4] =
+	b->private[5] = b->private[6] = b->private[7] = b->private[8] =
+	b->private[9] = b->private[10] = b->private[11] =
+	b->private[12] = "";
     b->upc_isrcs[0] = "";
     b->upc_isrcs[1] = "US-RF3-02-00001";
     b->upc_isrcs[2] = "US-RF3-02-00002";
