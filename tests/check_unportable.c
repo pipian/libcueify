@@ -230,7 +230,7 @@ START_TEST (test_mcn_isrc)
 	fail_unless(cueify_device_read_isrc(dev, i + 1, buffer,
 					    &size) == CUEIFY_OK,
 		    "Failed to read ISRC from device");
-	fail_unless(size == 13, "ISRC size incorrect");
+	fail_unless(size == 16, "ISRC size incorrect");
 	fail_unless(strcmp(buffer, isrcs[i]) == 0, "ISRC not correct");
     }
 }
@@ -246,8 +246,14 @@ Suite *toc_suite() {
     tcase_add_test(tc_core, test_sessions);
     tcase_add_test(tc_core, test_full_toc);
     tcase_add_test(tc_core, test_cdtext);
-    tcase_add_test(tc_core, test_mcn_isrc);
     suite_add_tcase(s, tc_core);
+
+    /* Extra test-case for seek-based tests, which are slower. */
+    TCase *tc_seekbased = tcase_create("seekbased");
+    tcase_set_timeout(tc_seekbased, 10);
+    tcase_add_checked_fixture(tc_seekbased, setup, teardown);
+    tcase_add_test(tc_seekbased, test_mcn_isrc);
+    suite_add_tcase(s, tc_seekbased);
 
     return s;
 }
