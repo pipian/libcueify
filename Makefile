@@ -13,7 +13,8 @@ check-indices:
 check-pregaps:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check-pregaps
 
-docs:
+docs!
+	if [ -d docs ]; then rm -rf docs; fi
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make docs
 
 install:
