@@ -112,7 +112,7 @@ int cueify_sessions_serialize(cueify_sessions *s, uint8_t *buffer, size_t *size)
  * @pre { s != NULL }
  * @param s a cueify_sessions object created by cueify_sessions_new()
  */
-void cueify_sessions_free(cueify_sessions *t);
+void cueify_sessions_free(cueify_sessions *s);
 
 
 /**

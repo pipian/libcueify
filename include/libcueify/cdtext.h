@@ -446,9 +446,8 @@ uint8_t cueify_cdtext_block_has_name_copyright(cueify_cdtext_block *b);
 uint8_t cueify_cdtext_block_has_title_copyright(cueify_cdtext_block *b);
 
 
-#define CUEIFY_CDTEXT_ALBUM  0x00  /** Track number to represent the
-				       entire album rather than a
-				       single track. */
+/** Track number to represent the entire album rather than a single track. */
+#define CUEIFY_CDTEXT_ALBUM  0x00
 
 
 /**

@@ -46,21 +46,11 @@
 #define CUEIFY_SUB_Q_POSITION  0x1
 /** The sub-Q-channel contains the media catalog number. */
 #define CUEIFY_SUB_Q_MCN       0x2
-/** The sub-Q-channel contains an International Standard Recording
+/**
+ * The sub-Q-channel contains an International Standard Recording
  * Code (ISRC)
  */
 #define CUEIFY_SUB_Q_ISRC      0x3
 
-
-/** The sub-Q-channel contains nothing. */
-#define CUEIFY_SUB_Q_NOTHING   0x0
-/** The sub-Q-channel contains the current position. */
-#define CUEIFY_SUB_Q_POSITION  0x1
-/** The sub-Q-channel contains the media catalog number. */
-#define CUEIFY_SUB_Q_MCN       0x2
-/** The sub-Q-channel contains an International Standard Recording
- * Code (ISRC)
- */
-#define CUEIFY_SUB_Q_ISRC      0x3
 
 #endif /* _LIBCUEIFY_CONSTANTS_H */

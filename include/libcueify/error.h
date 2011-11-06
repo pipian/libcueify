@@ -28,22 +28,26 @@
 
 /** Possible return values for functions in libcueify. */
 enum cueify_error {
-    CUEIFY_OK = 0,              /** The last function returned successfully. */
-    CUEIFY_NO_DATA,             /** The data requested is not present. */
-    CUEIFY_ERR_INTERNAL,        /**
-				 * An internal error occured. Ideally,
-				 * this should never be returned.
-				 */
-    CUEIFY_ERR_BADARG,          /** A bad argument was provided. */
-    CUEIFY_ERR_NOMEM,           /**
-				 * Memory could not be allocated
-				 * during this operation.
-				 */
-    CUEIFY_ERR_NO_DEVICE,       /** The device could not be opened. */
-    CUEIFY_ERR_TRUNCATED,       /** The serialized data was truncated. */
-    CUEIFY_ERR_CORRUPTED,       /** The serialized data was corrupted. */
-    CUEIFY_ERR_TOOSMALL,        /** The serialized data could not fit. */
-    CUEIFY_ERR_INVALID_CDTEXT   /** The CD-Text data was invalid. */
+    /** The last function returned successfully. */
+    CUEIFY_OK = 0,
+    /** The data requested is not present. */
+    CUEIFY_NO_DATA,
+    /** An internal error occured. Ideally, this should never be returned. */
+    CUEIFY_ERR_INTERNAL,
+    /** A bad argument was provided. */
+    CUEIFY_ERR_BADARG,
+    /** Memory could not be allocated during this operation. */
+    CUEIFY_ERR_NOMEM,
+    /** The device could not be opened. */
+    CUEIFY_ERR_NO_DEVICE,
+    /** The serialized data was truncated. */
+    CUEIFY_ERR_TRUNCATED,
+    /** The serialized data was corrupted. */
+    CUEIFY_ERR_CORRUPTED,
+    /** The serialized data could not fit. */
+    CUEIFY_ERR_TOOSMALL,
+    /** The CD-Text data was invalid. */
+    CUEIFY_ERR_INVALID_CDTEXT
 };
 
 #endif /* _LIBCUEIFY_ERROR_H */

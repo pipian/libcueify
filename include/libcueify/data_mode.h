@@ -31,11 +31,16 @@
 #include <libcueify/constants.h>
 #include <libcueify/types.h>
 
-#define CUEIFY_DATA_MODE_CDDA     0x00  /** Track is CD-DA (Audio) */
-#define CUEIFY_DATA_MODE_MODE_1   0x01  /** Track is Mode 1 */
-#define CUEIFY_DATA_MODE_MODE_2   0x02  /** Track is Mode 2 */
-#define CUEIFY_DATA_MODE_UNKNOWN  0x0F  /** Track is in an unknown data mode */
-#define CUEIFY_DATA_MODE_ERROR    0x10  /** An error occurred when reading mode */
+/** Track is CD-DA (Audio) */
+#define CUEIFY_DATA_MODE_CDDA     0x00
+/** Track is Mode 1 */
+#define CUEIFY_DATA_MODE_MODE_1   0x01
+/** Track is Mode 2 */
+#define CUEIFY_DATA_MODE_MODE_2   0x02
+/** Track is in an unknown data mode */
+#define CUEIFY_DATA_MODE_UNKNOWN  0x0F
+/** An error occurred when reading mode */
+#define CUEIFY_DATA_MODE_ERROR    0x10
 
 /**
  * Read the data mode of a track on the disc in the optical disc
