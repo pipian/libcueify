@@ -86,6 +86,17 @@ void cueify_device_free(cueify_device *d) {
 }  /* cueify_device_free */
 
 
+int cueify_device_get_supported_apis(cueify_device *d) {
+    cueify_device_private *dev = (cueify_device_private *)d;
+
+    if (d == NULL) {
+	return 0;
+    }
+
+    return cueify_device_get_supported_apis_unportable(dev);
+}  /* cueify_device_get_supported_apis */
+
+
 const char *cueify_device_get_default_device() {
     return cueify_device_get_default_device_unportable();
 }  /* cueify_device_get_default_device */

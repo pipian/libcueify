@@ -109,6 +109,14 @@ int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
 int cueify_device_close_unportable(cueify_device_private *d);
 
 
+/** Unportable version of cueify_device_get_supported_apis().
+ *
+ * @param d the cueify device handle for which to get supported APIs
+ * @return a bitmask of the supported APIs of the device
+ */
+int cueify_device_get_supported_apis_unportable(cueify_device_private *d);
+
+
 /** Unportable version of cueify_device_get_default_device().
  *
  * @return the OS-specific device identifier of the default optical
