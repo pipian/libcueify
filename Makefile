@@ -10,6 +10,9 @@ check-unportable:
 check-indices:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check-indices
 
+check-pregaps:
+	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make check-pregaps
+
 docs:
 	if [ ! -d build ]; then mkdir build; fi; cd build; cmake ..; make docs
 

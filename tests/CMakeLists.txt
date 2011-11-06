@@ -41,6 +41,12 @@ IF(LIBCHECK_FOUND)
     ADD_EXECUTABLE(check_indices check_indices.c)
     ADD_DEPENDENCIES(check check_indices)
     ADD_DEPENDENCIES(check-indices check_indices)
+
+    ADD_CUSTOM_TARGET(check-pregaps
+		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_pregaps)
+    ADD_EXECUTABLE(check_pregaps check_pregaps.c)
+    ADD_DEPENDENCIES(check check_pregaps)
+    ADD_DEPENDENCIES(check-pregaps check_pregaps)
 ENDIF(LIBCHECK_FOUND)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
