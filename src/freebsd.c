@@ -484,11 +484,18 @@ int cueify_device_read_position_unportable(cueify_device_private *d,
     memset(&buffer, 0, sizeof(buffer));
 
     /*
-     * We can actually get the position from reading the Q subchannel
-     * during our raw read, rather than doing a subchannel ioctl!
+     * Manual testing shows that, on SOME discs, we will return all
+     * zeroes for the Q subchannel!
      */
-    if (cueify_device_read_raw_unportable(d, lba, &buffer) != CUEIFY_OK) {
-	return CUEIFY_ERR_INTERNAL;
+    while (buffer.track == 0) {
+	/*
+	 * We can actually get the position from reading the Q subchannel
+	 * during our raw read, rather than doing a subchannel ioctl!
+	 */
+	if (cueify_device_read_raw_unportable(d, lba, &buffer) != CUEIFY_OK) {
+	    return CUEIFY_ERR_INTERNAL;
+	}
+	lba--;
     }
 
     pos->track = BCD2BIN(buffer.track);
