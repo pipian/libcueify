@@ -1,6 +1,10 @@
 PROJECT_NAME        = "${PROJECT_NAME}"
 PROJECT_NUMBER      = ${PROJECT_VERSION}
+INPUT		    = include
+RECURSIVE	    = YES
+EXTRACT_ALL	    = YES
 HTML_OUTPUT         = docs
 GENERATE_LATEX      = NO
 GENERATE_MAN        = NO
 GENERATE_RTF        = NO
+WARNINGS	    = YES
