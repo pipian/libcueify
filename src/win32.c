@@ -55,9 +55,11 @@ int cueify_device_open_unportable(cueify_device_private *d,
 
     /* Precondition: device[0] != '\0' */
 
-    /* Is it a drive letter? (Regular Expression: c(?::\?\)?) */
-    if ( device[1] == '\0' ||
-	(device[1] == ':' && device[2] == '\0')) {
+    /* Is it a drive letter? (Regular Expression: c(?::\\?)?) */
+    if (device[1] == '\0' ||
+	(device[1] == ':' &&
+	 (device[2] == '\0' ||
+	  (device[2] == '\\' && device[3] == '\0')))) {
 	/* Just a single letter. */
 	cDriveLetter = device[0];
     } else {
