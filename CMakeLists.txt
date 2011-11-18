@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+# Suppress CYGWIN warning (until 2.8.4 is required)
+SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 PROJECT(libcueify)
 SET(PROJECT_VERSION 0.1.0)
