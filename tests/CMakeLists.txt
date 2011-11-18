@@ -52,3 +52,17 @@ ENDIF(LIBCHECK_FOUND)
 IF(CMAKE_COMPILER_IS_GNUCC)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
+
+# Windows requires the DLLs to be in the same directory.
+IF(CYGWIN)
+    GET_PROPERTY(cueify_LOCATION TARGET cueify PROPERTY LOCATION)
+    GET_FILENAME_COMPONENT(cueify_BASENAME ${cueify_LOCATION} NAME)
+    ADD_CUSTOM_TARGET(copy-test-library
+                      COMMAND ${CMAKE_COMMAND} -E copy ${cueify_LOCATION} ${CMAKE_CURRENT_BINARY_DIR}/${cueify_BASENAME}
+                      DEPENDS cueify)
+    ADD_DEPENDENCIES(check copy-test-library)
+    ADD_DEPENDENCIES(check-unportable copy-test-library)
+    ADD_DEPENDENCIES(check-indices copy-test-library)
+    ADD_DEPENDENCIES(check-pregaps copy-test-library)
+ENDIF(CYGWIN)
+
