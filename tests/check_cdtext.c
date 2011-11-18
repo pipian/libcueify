@@ -219,7 +219,7 @@ START_TEST (test_deserialize)
 	    mock_cdtext.toc.num_intervals[i] &&
 	    deserialized_mock_cdtext.toc.num_intervals[i] != 0) {
 	    for (j = 0;
-		 j <= deserialized_mock_cdtext.toc.num_intervals[i];
+		 j < deserialized_mock_cdtext.toc.num_intervals[i];
 		 j++) {
 		fail_unless(
 		    memcmp(
