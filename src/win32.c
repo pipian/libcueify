@@ -429,10 +429,17 @@ int cueify_device_read_mcn_unportable(cueify_device_private *d,
 			 &dwReturned, NULL)) {
 	return CUEIFY_ERR_INTERNAL;
     } else if (!data.MediaCatalog.Mcval) {
+	if (*size > 0) {
+	    *size = 1;
+	    buffer[0] = '\0';
+	}
 	return CUEIFY_NO_DATA;
     } else {
-	*size = min(sizeof(data.MediaCatalog.MediaCatalog), *size);
-	memcpy(buffer, data.MediaCatalog.MediaCatalog, *size);
+	*size = min(sizeof(data.MediaCatalog.MediaCatalog) + 1, *size);
+	if (*size > 0) {
+	    memcpy(buffer, data.MediaCatalog.MediaCatalog, *size - 1);
+	    buffer[*size - 1] = '\0';
+	}
 
 	return CUEIFY_OK;
     }
@@ -455,10 +462,17 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 			 &dwReturned, NULL)) {
 	return CUEIFY_ERR_INTERNAL;
     } else if (!data.TrackIsrc.Tcval) {
+	if (*size > 0) {
+	    *size = 1;
+	    buffer[0] = '\0';
+	}
 	return CUEIFY_NO_DATA;
     } else {
-	*size = min(sizeof(data.TrackIsrc.TrackIsrc), *size);
-	memcpy(buffer, data.TrackIsrc.TrackIsrc, *size);
+	*size = min(sizeof(data.TrackIsrc.TrackIsrc) + 1, *size);
+	if (*size > 0) {
+	    memcpy(buffer, data.TrackIsrc.TrackIsrc, *size - 1);
+	    buffer[*size - 1] = '\0';
+	}
 
 	return CUEIFY_OK;
     }
