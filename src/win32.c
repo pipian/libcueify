@@ -270,6 +270,7 @@ int cueify_device_read_full_toc_unportable(cueify_device_private *d,
     } else {
 	t->first_session_number = fulltoc->FirstCompleteSession;
 	t->last_session_number = fulltoc->LastCompleteSession;
+	t->first_track_number = t->last_track_number = 0;
 	for (i = 0; i < 256; i++) {
 	    if (fulltoc->Descriptors[i].Adr == 1) {
 		point = fulltoc->Descriptors[i].Point;
@@ -310,7 +311,7 @@ int cueify_device_read_full_toc_unportable(cueify_device_private *d,
 			fulltoc->Descriptors[i].MsfExtra[2];
 		    session->first_track_number =
 			fulltoc->Descriptors[i].Msf[0];
-		    if (session->first_track_number == 0 ||
+		    if (t->first_track_number == 0 ||
 			session->first_track_number < t->first_track_number) {
 			t->first_track_number = session->first_track_number;
 		    }
@@ -331,35 +332,35 @@ int cueify_device_read_full_toc_unportable(cueify_device_private *d,
 			fulltoc->Descriptors[i].MsfExtra[1];
 		    session->pseudotracks[2].atime.frm =
 			fulltoc->Descriptors[i].MsfExtra[2];
-		    if (session->last_track_number == 0 ||
+		    session->last_track_number =
+			fulltoc->Descriptors[i].Msf[0];
+		    if (t->last_track_number == 0 ||
 			session->last_track_number > t->last_track_number) {
 			t->last_track_number = session->last_track_number;
 		    }
-		    session->last_track_number =
-			fulltoc->Descriptors[i].Msf[0];
 		} else if (point == 0xA2) {
 		    /* Lead-Out */
 		    session = &(t->sessions[
 				    fulltoc->Descriptors[i].SessionNumber]);
-		    session->pseudotracks[3].session =
+		    session->pseudotracks[0].session =
 			fulltoc->Descriptors[i].SessionNumber;
-		    session->pseudotracks[3].control =
+		    session->pseudotracks[0].control =
 			fulltoc->Descriptors[i].Control;
-		    session->pseudotracks[3].adr =
+		    session->pseudotracks[0].adr =
 			fulltoc->Descriptors[i].Adr;
-		    session->pseudotracks[3].atime.min =
+		    session->pseudotracks[0].atime.min =
 			fulltoc->Descriptors[i].MsfExtra[0];
-		    session->pseudotracks[3].atime.sec =
+		    session->pseudotracks[0].atime.sec =
 			fulltoc->Descriptors[i].MsfExtra[1];
-		    session->pseudotracks[3].atime.frm =
+		    session->pseudotracks[0].atime.frm =
 			fulltoc->Descriptors[i].MsfExtra[2];
-		    session->pseudotracks[3].offset.min =
+		    session->pseudotracks[0].offset.min =
 			fulltoc->Descriptors[i].Msf[0];
-		    session->pseudotracks[3].offset.sec =
+		    session->pseudotracks[0].offset.sec =
 			fulltoc->Descriptors[i].Msf[1];
-		    session->pseudotracks[3].offset.frm =
+		    session->pseudotracks[0].offset.frm =
 			fulltoc->Descriptors[i].Msf[2];
-		    session->leadout = session->pseudotracks[3].offset;
+		    session->leadout = session->pseudotracks[0].offset;
 		}
 	    }
 	}
