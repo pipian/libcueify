@@ -24,10 +24,25 @@
  */
 
 #include <windows.h>
-#include <tchar.h>
+#include <libcueify/error.h>
+#include <libcueify/cdtext.h>
+#include <libcueify/full_toc.h>
+#include "device_private.h"
+#include "toc_private.h"
+#include "sessions_private.h"
+#include "full_toc_private.h"
+#include "cdtext_private.h"
+#include "indices_private.h"
+#include "win32.h"
 
-LPCTSTR szVolumeFormat[9] = "\\\\.\\%lc:";
-LPCTSTR szRootFormat[6] = "%lc:\\";
+#if defined(__WIN32__) && !defined(__CYGWIN__)
+#include <tchar.h>
+#else
+typedef char TCHAR;
+#endif
+
+TCHAR szVolumeFormat[9] = "\\\\.\\%lc:";
+TCHAR szRootFormat[6] = "%lc:\\";
 
 int cueify_device_open_unportable(cueify_device_private *d,
 				  const char *device) {
@@ -47,7 +62,7 @@ int cueify_device_open_unportable(cueify_device_private *d,
 	cDriveLetter = device[0];
     } else {
 	/* We currently don't handle drives without a letter. */
-	return CUEIFY_BADARG;
+	return CUEIFY_ERR_BADARG;
     }
     wsprintf(szRootName, szRootFormat, cDriveLetter);
 
@@ -96,6 +111,7 @@ const char *driveLetters[26] = {
 
 const char *cueify_device_get_default_device_unportable() {
     int i;
+    UINT uDriveType;
     DWORD dwDrives;
     TCHAR szRootName[4] = "a:\\";
 
@@ -118,7 +134,7 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
     DWORD dwReturned;
     CDROM_READ_TOC_EX toc_ex;
     CDROM_TOC toc;
-    BOOL succeded;
+    BOOL succeeded;
     int i;
     
     toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_TOC;
@@ -128,36 +144,36 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
     toc_ex.Reserved2 = 0;
     toc_ex.Reserved3 = 0;
     
-    succeded = DeviceIoControl(d->handle,
-			       IOCTL_CDROM_READ_TOC_EX,
-			       &toc_ex, sizeof(CDROM_READ_TOC_EX),
-			       &toc, sizeof(CDROM_TOC),
-			       &dwReturned, NULL);
+    succeeded = DeviceIoControl(d->handle,
+				IOCTL_CDROM_READ_TOC_EX,
+				&toc_ex, sizeof(CDROM_READ_TOC_EX),
+				&toc, sizeof(CDROM_TOC),
+				&dwReturned, NULL);
     if (!succeeded) {
 	return CUEIFY_ERR_INTERNAL;
     } else {
-	t->first_track_number = toc->FirstTrack;
-	t->last_track_number = toc->LastTrack;
+	t->first_track_number = toc.FirstTrack;
+	t->last_track_number = toc.LastTrack;
 	for (i = 0; i < MAXIMUM_NUMBER_TRACKS; i++) {
-	    if (toc->TrackData[i].TrackNumber == 0xAA) {
+	    if (toc.TrackData[i].TrackNumber == 0xAA) {
 		/* Lead-out Track */
-		t->tracks[0].control = toc->TrackData[i].Control;
-		t->tracks[0].adr = toc->TrackData[i].Adr;
+		t->tracks[0].control = toc.TrackData[i].Control;
+		t->tracks[0].adr = toc.TrackData[i].Adr;
 		t->tracks[0].lba =
-		    ((toc->TrackData[i].Address[0] << 24) |
-		     (toc->TrackData[i].Address[1] << 16) |
-		     (toc->TrackData[i].Address[2] << 8) |
-		     toc->TrackData[i].Address[3]);
-	    } else if (toc->TrackData[i].TrackNumber != 0) {
-		t->tracks[toc->TrackData[i].TrackNumber].control =
-		    toc->TrackData[i].Control;
-		t->tracks[toc->TrackData[i].TrackNumber].adr =
-		    toc->TrackData[i].Adr;
-		t->tracks[toc->TrackData[i].TrackNumber].lba =
-		    ((toc->TrackData[i].Address[0] << 24) |
-		     (toc->TrackData[i].Address[1] << 16) |
-		     (toc->TrackData[i].Address[2] << 8) |
-		     toc->TrackData[i].Address[3]);
+		    ((toc.TrackData[i].Address[0] << 24) |
+		     (toc.TrackData[i].Address[1] << 16) |
+		     (toc.TrackData[i].Address[2] << 8) |
+		     toc.TrackData[i].Address[3]);
+	    } else if (toc.TrackData[i].TrackNumber != 0) {
+		t->tracks[toc.TrackData[i].TrackNumber].control =
+		    toc.TrackData[i].Control;
+		t->tracks[toc.TrackData[i].TrackNumber].adr =
+		    toc.TrackData[i].Adr;
+		t->tracks[toc.TrackData[i].TrackNumber].lba =
+		    ((toc.TrackData[i].Address[0] << 24) |
+		     (toc.TrackData[i].Address[1] << 16) |
+		     (toc.TrackData[i].Address[2] << 8) |
+		     toc.TrackData[i].Address[3]);
 	    }
 	}
     }
@@ -168,11 +184,10 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
 
 int cueify_device_read_sessions_unportable(cueify_device_private *d,
 					   cueify_sessions_private *s) {
-{
     DWORD dwReturned;
     CDROM_READ_TOC_EX toc_ex;
     CDROM_TOC_SESSION_DATA session;
-    BOOL succeded;
+    BOOL succeeded;
 
     toc_ex.Format = CDROM_READ_TOC_EX_FORMAT_SESSION;
     toc_ex.Reserved1 = 0;
@@ -181,7 +196,7 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
     toc_ex.Reserved2 = 0;
     toc_ex.Reserved3 = 0;
 
-    succeeded = DeviceIoControl(d->device,
+    succeeded = DeviceIoControl(d->handle,
 				IOCTL_CDROM_READ_TOC_EX,
 				&toc_ex, sizeof(CDROM_READ_TOC_EX),
 				&session, sizeof(CDROM_TOC_SESSION_DATA),
@@ -189,16 +204,16 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
     if (!succeeded) {
 	return CUEIFY_ERR_INTERNAL;
     } else {
-	s->first_session_number = session->FirstCompleteSession;
-	s->last_session_number = session->LastCompleteSession;
-	s->track_control = session->TrackData[0].Control;
-	s->track_adr = session->TrackData[0].Adr;
-	s->track_number = session->TrackData[0].TrackNumber;
+	s->first_session_number = session.FirstCompleteSession;
+	s->last_session_number = session.LastCompleteSession;
+	s->track_control = session.TrackData[0].Control;
+	s->track_adr = session.TrackData[0].Adr;
+	s->track_number = session.TrackData[0].TrackNumber;
 	s->track_lba =
-	  ((session->TrackData[0].Address[0] << 24) |
-	   (session->TrackData[0].Address[1] << 16) |
-	   (session->TrackData[0].Address[2] << 8) |
-	   session->TrackData[0].Address[3]);
+	  ((session.TrackData[0].Address[0] << 24) |
+	   (session.TrackData[0].Address[1] << 16) |
+	   (session.TrackData[0].Address[2] << 8) |
+	   session.TrackData[0].Address[3]);
     }
 
     return CUEIFY_OK;
@@ -207,13 +222,13 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
 
 int cueify_device_read_full_toc_unportable(cueify_device_private *d,
 					   cueify_full_toc_private *t) {
-{
     DWORD dwReturned;
     CDROM_READ_TOC_EX toc_ex;
     int iSize = 256 * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) +
 	sizeof(CDROM_TOC_FULL_TOC_DATA);
-    uint8_t buf[iSize], point;
-    CDROM_TOC_FULL_TOC_DATA *fulltoc = buf;
+    uint8_t buf[256 * sizeof(CDROM_TOC_FULL_TOC_DATA_BLOCK) +
+		sizeof(CDROM_TOC_FULL_TOC_DATA)], point;
+    CDROM_TOC_FULL_TOC_DATA *fulltoc = (CDROM_TOC_FULL_TOC_DATA *)buf;
     int i;
     cueify_full_toc_session_private *session;
 
@@ -368,7 +383,7 @@ int cueify_device_read_cdtext_unportable(cueify_device_private *d,
     }
 
     /* Can probably get away with this. */
-    cueify_cdtext_deserialize(t, cdtext,
+    cueify_cdtext_deserialize((cueify_cdtext *)t, (uint8_t *)cdtext,
 			      ((dummy.Length[0] << 8) |
 			       dummy.Length[1]) + 2);
     free(cdtext);
@@ -430,7 +445,7 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 
 
 int cueify_device_read_position_unportable(cueify_device_private *d,
-					   uint8_t track, uint8_t lba,
+					   uint8_t track, uint32_t lba,
 					   cueify_position_t *pos) {
     DWORD dwReturned;
     CDROM_SEEK_AUDIO_MSF seek;
@@ -481,18 +496,18 @@ int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
     cueify_full_toc_private full_toc;
 
     /* What mode should I probably read this in? */
-    if (cueify_device_read_full_toc_unportable(d, full_toc) != CUEIFY_OK) {
+    if (cueify_device_read_full_toc_unportable(d, &full_toc) != CUEIFY_OK) {
 	return CUEIFY_ERR_INTERNAL;
     }
 
     read_info.DiskOffset.QuadPart = lba * 2048;
     read_info.SectorCount = 1;
     switch (full_toc.sessions[full_toc.first_session_number].session_type) {
-    case CUEIFY_DISC_MODE_1:
+    case CUEIFY_SESSION_MODE_1:
 	read_info.TrackMode = YellowMode2;
 	break;
-    case CUEIFY_DISC_CDI:
-    case CUEIFY_DISC_MODE_2:
+    case CUEIFY_SESSION_CDI:
+    case CUEIFY_SESSION_MODE_2:
 	read_info.TrackMode = XAForm2;
 	break;
     default:
