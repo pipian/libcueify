@@ -41,12 +41,9 @@ SET_TARGET_PROPERTIES(cueify PROPERTIES
 )
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-    IF(OS_IS_FREEBSD)
-        # Unfortunately, libcam fails -pedantic-errors
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic")
-    ELSE(OS_IS_FREEBSD)
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic-errors")
-    ENDIF(OS_IS_FREEBSD)
+    # Unfortunately, libcam and w32api fail -pedantic-errors
+    # (and -isystem fails to help)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 INSTALL(TARGETS cueify DESTINATION ${LIB_INSTALL_DIR})
