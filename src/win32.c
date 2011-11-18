@@ -102,6 +102,24 @@ int cueify_device_close_unportable(cueify_device_private *d) {
     }
 }  /* cueify_device_close_unportable */
 
+
+int cueify_device_get_supported_apis_unportable(cueify_device_private *d) {
+    /* Suppress error about d. */
+    d++;
+    /*
+     * Windows supports all APIs, but in the future we could try to
+     * use GET CONFIGURATION to determine what the DEVICE can support.
+     */
+    return (CUEIFY_DEVICE_SUPPORTS_TOC      |
+	    CUEIFY_DEVICE_SUPPORTS_SESSIONS |
+	    CUEIFY_DEVICE_SUPPORTS_FULL_TOC |
+	    CUEIFY_DEVICE_SUPPORTS_CDTEXT   |
+	    CUEIFY_DEVICE_SUPPORTS_MCN_ISRC |
+	    CUEIFY_DEVICE_SUPPORTS_INDICES  |
+	    CUEIFY_DEVICE_SUPPORTS_DATA_MODE);
+}  /* cueify_device_get_supported_apis_unportable */
+
+
 const char *driveLetters[26] = {
     "a:\\", "b:\\", "c:\\", "d:\\", "e:\\", "f:\\", "g:\\", "h:\\",
     "i:\\", "j:\\", "k:\\", "l:\\", "m:\\", "n:\\", "o:\\", "p:\\",
