@@ -1,0 +1,58 @@
+libcueify 0.1.0
+---------------
+
+libcueify is a library which permits access to a vast variety of Audio
+CD metadata, including Table of Contents (TOC) data, multi-session
+data, and CD-TEXT data.
+
+libcueify requires:
+
+- cmake (>= 2.6) <http://www.cmake.org/>
+- check <http://check.sourceforge.net/> to run its unit tests
+
+libcueify has been tested (and compiles) with the following configurations:
+
+- FreeBSD
+- Cygwin
+- MinGW (libcheck tests cannot be run)
+
+Support for Linux and Darwin (Mac OS X) will be added in the future.
+
+It likely requires little modification to work with Visual Studio directly.
+
+BUILDING:
+
+The Makefile (for use with GNU Make) included provides some simple
+targets to control building with cmake, including the targets you'd
+expect ("all", "check", "install", "clean", "distclean", "docs"),
+simply creating the subdirectory "build" to contain compiler output.
+However, you may use cmake to generate the build directory somewhere
+other than a subdirectory named "build".  Thus, simply invoking "make"
+will configure and compile libcueify.
+
+TESTING:
+
+In addition to the "check" target, which tests the library internal
+APIs, the "check-unportable", "check-indices" and "check-pregaps"
+targets will run additional tests on the unportable APIs which make
+use of direct access to the CD-ROM drive, with some assumptions as to
+the disc that's currently in the drive.  Since these tests aren't
+easily reproduced without the right disc, they are not run
+automatically via "make check".
+
+NOTES:
+
+Some calls use SCSI pass-through logic, and as such, may misbehave on
+older drives which don't support the SCSI commands used (Specifically,
+READ TOC/PMA/ATIP with CD-Text support and READ CD with subchannel
+read support).  Furthermore, I have not tested this code with any
+IDE/ATAPI drives, so I am unsure whether these SCSI commands will work
+correctly with them either.
+
+libcueify should support CDs with CD-TEXT in the Japanese MS-JIS
+encoding.  However, this encoding has been reverse engineered without
+the use of the Music Shift-JIS standard itself, and, as far as I am
+aware, has never been used on an actual retail disc; as a result this
+support has not been tested.  Furthermore, some non-Unicode variation
+selectors will be output when converting to UTF-8 (in order to support
+round-trip encoding).
