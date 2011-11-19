@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2010, 2011 Ian Jacobi, except typedefs and defines,
  *     which are in the public domain courtesy of Caspar S. Hornstrup,
- *     <chorns@users.sourceforge.net>
+ *     <chorns@users.sourceforge.net> from w32api (part of mingw)
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -35,6 +35,8 @@
 
 #define FILE_DEVICE_CD_ROM                0x00000002
 #define FILE_READ_ACCESS                  0x00000001
+#define FILE_WRITE_ACCESS                 0x00000002
+#define FILE_ANY_ACCESS                   0x00000000
 #define METHOD_BUFFERED                   0
 #define METHOD_OUT_DIRECT                 2
 
@@ -233,5 +235,46 @@ typedef struct __RAW_READ_INFO {
 } RAW_READ_INFO, *PRAW_READ_INFO;
 
 #define RAW_SECTOR_SIZE 2352
+
+#define IOCTL_SCSI_BASE 0x00000004
+
+#define IOCTL_SCSI_GET_ADDRESS \
+    CTL_CODE(IOCTL_SCSI_BASE, 0x0406, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_SCSI_PASS_THROUGH_DIRECT \
+    CTL_CODE(IOCTL_SCSI_BASE, 0x0405, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
+
+#define SCSI_IOCTL_DATA_OUT 0
+#define SCSI_IOCTL_DATA_IN 1
+#define SCSI_IOCTL_DATA_UNSPECIFIED 2
+
+typedef struct _SCSI_ADDRESS {
+    ULONG Length;
+    UCHAR PortNumber;
+    UCHAR PathId;
+    UCHAR TargetId;
+    UCHAR Lun;
+} SCSI_ADDRESS, *PSCSI_ADDRESS;
+
+typedef struct _SCSI_PASS_THROUGH_DIRECT {
+    USHORT    Length;
+    UCHAR     ScsiStatus;
+    UCHAR     PathId;
+    UCHAR     TargetId;
+    UCHAR     Lun;
+    UCHAR     CdbLength;
+    UCHAR     SenseInfoLength;
+    UCHAR     DataIn;
+    ULONG     DataTransferLength;
+    ULONG     TimeOutValue;
+    PVOID     DataBuffer;
+    ULONG     SenseInfoOffset;
+    UCHAR     Cdb[16];
+} SCSI_PASS_THROUGH_DIRECT, *PSCSI_PASS_THROUGH_DIRECT;
+
+typedef struct _SCSI_PASS_THROUGH_DIRECT_WITH_BUFFERS {
+    SCSI_PASS_THROUGH_DIRECT Spt;
+    ULONG             Filler;
+    UCHAR             SenseBuf[32];
+} SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, *PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER;
 
 #endif  /* _LIBCUEIFY_WIN32_H */

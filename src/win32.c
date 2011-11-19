@@ -71,10 +71,8 @@ int cueify_device_open_unportable(cueify_device_private *d,
     uDriveType = GetDriveType(szRootName);
     switch (uDriveType) {
     case DRIVE_REMOVABLE:
-	dwAccessFlags = GENERIC_READ | GENERIC_WRITE;
-	break;
     case DRIVE_CDROM:
-	dwAccessFlags = GENERIC_READ;
+	dwAccessFlags = GENERIC_READ | GENERIC_WRITE;
 	break;
     default:
 	return CUEIFY_ERR_NO_DEVICE;
@@ -479,82 +477,138 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 }  /* cueify_device_read_isrc_unportable */
 
 
+/** Return the binary representation of a binary-coded decimal. */
+#define BCD2BIN(x)  (((x >> 4) & 0xF) * 10 + (x & 0xF))
+
+
 int cueify_device_read_position_unportable(cueify_device_private *d,
 					   uint8_t track, uint32_t lba,
 					   cueify_position_t *pos) {
-    DWORD dwReturned;
-    CDROM_SEEK_AUDIO_MSF seek;
-    CDROM_SUB_Q_DATA_FORMAT format;
-    SUB_Q_CHANNEL_DATA data;
+    /* A-la FreeBSD, we now use READ CD, which is at least reproducible?? */
+    cueify_raw_read_private buffer;
 
-    /* First, seek to the desired absolute position. */
-    seek.M = lba / 75 / 60;
-    seek.S = lba / 75 % 60;
-    seek.F = lba % 75;
-    if (DeviceIoControl(d->handle,
-			IOCTL_CDROM_SEEK_AUDIO_MSF,
-			&seek, sizeof(seek),
-			NULL, 0,
-			&dwReturned, NULL)) {
-	/* Next, get the "current" position. */
-	format.Track = track;
-	format.Format = IOCTL_CDROM_CURRENT_POSITION;
+    /* Do nothing, but remove error where track is unused! */
+    buffer.data_mode = track;
+    memset(&buffer, 0, sizeof(buffer));
 
-	if (!DeviceIoControl(d->handle,
-			     IOCTL_CDROM_READ_Q_CHANNEL,
-			     &format, sizeof(format),
-			     &data, sizeof(data),
-			     &dwReturned, NULL)) {
+    /*
+     * Manual testing shows that, on SOME discs, we will return all
+     * zeroes for the Q subchannel!
+     */
+    while (buffer.track == 0) {
+	/*
+	 * We can actually get the position from reading the Q subchannel
+	 * during our raw read, rather than doing a subchannel ioctl!
+	 */
+	if (cueify_device_read_raw_unportable(d, lba, &buffer) != CUEIFY_OK) {
 	    return CUEIFY_ERR_INTERNAL;
-	} else {
-	    pos->track = data.CurrentPosition.TrackNumber;
-	    pos->index = data.CurrentPosition.IndexNumber;
-	    pos->abs.min = data.CurrentPosition.AbsoluteAddress[1];
-	    pos->abs.sec = data.CurrentPosition.AbsoluteAddress[2];
-	    pos->abs.frm = data.CurrentPosition.AbsoluteAddress[3];
-	    pos->rel.min = data.CurrentPosition.TrackRelativeAddress[1];
-	    pos->rel.sec = data.CurrentPosition.TrackRelativeAddress[2];
-	    pos->rel.frm = data.CurrentPosition.TrackRelativeAddress[3];
-
-	    return CUEIFY_OK;
 	}
+	lba--;
     }
-    
-    return CUEIFY_ERR_INTERNAL;
+
+    pos->track = BCD2BIN(buffer.track);
+    pos->index = BCD2BIN(buffer.index);
+
+    /* Times are given in binary-coded decimal. */
+    pos->abs.min = BCD2BIN(buffer.amin);
+    pos->abs.sec = BCD2BIN(buffer.asec);
+    pos->abs.frm = BCD2BIN(buffer.afrm);
+
+    /* Adjust the absolute time by 2 seconds for the lead-in. */
+    if (pos->abs.sec < 2) {
+	pos->abs.sec += 75;
+	pos->abs.min--;
+    }
+    pos->abs.sec -= 2;
+
+    /* I expect that relative times are in BCD as well. */
+    pos->rel.min = BCD2BIN(buffer.min);
+    pos->rel.sec = BCD2BIN(buffer.sec);
+    pos->rel.frm = BCD2BIN(buffer.frm);
+
+    return CUEIFY_OK;
 }  /* cueify_device_read_position_unportable */
+
+
+#define READ_CD   0xBE  /** MMC op code for READ CD */
+
+
+/** Struct representing READ CD command structure */
+struct scsi_read_cd {
+    uint8_t op_code;      /** MMC op code (0xBE) */
+    uint8_t sector_type;  /** Expected sector type in bits 2-4 */
+    uint8_t address[4];   /** Starting logical block address */
+    uint8_t length[3];    /** Transfer length */
+    /**
+     * Sync bit in bit 7, Header Code in bits 6-5, User Data bit in bit 4,
+     * EDC/ECC bit in bit 3, Erro field in bits 2-1
+     */
+    uint8_t bitmask;
+    uint8_t subchannels;  /** Subchannel selection bits in bits 2-0 */
+    uint8_t control;      /** Control data */
+};
 
 
 int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
 				      cueify_raw_read_private *buffer) {
+    /*
+     * Could use IOCTL_CDROM_RAW_READ, but the SCSI "READ CD" command
+     * is the best way to get the current position.
+     */
+    SCSI_ADDRESS address;
+    SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER srb;
+    struct scsi_read_cd *scsi_cmd;
     DWORD dwReturned;
-    RAW_READ_INFO read_info;
-    cueify_full_toc_private full_toc;
 
-    /* What mode should I probably read this in? */
-    if (cueify_device_read_full_toc_unportable(d, &full_toc) != CUEIFY_OK) {
+    memset(&address, 0, sizeof(SCSI_ADDRESS));
+    address.Length = sizeof(SCSI_ADDRESS);
+
+    if (!DeviceIoControl(d->handle,
+			 IOCTL_SCSI_GET_ADDRESS,
+			 &address, sizeof(SCSI_ADDRESS),
+			 &address, sizeof(SCSI_ADDRESS),
+			 &dwReturned, NULL)) {
 	return CUEIFY_ERR_INTERNAL;
     }
 
-    read_info.DiskOffset.QuadPart = lba * 2048;
-    read_info.SectorCount = 1;
-    switch (full_toc.sessions[full_toc.first_session_number].session_type) {
-    case CUEIFY_SESSION_MODE_1:
-	read_info.TrackMode = YellowMode2;
-	break;
-    case CUEIFY_SESSION_CDI:
-    case CUEIFY_SESSION_MODE_2:
-	read_info.TrackMode = XAForm2;
-	break;
-    default:
-	read_info.TrackMode = YellowMode2;
-	break;
-    }
+    memset(&srb, 0, sizeof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER));
+
+    srb.Spt.Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
+    srb.Spt.PathId = address.PathId; /* SCSI Controller ID */
+    srb.Spt.TargetId = address.TargetId; /* SCSI Target Device ID */
+    srb.Spt.Lun = address.Lun; /* SCSI Logical Unit Device ID */
+    srb.Spt.CdbLength = sizeof(struct scsi_read_cd);
+    srb.Spt.SenseInfoLength = sizeof(srb.SenseBuf); /* SenseInfo length */
+    srb.Spt.DataIn = SCSI_IOCTL_DATA_IN;
+    srb.Spt.DataTransferLength = sizeof(cueify_raw_read_private);
+    srb.Spt.TimeOutValue = 50000;
+    srb.Spt.DataBuffer = buffer;
+    srb.Spt.SenseInfoOffset = (UCHAR *)&srb.SenseBuf - (UCHAR *)&srb;
+
+    scsi_cmd = (struct scsi_read_cd *)&srb.Spt.Cdb;
+    bzero(scsi_cmd, sizeof(*scsi_cmd));
+
+    scsi_cmd->address[0] = (lba >> 24);
+    scsi_cmd->address[1] = (lba >> 16) & 0xFF;
+    scsi_cmd->address[2] = (lba >> 8) & 0xFF;
+    scsi_cmd->address[3] = lba & 0xFF;
+
+    scsi_cmd->length[0] = 0;
+    scsi_cmd->length[1] = 0;
+    scsi_cmd->length[2] = 1;
+
+    scsi_cmd->bitmask = 0xF8;  /* Read Sync bit, all headers, User Data, and ECC */
+    scsi_cmd->subchannels = 0x02;  /* Support the Q subchannel */
+
+    scsi_cmd->op_code = READ_CD;
 
     if (!DeviceIoControl(d->handle,
-			 IOCTL_CDROM_RAW_READ,
-			 &read_info, sizeof(read_info),
-			 buffer, sizeof(cueify_raw_read_private),
+			 IOCTL_SCSI_PASS_THROUGH_DIRECT,
+			 &srb, sizeof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER),
+			 &srb, sizeof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER),
 			 &dwReturned, NULL)) {
+	DWORD error;
+	error = GetLastError();
 	return CUEIFY_ERR_INTERNAL;
     }
 
