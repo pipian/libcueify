@@ -1,6 +1,6 @@
 /* win32.c - win32-specific (Windows XP+) CD-ROM API glue
  *
- * Copyright (c) 2010, 2011 Ian Jacobi
+ * Copyright (c) 2010, 2011 Ian Jacobi <pipian@pipian.com>
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
