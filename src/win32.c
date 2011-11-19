@@ -586,7 +586,7 @@ int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
     srb.Spt.SenseInfoOffset = (UCHAR *)&srb.SenseBuf - (UCHAR *)&srb;
 
     scsi_cmd = (struct scsi_read_cd *)&srb.Spt.Cdb;
-    bzero(scsi_cmd, sizeof(*scsi_cmd));
+    memset(scsi_cmd, 0, sizeof(*scsi_cmd));
 
     scsi_cmd->address[0] = (lba >> 24);
     scsi_cmd->address[1] = (lba >> 16) & 0xFF;
