@@ -5,6 +5,8 @@ ifeq ($(shell gcc -dumpmachine),mingw32)
 CMAKE_COMMAND = "/c/Program Files/CMake 2.8/bin/cmake.exe"
 endif
 
+.PHONY: check check-unportable check-indices check-pregaps docs install clean distclean
+
 all:
 	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make all
 
