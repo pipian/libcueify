@@ -64,6 +64,10 @@ typedef unsigned long size_t;
 #define NULL ((void *)0)
 #endif
 
+#if defined(_WIN32) && !defined(HAVE_HANDLE)
+typedef void *HANDLE;
+#endif
+
 /** A time structure representing minutes, seconds, and frames on a CD. */
 typedef struct {
     uint8_t min;  /** The number of minutes */
