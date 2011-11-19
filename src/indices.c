@@ -29,7 +29,7 @@
 #include <libcueify/indices.h>
 #include <libcueify/error.h>
 #include "device_private.h"
-#include "toc_private.h"
+#include "full_toc_private.h"
 #include "indices_private.h"
 
 cueify_indices *cueify_indices_new() {
@@ -48,16 +48,28 @@ static inline void lba_to_msf(uint32_t lba, cueify_msf_t *msf) {
 	msf->min++;
 	msf->sec -= 60;
     }
-}
+}  /* lba_to_msf */
+
+
+static inline uint32_t msf_to_lba(cueify_msf_t msf) {
+    uint32_t lba = 0;
+
+    lba += msf.frm;
+    lba += msf.sec * 75;
+    lba += msf.min * 60 * 75;
+    lba -= 150;  /* Lead-in */
+
+    return lba;
+}  /* msf_to_lba */
 
 
 int cueify_device_read_track_indices(cueify_device *d, cueify_indices *i,
 				     uint8_t track) {
     cueify_device_private *dev = (cueify_device_private *)d;
     cueify_indices_private *indices = (cueify_indices_private *)i;
-    cueify_toc_private toc;
+    cueify_full_toc_private toc;
 
-    if (cueify_device_read_toc_unportable(dev, &toc) != CUEIFY_OK) {
+    if (cueify_device_read_full_toc_unportable(dev, &toc) != CUEIFY_OK) {
 	return CUEIFY_ERR_INTERNAL;
     }
 
@@ -70,11 +82,13 @@ int cueify_device_read_track_indices(cueify_device *d, cueify_indices *i,
 	int lba, first_lba, left_lba, right_lba, last_lba;
 	int index;
 
-	first_lba = left_lba = toc.tracks[track].lba;
-	if (track == toc.last_track_number) {
-	    last_lba = right_lba = toc.tracks[0].lba;
+	first_lba = left_lba = msf_to_lba(toc.tracks[track].offset);
+	if (track ==
+	    toc.sessions[toc.tracks[track].session].last_track_number) {
+	    last_lba = right_lba =
+		msf_to_lba(toc.sessions[toc.tracks[track].session].leadout);
 	} else {
-	    last_lba = right_lba = toc.tracks[track + 1].lba;
+	    last_lba = right_lba = msf_to_lba(toc.tracks[track + 1].offset);
 	}
 
 	/* Get the index of the penultimate second of the track. */
