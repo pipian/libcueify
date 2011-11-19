@@ -30,6 +30,11 @@ However, you may use cmake to generate the build directory somewhere
 other than a subdirectory named "build".  Thus, simply invoking "make"
 will configure and compile libcueify.
 
+If you are building using MinGW (particularly, MSYS), the Makefile
+assumes that you have CMake installed in "C:\Program Files\CMake
+2.8\bin\cmake.exe".  You will need to modify the Makefile if this is
+not the case.
+
 TESTING:
 
 In addition to the "check" target, which tests the library internal
