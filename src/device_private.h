@@ -31,7 +31,7 @@
 /** OS-specific device handle types. */
 #ifdef _WIN32
 #define device_handle HANDLE  /* HANDLE to an OpenVolume */
-#elif defined __unix__
+#elif defined(__unix__) || defined(__APPLE__)
 #define device_handle int     /* file descriptor */
 #endif
 

@@ -125,6 +125,8 @@ int cueify_device_get_supported_apis(cueify_device *d);
  * Get an operating-system-specific device identifier for the default
  * optical disc (CD-ROM) device in this system.
  *
+ * @note This function is not guaranteed to be thread-safe (e.g. on Darwin)
+ *
  * @return NULL if there is no default optical disc (CD-ROM) device in
  *         this system, else the identifier of the default device
  */
