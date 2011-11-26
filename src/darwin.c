@@ -72,7 +72,13 @@ int cueify_device_close_unportable(cueify_device_private *d) {
 int cueify_device_get_supported_apis_unportable(cueify_device_private *d) {
     /* Suppress error about d. */
     d++;
-    return (CUEIFY_DEVICE_SUPPORTS_TOC);
+    return (CUEIFY_DEVICE_SUPPORTS_TOC      |
+	    CUEIFY_DEVICE_SUPPORTS_SESSIONS |
+	    CUEIFY_DEVICE_SUPPORTS_FULL_TOC |
+	    CUEIFY_DEVICE_SUPPORTS_CDTEXT   |
+	    CUEIFY_DEVICE_SUPPORTS_MCN_ISRC |
+	    CUEIFY_DEVICE_SUPPORTS_INDICES  |
+	    CUEIFY_DEVICE_SUPPORTS_DATA_MODE);
 }  /* cueify_device_get_supported_apis_unportable */
 
 
