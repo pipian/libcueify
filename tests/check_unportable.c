@@ -231,7 +231,8 @@ START_TEST (test_mcn_isrc)
 	fail_unless(cueify_device_read_isrc(dev, i + 1, buffer,
 					    &size) == CUEIFY_OK,
 		    "Failed to read ISRC from device");
-	fail_unless(size == 16, "ISRC size incorrect");
+	/* Some OSs will only fill the length of the ISRC string */
+	fail_unless(size == 16 || size == 13, "ISRC size incorrect");
 	fail_unless(strcmp(buffer, isrcs[i]) == 0, "ISRC not correct");
     }
 }

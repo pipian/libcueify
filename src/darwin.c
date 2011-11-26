@@ -44,6 +44,8 @@
 #include "cdtext_private.h"
 #include "indices_private.h"
 
+#define min(x, y)  ((x > y) ? y : x)  /** Return the minimum of x and y. */
+
 int cueify_device_open_unportable(cueify_device_private *d,
 				  const char *device) {
     int fd;
@@ -192,20 +194,62 @@ int cueify_device_read_cdtext_unportable(cueify_device_private *d,
 
 int cueify_device_read_mcn_unportable(cueify_device_private *d,
 				      char *buffer, size_t *size) {
-    d = 0;
-    buffer = 0;
-    size = 0;
-    return CUEIFY_NO_DATA;
+    dk_cd_read_mcn_t mcn;
+
+    memset(&mcn, 0, sizeof(mcn));
+
+    if (ioctl(d->handle, DKIOCCDREADMCN, &mcn) < 0) {
+	if (errno == EIO) {
+	    /* No MCN! */
+	    if (*size > 0) {
+		*buffer = '\0';
+		*size = 1;
+	    }
+	    return CUEIFY_NO_DATA;
+	}
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    *size = min(kCDMCNMaxLength + 1, *size);
+    memcpy(buffer, mcn.mcn, *size - 1);
+    buffer[*size] = '\0';
+    if (buffer[0] == '\0') {
+	*size = 1;
+	return CUEIFY_NO_DATA;
+    }
+
+    return CUEIFY_OK;
 }  /* cueify_device_read_mcn_unportable */
 
 
 int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 				       char *buffer, size_t *size) {
-    d = 0;
-    track = 0;
-    buffer = 0;
-    size = 0;
-    return CUEIFY_NO_DATA;
+    dk_cd_read_isrc_t isrc;
+
+    memset(&isrc, 0, sizeof(isrc));
+    isrc.track = track;
+
+    if (ioctl(d->handle, DKIOCCDREADISRC, &isrc) < 0) {
+	if (errno == EIO) {
+	    /* No ISRC! */
+	    if (*size > 0) {
+		*buffer = '\0';
+		*size = 1;
+	    }
+	    return CUEIFY_NO_DATA;
+	}
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    *size = min(kCDISRCMaxLength + 1, *size);
+    memcpy(buffer, isrc.isrc, *size - 1);
+    buffer[*size] = '\0';
+    if (buffer[0] == '\0') {
+	*size = 1;
+	return CUEIFY_NO_DATA;
+    }
+
+    return CUEIFY_OK;
 }  /* cueify_device_read_isrc_unportable */
 
 

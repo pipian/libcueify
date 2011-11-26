@@ -56,7 +56,7 @@ SET_TARGET_PROPERTIES(cueify PROPERTIES
 IF(CMAKE_COMPILER_IS_GNUCC)
     # Unfortunately, libcam and w32api fail -pedantic-errors
     # (and -isystem fails to help)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -std=gnu99 -pedantic")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -std=gnu99 -pedantic -g")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 INSTALL(TARGETS cueify DESTINATION ${LIB_INSTALL_DIR})
