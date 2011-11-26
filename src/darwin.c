@@ -170,9 +170,23 @@ int cueify_device_read_full_toc_unportable(cueify_device_private *d,
 
 int cueify_device_read_cdtext_unportable(cueify_device_private *d,
 					 cueify_cdtext_private *t) {
-    d = 0;
-    t = 0;
-    return CUEIFY_NO_DATA;
+    uint8_t data[256 * 11 + 4];
+    uint16_t size = 256 * 11 + 4;
+    dk_cd_read_toc_t toc;
+
+    memset(data, 0, size);
+    memset(&toc, 0, sizeof(toc));
+    toc.format = kCDTOCFormatTEXT;  /* CD-Text */
+    toc.formatAsTime = 0;  /* 0 = LBA */
+    toc.bufferLength = size;
+    toc.buffer = data;
+
+    if (ioctl(d->handle, DKIOCCDREADTOC, &toc) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    return cueify_cdtext_deserialize((cueify_cdtext *)t, toc.buffer,
+				     toc.bufferLength);
 }  /* cueify_device_read_cdtext_unportable */
 
 
