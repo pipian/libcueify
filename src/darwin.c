@@ -253,21 +253,77 @@ int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 }  /* cueify_device_read_isrc_unportable */
 
 
+/** Return the binary representation of a binary-coded decimal. */
+#define BCD2BIN(x)  (((x >> 4) & 0xF) * 10 + (x & 0xF))
+
+
 int cueify_device_read_position_unportable(cueify_device_private *d,
 					   uint8_t track, uint32_t lba,
 					   cueify_position_t *pos) {
-    d = 0;
-    track = 0;
-    lba = 0;
-    pos = 0;
-    return CUEIFY_NO_DATA;
+    cueify_raw_read_private buffer;
+
+    /* Do nothing, but remove error where track is unused! */
+    buffer.data_mode = track;
+    memset(&buffer, 0, sizeof(buffer));
+
+    /*
+     * Manual testing shows that, on SOME discs, we will return all
+     * zeroes for the Q subchannel!
+     */
+    while (buffer.track == 0) {
+	/*
+	 * We can actually get the position from reading the Q subchannel
+	 * during our raw read, rather than doing a subchannel ioctl!
+	 */
+	if (cueify_device_read_raw_unportable(d, lba, &buffer) != CUEIFY_OK) {
+	    return CUEIFY_ERR_INTERNAL;
+	}
+	lba--;
+    }
+
+    pos->track = BCD2BIN(buffer.track);
+    pos->index = BCD2BIN(buffer.index);
+
+    /* Times are given in binary-coded decimal. */
+    pos->abs.min = BCD2BIN(buffer.amin);
+    pos->abs.sec = BCD2BIN(buffer.asec);
+    pos->abs.frm = BCD2BIN(buffer.afrm);
+
+    /* Adjust the absolute time by 2 seconds for the lead-in. */
+    if (pos->abs.sec < 2) {
+	pos->abs.sec += 75;
+	pos->abs.min--;
+    }
+    pos->abs.sec -= 2;
+
+    /* I expect that relative times are in BCD as well. */
+    pos->rel.min = BCD2BIN(buffer.min);
+    pos->rel.sec = BCD2BIN(buffer.sec);
+    pos->rel.frm = BCD2BIN(buffer.frm);
+
+    return CUEIFY_OK;
 }  /* cueify_device_read_position_unportable */
 
 
 int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
 				      cueify_raw_read_private *buffer) {
-    d = 0;
-    lba = 0;
-    buffer = 0;
-    return CUEIFY_NO_DATA;
+    dk_cd_read_t read;
+
+    memset(&read, 0, sizeof(read));
+    read.offset = lba * sizeof(*buffer);  /* Offset is relative to data size */
+    read.sectorArea = (kCDSectorAreaSync      |
+		       kCDSectorAreaHeader    |
+		       kCDSectorAreaSubHeader |
+		       kCDSectorAreaUser      |
+		       kCDSectorAreaAuxiliary |
+		       kCDSectorAreaSubChannelQ);
+    read.sectorType = kCDSectorTypeUnknown;
+    read.bufferLength = sizeof(*buffer);
+    read.buffer = buffer;
+
+    if (ioctl(d->handle, DKIOCCDREAD, &read) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    return CUEIFY_OK;
 }  /* cueify_device_read_raw_unportable */
