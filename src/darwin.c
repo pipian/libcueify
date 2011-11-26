@@ -126,9 +126,23 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
 
 int cueify_device_read_sessions_unportable(cueify_device_private *d,
 					   cueify_sessions_private *s) {
-    d = 0;
-    s = 0;
-    return CUEIFY_NO_DATA;
+    uint8_t data[12];
+    uint16_t size = 12;
+    dk_cd_read_toc_t toc;
+
+    memset(data, 0, size);
+    memset(&toc, 0, sizeof(toc));
+    toc.format = 0x01;  /* 0001b = Session Info */
+    toc.formatAsTime = 0;  /* 0 = LBA */
+    toc.bufferLength = size;
+    toc.buffer = data;
+
+    if (ioctl(d->handle, DKIOCCDREADTOC, &toc) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    return cueify_sessions_deserialize((cueify_sessions *)s, toc.buffer,
+				       toc.bufferLength);
 }  /* cueify_device_read_sessions_unportable */
 
 
