@@ -18,9 +18,9 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 #    then increment age.
 # 4. If any interfaces have been removed since the last public
 #    release, then set age to 0.
-SET(libcueify_SOVERSION_CURRENT  0)
+SET(libcueify_SOVERSION_CURRENT  1)
 SET(libcueify_SOVERSION_REVISION 0)
-SET(libcueify_SOVERSION_AGE      0)
+SET(libcueify_SOVERSION_AGE      1)
 
 MATH(EXPR libcueify_SOVERSION_MAJOR
      "${libcueify_SOVERSION_CURRENT} - ${libcueify_SOVERSION_AGE}")

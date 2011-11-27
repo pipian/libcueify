@@ -89,22 +89,24 @@ void cueify_device_free(cueify_device *d);
 
 
 /** Device supports reading TOC */
-#define CUEIFY_DEVICE_SUPPORTS_TOC        0x01
+#define CUEIFY_DEVICE_SUPPORTS_TOC            0x01
 /** Device supports reading multi-session data */
-#define CUEIFY_DEVICE_SUPPORTS_SESSIONS   0x02
+#define CUEIFY_DEVICE_SUPPORTS_SESSIONS       0x02
 /** Device supports reading the full TOC */
-#define CUEIFY_DEVICE_SUPPORTS_FULL_TOC   0x04
+#define CUEIFY_DEVICE_SUPPORTS_FULL_TOC       0x04
 /** Device supports reading CD-Text */
-#define CUEIFY_DEVICE_SUPPORTS_CDTEXT     0x08
+#define CUEIFY_DEVICE_SUPPORTS_CDTEXT         0x08
 /**
  * Device supports reading Media Catalog Numbers/International
  * Standard Recording Codes (ISRCs).
  */
-#define CUEIFY_DEVICE_SUPPORTS_MCN_ISRC   0x10
+#define CUEIFY_DEVICE_SUPPORTS_MCN_ISRC       0x10
 /** Device supports reading track indices */
-#define CUEIFY_DEVICE_SUPPORTS_INDICES    0x20
+#define CUEIFY_DEVICE_SUPPORTS_INDICES        0x20
 /** Device supports reading data modes */
-#define CUEIFY_DEVICE_SUPPORTS_DATA_MODE  0x40
+#define CUEIFY_DEVICE_SUPPORTS_DATA_MODE      0x40
+/** Device supports reading control flags from the track itself */
+#define CUEIFY_DEVICE_SUPPORTS_TRACK_CONTROL  0x80
 
 
 /**

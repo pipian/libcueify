@@ -1,4 +1,5 @@
-/* check_unportable.h - Unit tests for unportable libcueify APIs
+/* check_indices.c - Unit tests for unportable libcueify APIs to
+ * detect track indices
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 

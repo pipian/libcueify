@@ -1,5 +1,6 @@
 /* data_mode.h - Header for CD-ROM functions which read the mode in
- * which a data track was written on a CD.
+ * which a data track was written on a CD or the control flags of a
+ * track from the CD.
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -54,5 +55,22 @@
  *         read; otherwise CUEIFY_DATA_MODE_ERROR is returned
  */
 int cueify_device_read_data_mode(cueify_device *d, uint8_t track);
+
+
+/**
+ * Read the control flags of a track on a disc in an optical disc
+ * (CD-ROM) device associated with a device handle.  This function
+ * reads the flags directly from the track rather than relying on the
+ * TOC.
+ *
+ * @pre { d != NULL, track in range of track numbers on disc }
+ * @param d an opened device handle
+ * @param track the number of the track for which indices should be
+ *              retrieved
+ * @return the control flags for track number track in d (or 0xF if
+ *         they could not be read).
+ */
+uint8_t cueify_device_read_track_control_flags(cueify_device *d,
+					       uint8_t track);
 
 #endif /* _LIBCUEIFY_DATA_MODE_H */

@@ -107,13 +107,14 @@ int cueify_device_get_supported_apis_unportable(cueify_device_private *d) {
      * FreeBSD supports all APIs, but in the future we could try to
      * use GET CONFIGURATION to determine what the DEVICE can support.
      */
-    return (CUEIFY_DEVICE_SUPPORTS_TOC      |
-	    CUEIFY_DEVICE_SUPPORTS_SESSIONS |
-	    CUEIFY_DEVICE_SUPPORTS_FULL_TOC |
-	    CUEIFY_DEVICE_SUPPORTS_CDTEXT   |
-	    CUEIFY_DEVICE_SUPPORTS_MCN_ISRC |
-	    CUEIFY_DEVICE_SUPPORTS_INDICES  |
-	    CUEIFY_DEVICE_SUPPORTS_DATA_MODE);
+    return (CUEIFY_DEVICE_SUPPORTS_TOC       |
+	    CUEIFY_DEVICE_SUPPORTS_SESSIONS  |
+	    CUEIFY_DEVICE_SUPPORTS_FULL_TOC  |
+	    CUEIFY_DEVICE_SUPPORTS_CDTEXT    |
+	    CUEIFY_DEVICE_SUPPORTS_MCN_ISRC  |
+	    CUEIFY_DEVICE_SUPPORTS_INDICES   |
+	    CUEIFY_DEVICE_SUPPORTS_DATA_MODE |
+	    CUEIFY_DEVICE_SUPPORTS_TRACK_CONTROL);
 }  /* cueify_device_get_supported_apis_unportable */
 
 

@@ -1,5 +1,6 @@
 /* data_mode.c - CD-ROM functions which read the mode in which a data
- * track was written on a CD.
+ * track was written on a CD or the control flags of a track from the
+ * CD.
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -55,3 +56,27 @@ int cueify_device_read_data_mode(cueify_device *d, uint8_t track) {
 	return CUEIFY_DATA_MODE_ERROR;
     }
 }  /* cueify_device_read_data_mode */
+
+
+uint8_t cueify_device_read_track_control_flags(cueify_device *d,
+					       uint8_t track) {
+    cueify_device_private *dev = (cueify_device_private *)d;
+    cueify_toc_private toc;
+    cueify_raw_read_private buffer;
+
+    if (cueify_device_read_toc_unportable(dev, &toc) != CUEIFY_OK) {
+	return 0xF;
+    }
+
+    if (cueify_device_read_raw_unportable(dev, toc.tracks[track].lba,
+					  &buffer) != CUEIFY_OK) {
+	return 0xF;
+    }
+
+    if (sizeof(buffer) == 2352 + 16) {
+	/* Must support sub-Q-channel. */
+	return buffer.control_adr >> 4;
+    } else {
+	return 0xF;
+    }
+}  /* cueify_device_read_track_control_flags */

@@ -47,6 +47,12 @@ IF(LIBCHECK_FOUND)
     ADD_EXECUTABLE(check_pregaps check_pregaps.c)
     ADD_DEPENDENCIES(check check_pregaps)
     ADD_DEPENDENCIES(check-pregaps check_pregaps)
+
+    ADD_CUSTOM_TARGET(check-track-control
+		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_track_control)
+    ADD_EXECUTABLE(check_track_control check_track_control.c)
+    ADD_DEPENDENCIES(check check_track_control)
+    ADD_DEPENDENCIES(check-track-control check_track_control)
 ENDIF(LIBCHECK_FOUND)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
@@ -64,5 +70,6 @@ IF(CYGWIN)
     ADD_DEPENDENCIES(check-unportable copy-test-library)
     ADD_DEPENDENCIES(check-indices copy-test-library)
     ADD_DEPENDENCIES(check-pregaps copy-test-library)
+    ADD_DEPENDENCIES(check-track-control copy-test-library)
 ENDIF(CYGWIN)
 

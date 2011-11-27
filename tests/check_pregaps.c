@@ -1,4 +1,5 @@
-/* check_unportable.h - Unit tests for unportable libcueify APIs
+/* check_pregaps.c - Unit tests for unportable libcueify APIs to
+ * detect pregaps
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 

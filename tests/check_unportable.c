@@ -1,4 +1,4 @@
-/* check_unportable.h - Unit tests for unportable libcueify APIs
+/* check_unportable.c - Unit tests for unportable libcueify APIs
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
