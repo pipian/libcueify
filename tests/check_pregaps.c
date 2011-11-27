@@ -185,7 +185,8 @@ START_TEST (test_mcn_isrc)
 
     fail_unless(cueify_device_read_mcn(dev, buffer, &size) == CUEIFY_OK,
 		"Failed to (not) read media catalog number from device");
-    fail_unless(size == 16, "Media catalog number size incorrect");
+    fail_unless(size == 16 || size == 14,
+		"Media catalog number size incorrect");
     fail_unless(strcmp(buffer, "0000000000000") == 0,
 		"Media catalog number not set");
 
