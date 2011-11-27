@@ -13,10 +13,11 @@ libcueify requires:
 libcueify has been tested (and compiles) with the following configurations:
 
 - FreeBSD
+- Darwin (Mac OS X)
 - Cygwin
 - MinGW (libcheck tests cannot be run)
 
-Support for Linux and Darwin (Mac OS X) will be added in the future.
+Support for Linux will be added in the future.
 
 It likely requires little modification to work with Visual Studio directly.
 
