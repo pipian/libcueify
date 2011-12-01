@@ -117,7 +117,7 @@ int cueify_sessions_serialize(cueify_sessions *s, uint8_t *buffer,
     *size = sessions_length;
     if (buffer == NULL) {
 	return CUEIFY_OK;
-    } else if (*size < toc_length) {
+    } else if (*size < sessions_length) {
 	return CUEIFY_ERR_TOOSMALL;
     }
 
