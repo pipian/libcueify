@@ -100,8 +100,7 @@ int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
  * @param size a pointer to the size of the buffer. When called, the
  *             size must contain the maximum number of bytes that may
  *             be stored in buffer. When this function is complete,
- *             the pointer will contain the actual number of bytes
- *             serialized, or if buffer is NULL, the number of bytes
+ *             the pointer will contain the number of bytes
  *             needed to fully serialize the full TOC instance.
  * @return CUEIFY_OK if the full TOC was successfully serialized; otherwise
  *         an error code is returned

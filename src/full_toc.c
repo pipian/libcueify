@@ -238,7 +238,7 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
     uint8_t cur_session = 0;
     int i;
 
-    if (t == NULL || buffer == NULL || size == NULL) {
+    if (t == NULL || size == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
 
@@ -246,10 +246,12 @@ int cueify_full_toc_serialize(cueify_full_toc *t, uint8_t *buffer,
 	( (toc->last_track_number   - toc->first_track_number   + 1) +
 	 ((toc->last_session_number - toc->first_session_number + 1) * 3)) * 11
 	+ 4;
-    if (*size < toc_length) {
+    *size = toc_length;
+    if (buffer == NULL) {
+	return CUEIFY_OK;
+    } else if (*size < toc_length) {
 	return CUEIFY_ERR_TOOSMALL;
     }
-    *size = toc_length;
 
     /* TOC Data Length */
     toc_length -= 2;

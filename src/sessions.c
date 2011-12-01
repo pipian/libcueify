@@ -108,15 +108,17 @@ int cueify_sessions_serialize(cueify_sessions *s, uint8_t *buffer,
     uint16_t sessions_length;
     uint8_t *bp;
 
-    if (s == NULL || buffer == NULL || size == NULL) {
+    if (s == NULL || size == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
 
     sessions_length = 12;
-    if (*size < sessions_length) {
+    *size = sessions_length;
+    if (buffer == NULL) {
+	return CUEIFY_OK;
+    } else if (*size < toc_length) {
 	return CUEIFY_ERR_TOOSMALL;
     }
-    *size = sessions_length;
 
     /* TOC Data Length */
     sessions_length -= 2;

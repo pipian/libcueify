@@ -117,16 +117,18 @@ int cueify_toc_serialize(cueify_toc *t, uint8_t *buffer, size_t *size) {
     uint8_t track_number;
     int i;
 
-    if (t == NULL || buffer == NULL || size == NULL) {
+    if (t == NULL || size == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
 
     toc_length = (toc->last_track_number -
 		  toc->first_track_number + 2) * 8 + 4;
-    if (*size < toc_length) {
+    *size = toc_length;
+    if (buffer == NULL) {
+	return CUEIFY_OK;
+    } else if (*size < toc_length) {
 	return CUEIFY_ERR_TOOSMALL;
     }
-    *size = toc_length;
 
     /* TOC Data Length */
     toc_length -= 2;

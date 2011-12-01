@@ -660,7 +660,7 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
     /* NOTE: This doesn't yet enforce the rule that single-byte
      * charsets should come before double-byte charsets. */
 
-    if (t == NULL || buffer == NULL || size == NULL) {
+    if (t == NULL || size == NULL) {
 	return CUEIFY_ERR_BADARG;
     }
 
@@ -871,10 +871,12 @@ int cueify_cdtext_serialize(cueify_cdtext *t, uint8_t *buffer,
     }
 
     toc_length = num_descriptors * 18 + 4;
-    if (*size < toc_length) {
+    *size = toc_length;
+    if (buffer == NULL) {
+	return CUEIFY_OK;
+    } else if (*size < toc_length) {
 	return CUEIFY_ERR_TOOSMALL;
     }
-    *size = toc_length;
 
     /* TOC Data Length */
     toc_length -= 2;
