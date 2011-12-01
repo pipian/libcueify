@@ -1,14 +1,18 @@
-This is libcueify 0.1.0
+This is libcueify 0.1.1
+
+Changes in 0.1.1:
+
+	* Now actually installs header files.  Oops!
 
 Features in 0.1.0:
 
-	 * Supported OSs: FreeBSD, Windows (Cygwin, mingw32)
-	 * device: Open/close, get default device, get supported APIs
-	 * toc: Read/serialize basic TOC from a disc
-	 * full_toc: Read/serialize "full TOC" (including session data)
-	 * sessions: Read/serialize last-session data from a disc
-	 * cdtext: Read/serialize CD-TEXT data from a disc
-	 * indices: Read track indices/pregaps from a disc
-	 * mcn_isrc: Read MCN from disc, ISRCs from tracks
-	 * data_mode: Read mode of a data track
-	 * examples/cueify: Example program to create cuesheets from libcueify
+	* Supported OSs: FreeBSD, Windows (Cygwin, mingw32)
+	* device: Open/close, get default device, get supported APIs
+	* toc: Read/serialize basic TOC from a disc
+	* full_toc: Read/serialize "full TOC" (including session data)
+	* sessions: Read/serialize last-session data from a disc
+	* cdtext: Read/serialize CD-TEXT data from a disc
+	* indices: Read track indices/pregaps from a disc
+	* mcn_isrc: Read MCN from disc, ISRCs from tracks
+	* data_mode: Read mode of a data track
+	* examples/cueify: Example program to create cuesheets from libcueify
