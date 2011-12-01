@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 PROJECT(libcueify)
-SET(PROJECT_VERSION 0.1.0)
+SET(PROJECT_VERSION 0.5.0)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
@@ -30,8 +30,13 @@ MATH(EXPR libcueify_SOVERSION_PATCH "${libcueify_SOVERSION_REVISION}")
 SET(libcueify_VERSION ${libcueify_SOVERSION_MAJOR}.${libcueify_SOVERSION_MINOR}.${libcueify_SOVERSION_PATCH})
 SET(libcueify_SOVERSION ${libcueify_SOVERSION_MAJOR})
 
+SET(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
+SET(EXEC_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH
+    "Installation prefix for executables and object code libraries" FORCE)
 SET(LIB_INSTALL_DIR ${EXEC_INSTALL_PREFIX}/lib${LIB_SUFFIX} CACHE PATH
     "Installation prefix for object code libraries" FORCE)
+SET(INCLUDE_INSTALL_DIR ${EXEC_INSTALL_PREFIX}/include CACHE PATH
+    "Installation prefix for C header files" FORCE)
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
@@ -39,5 +44,9 @@ ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
 	       ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
+
+FILE(GLOB headers ${CMAKE_CURRENT_SOURCE_DIR}/include/libcueify/*.h)
+INSTALL(FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/include/libcueify/types.h
+        DESTINATION ${INCLUDE_INSTALL_DIR}/libcueify)
 
 ADD_CUSTOM_TARGET(docs doxygen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
