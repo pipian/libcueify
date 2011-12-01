@@ -45,8 +45,10 @@ ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
 	       ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
 
-FILE(GLOB headers ${CMAKE_CURRENT_SOURCE_DIR}/include/libcueify/*.h)
-INSTALL(FILES ${headers} ${CMAKE_CURRENT_BINARY_DIR}/include/libcueify/types.h
+FILE(GLOB cheaders ${CMAKE_CURRENT_SOURCE_DIR}/include/libcueify/*.h)
+FILE(GLOB cppheaders ${CMAKE_CURRENT_SOURCE_DIR}/include/libcueify/*.hxx)
+INSTALL(FILES ${cheaders} ${cppheaders}
+        ${CMAKE_CURRENT_BINARY_DIR}/include/libcueify/types.h
         DESTINATION ${INCLUDE_INSTALL_DIR}/libcueify)
 
 ADD_CUSTOM_TARGET(docs doxygen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
