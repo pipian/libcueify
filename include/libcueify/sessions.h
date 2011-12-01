@@ -30,6 +30,10 @@
 #include <libcueify/device.h>
 #include <libcueify/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+
 /**
  * A transparent handle for the multi-session data of an audio CD.
  *
@@ -184,5 +188,9 @@ uint8_t cueify_sessions_get_last_session_track_number(cueify_sessions *s);
  *         complete session of s
  */
 uint32_t cueify_sessions_get_last_session_address(cueify_sessions *s);
+
+#ifdef __cplusplus
+};  /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif /* _LIBCUEIFY_SESSIONS_H */

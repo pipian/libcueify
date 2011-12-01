@@ -26,6 +26,10 @@
 #ifndef _LIBCUEIFY_DEVICE_H
 #define _LIBCUEIFY_DEVICE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+
 /**
  * A transparent handle for an optical disc (CD-ROM) device.
  *
@@ -133,5 +137,9 @@ int cueify_device_get_supported_apis(cueify_device *d);
  *         this system, else the identifier of the default device
  */
 const char *cueify_device_get_default_device();
+
+#ifdef __cplusplus
+};  /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif /* _LIBCUEIFY_DEVICE_H */

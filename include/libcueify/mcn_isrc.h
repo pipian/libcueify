@@ -31,6 +31,10 @@
 #include <libcueify/constants.h>
 #include <libcueify/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+
 /**
  * Read the Media Catalog Number of the disc in the optical disc device
  * associated with a device handle.
@@ -75,5 +79,9 @@ int cueify_device_read_mcn(cueify_device *d, char *buffer, size_t *size);
  */
 int cueify_device_read_isrc(cueify_device *d, uint8_t track,
 			    char *buffer, size_t *size);
+
+#ifdef __cplusplus
+};  /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif /* _LIBCUEIFY_MCN_ISRC_H */

@@ -31,6 +31,10 @@
 #include <libcueify/constants.h>
 #include <libcueify/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+
 /**
  * A transparent handle for the track indices of track on an audio CD.
  *
@@ -108,5 +112,9 @@ uint8_t cueify_indices_get_index_number(cueify_indices *i, uint8_t index);
  * @return the offset of the track index index in i
  */
 cueify_msf_t cueify_indices_get_index_offset(cueify_indices *i, uint8_t index);
+
+#ifdef __cplusplus
+};  /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif /* _LIBCUEIFY_INDICES_H */

@@ -32,6 +32,10 @@
 #include <libcueify/constants.h>
 #include <libcueify/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+
 /** Track is CD-DA (Audio) */
 #define CUEIFY_DATA_MODE_CDDA     0x00
 /** Track is Mode 1 */
@@ -72,5 +76,9 @@ int cueify_device_read_data_mode(cueify_device *d, uint8_t track);
  */
 uint8_t cueify_device_read_track_control_flags(cueify_device *d,
 					       uint8_t track);
+
+#ifdef __cplusplus
+};  /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif /* _LIBCUEIFY_DATA_MODE_H */

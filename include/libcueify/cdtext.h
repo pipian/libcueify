@@ -31,6 +31,10 @@
 #include <libcueify/constants.h>
 #include <libcueify/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+
 /**
  * A transparent handle for the CD-Text data of an audio CD.
  *
@@ -590,5 +594,9 @@ uint16_t cueify_cdtext_block_get_genre_code(cueify_cdtext_block *b);
  *         UTF-8 encoding.
  */
 const char *cueify_cdtext_block_get_genre_name(cueify_cdtext_block *b);
+
+#ifdef __cplusplus
+};  /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif /* _LIBCUEIFY_CDTEXT_H */

@@ -31,6 +31,10 @@
 #include <libcueify/constants.h>
 #include <libcueify/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+
 /**
  * A transparent handle for the table of contents (TOC) of an audio CD.
  *
@@ -208,5 +212,9 @@ uint32_t cueify_toc_get_track_address(cueify_toc *t, uint8_t track);
  * @return the total number of CD-frames in track number track in t
  */
 uint32_t cueify_toc_get_track_length(cueify_toc *t, uint8_t track);
+
+#ifdef __cplusplus
+};  /* extern "C" */
+#endif  /* __cplusplus */
 
 #endif /* _LIBCUEIFY_TOC_H */
