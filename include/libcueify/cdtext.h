@@ -533,20 +533,6 @@ const char *cueify_cdtext_block_get_message(cueify_cdtext_block *b,
 
 
 /**
- * Get the message of a track in a CD-Text block.
- *
- * @pre { b != NULL }
- * @param b a CD-Text block instance
- * @param track the number of the track to retrieve the message for (or
- *        CUEIFY_CDTEXT_ALBUM for the message of the album)
- * @return NULL if no message has been set for the track, otherwise
- *         the message in UTF-8 encoding.
- */
-const char *cueify_cdtext_block_get_message(cueify_cdtext_block *b,
-					    uint8_t track);
-
-
-/**
  * Get the private data of a track in a CD-Text block.
  *
  * @pre { b != NULL }

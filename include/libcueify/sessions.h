@@ -147,18 +147,6 @@ uint8_t cueify_sessions_get_last_session_control_flags(cueify_sessions *s);
 
 
 /**
- * Get the track control flags for the first track in the last
- * complete session.
- *
- * @pre { s != NULL }
- * @param s a multisession instance
- * @return the control flags for the first track in the last complete
- *         session in s
- */
-uint8_t cueify_sessions_get_last_session_control_flags(cueify_sessions *s);
-
-
-/**
  * Get the format of the content of the sub-Q-channel for the first
  * track in the last complete session in a multisession instance.
  *
