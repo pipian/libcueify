@@ -80,11 +80,11 @@ struct cdtext_descriptor {
 #define CHAR_POSITION(x)  (x & 0xF)
 
 
-int cueify_cdtext_deserialize(cueify_cdtext *t, uint8_t *buffer,
+int cueify_cdtext_deserialize(cueify_cdtext *t, const uint8_t * const buffer,
 			      size_t size) {
     cueify_cdtext_private *cdtext = (cueify_cdtext_private *)t;
     uint16_t toc_length;
-    uint8_t *bp;
+    const uint8_t *bp;
     int block, pack_type, track;
     unsigned char *pack_data[MAX_BLOCKS][16];
     unsigned char *pack;

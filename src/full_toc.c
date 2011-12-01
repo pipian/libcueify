@@ -49,11 +49,12 @@ int cueify_device_read_full_toc(cueify_device *d, cueify_full_toc *t) {
 }  /* cueify_device_read_full_toc */
 
 
-int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
+int cueify_full_toc_deserialize(cueify_full_toc *t,
+				const uint8_t * const buffer,
 				size_t size) {
     cueify_full_toc_private *toc = (cueify_full_toc_private *)t;
     uint16_t toc_length;
-    uint8_t *bp;
+    const uint8_t *bp;
     uint8_t offset;
 
     if (t == NULL || buffer == NULL) {

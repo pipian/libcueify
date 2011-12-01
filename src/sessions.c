@@ -50,11 +50,12 @@ int cueify_device_read_sessions(cueify_device *d, cueify_sessions *s) {
 }  /* cueify_device_read_sessions */
 
 
-int cueify_sessions_deserialize(cueify_sessions *s, uint8_t *buffer,
+int cueify_sessions_deserialize(cueify_sessions *s,
+				const uint8_t * const buffer,
 				size_t size) {
     cueify_sessions_private *sessions = (cueify_sessions_private *)s;
     uint16_t sessions_length;
-    uint8_t *bp;
+    const uint8_t *bp;
 
     if (s == NULL || buffer == NULL) {
 	return CUEIFY_ERR_BADARG;

@@ -85,7 +85,8 @@ int cueify_device_read_full_toc(cueify_device *d, cueify_full_toc *t);
  * @return CUEIFY_OK if the full TOC was successfully deserialized;
  *         otherwise an error code is returned
  */
-int cueify_full_toc_deserialize(cueify_full_toc *t, uint8_t *buffer,
+int cueify_full_toc_deserialize(cueify_full_toc *t,
+				const uint8_t * const buffer,
 				size_t size);
 
 

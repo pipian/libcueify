@@ -82,7 +82,8 @@ int cueify_device_read_sessions(cueify_device *d, cueify_sessions *s);
  * @return CUEIFY_OK if the multisession instance was successfully
  *         deserialized; otherwise an error code is returned
  */
-int cueify_sessions_deserialize(cueify_sessions *s, uint8_t *buffer,
+int cueify_sessions_deserialize(cueify_sessions *s,
+				const uint8_t * const buffer,
 				size_t size);
 
 

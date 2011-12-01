@@ -91,7 +91,8 @@ int cueify_device_read_cdtext(cueify_device *d, cueify_cdtext *t);
  * @return CUEIFY_OK if the CD-Text instance was successfully
  *         deserialized; otherwise an error code is returned
  */
-int cueify_cdtext_deserialize(cueify_cdtext *t, uint8_t *buffer, size_t size);
+int cueify_cdtext_deserialize(cueify_cdtext *t, const uint8_t * const buffer,
+			      size_t size);
 
 
 /**

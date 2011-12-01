@@ -83,7 +83,8 @@ int cueify_device_read_toc(cueify_device *d, cueify_toc *t);
  * @return CUEIFY_OK if the TOC was successfully deserialized;
  *         otherwise an error code is returned
  */
-int cueify_toc_deserialize(cueify_toc *t, uint8_t *buffer, size_t size);
+int cueify_toc_deserialize(cueify_toc *t, const uint8_t * const buffer,
+			   size_t size);
 
 
 /**
