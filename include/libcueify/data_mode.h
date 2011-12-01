@@ -65,7 +65,7 @@ int cueify_device_read_data_mode(cueify_device *d, uint8_t track);
  *
  * @pre { d != NULL, track in range of track numbers on disc }
  * @param d an opened device handle
- * @param track the number of the track for which indices should be
+ * @param track the number of the track for which control flags should be
  *              retrieved
  * @return the control flags for track number track in d (or 0xF if
  *         they could not be read).

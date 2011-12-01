@@ -147,7 +147,7 @@ uint8_t cueify_full_toc_get_last_session(cueify_full_toc *t);
  * @param t a full TOC instance
  * @param track the number of the track for which the session number
  *              should be returned
- * @return the number of the last session in t
+ * @return the number of the session of track number track in t
  */
 uint8_t cueify_full_toc_get_track_session(cueify_full_toc *t, uint8_t track);
 
@@ -232,7 +232,7 @@ uint8_t cueify_full_toc_get_session_control_flags(cueify_full_toc *t,
  *        session <= cueify_full_toc_get_last_session(t) }
  * @param t a full TOC instance
  * @param session the session number for which the point applies
- * @param point the point in the lead-in for which the track control flags
+ * @param point the point in the lead-in for which the sub-Q-channel format
  *              should be returned
  * @return the format of the contents of the sub-Q-channel for track
  *         number track in t

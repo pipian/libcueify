@@ -91,7 +91,7 @@ uint8_t cueify_indices_get_num_indices(cueify_indices *i);
  * @note A track index of 0 represents the index of the start of the
  *       pregap for the following track.
  *
- * @pre { i != NULL }
+ * @pre { i != NULL, 1 <= index <= cueify_indices_get_num_indices(i) }
  * @param i the track indices instance to get the number of indices from
  * @param index the offset of the index to get the index number for
  * @return the number of the track index index in i
@@ -102,7 +102,7 @@ uint8_t cueify_indices_get_index_number(cueify_indices *i, uint8_t index);
 /**
  * Get the offset of an index in a track indices instance
  *
- * @pre { i != NULL }
+ * @pre { i != NULL, 1 <= index <= cueify_indices_get_num_indices(i) }
  * @param i the track indices instance to get the number of indices from
  * @param index the offset of the index to get the offset for
  * @return the offset of the track index index in i

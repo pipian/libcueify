@@ -51,9 +51,8 @@ typedef void *cueify_cdtext_block;
 
 /**
  * Create a new CD-Text instance. The instance is created with no
- * data, and should be populated using cueify_device_read_cdtext(),
- * cueify_cdtext_deserialize(), or the various
- * cueify_cdtext_set_*() functions.
+ * data, and should be populated using cueify_device_read_cdtext() or
+ * cueify_cdtext_deserialize().
  *
  * @return NULL if there was an error allocating memory, else the new
  *         CD-Text data
@@ -430,7 +429,7 @@ uint8_t cueify_cdtext_block_has_message_copyright(cueify_cdtext_block *b);
  *
  * @pre { b != NULL }
  * @param b a CD-Text block instance
- * @return TRUE if the artist names in b is copyrighted, otherwise FALSE
+ * @return TRUE if the artist names in b are copyrighted, otherwise FALSE
  */
 uint8_t cueify_cdtext_block_has_name_copyright(cueify_cdtext_block *b);
 
