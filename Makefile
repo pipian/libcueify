@@ -22,6 +22,9 @@ check-indices:
 check-pregaps:
 	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make check-pregaps
 
+check-track-control:
+	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make check-track-control
+
 docs:
 	if [ -d docs ]; then rm -rf docs; fi
 	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make docs
