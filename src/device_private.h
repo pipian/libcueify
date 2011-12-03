@@ -50,6 +50,7 @@ typedef struct {
     /** Sector data after the data mode. */
     uint8_t reserved2[RAW_SECTOR_SIZE - 0x10];
 #if defined(__FreeBSD__) || defined(_WIN32) || defined(__APPLE__)
+#define READ_RAW_SUPPORTS_SUBQ 1
     /*
      * Subchannel Q data used to construct current position from READ
      * CD call. All values in binary-coded decimal.

@@ -60,6 +60,8 @@ int cueify_device_read_data_mode(cueify_device *d, uint8_t track) {
 uint8_t cueify_device_read_track_control_flags(cueify_device *d,
 					       uint8_t track) {
     cueify_device_private *dev = (cueify_device_private *)d;
+#ifdef READ_RAW_SUPPORTS_SUBQ
+    /* Must support sub-Q-channel. */
     cueify_toc_private toc;
     cueify_raw_read_private buffer;
 
@@ -72,10 +74,12 @@ uint8_t cueify_device_read_track_control_flags(cueify_device *d,
 	return 0xF;
     }
 
-    if (sizeof(buffer) == 2352 + 16) {
-	/* Must support sub-Q-channel. */
-	return buffer.control_adr >> 4;
-    } else {
-	return 0xF;
-    }
+    return buffer.control_adr >> 4;
+#else
+    /* Suppress unused variable error */
+    uint8_t t;
+    t = track;
+    dev = (cueify_device_private *)d;
+    return 0xF;
+#endif
 }  /* cueify_device_read_track_control_flags */
