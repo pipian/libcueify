@@ -25,6 +25,12 @@ check-pregaps:
 check-track-control:
 	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make check-track-control
 
+ruby-cueify:
+	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make ruby-cueify
+
+perl-cueify:
+	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make perl-cueify
+
 docs:
 	if [ -d docs ]; then rm -rf docs; fi
 	if [ ! -d build ]; then mkdir build; fi; cd build; $(CMAKE_COMMAND) ..; make docs

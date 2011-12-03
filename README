@@ -46,14 +46,69 @@ the disc that's currently in the drive.  Since these tests aren't
 easily reproduced without the right disc, they are not run
 automatically via "make check".
 
+LANGUAGE BINDINGS:
+
+libcueify is written in C, but bindings for other languages have been
+provided, including:
+
+- C++
+- Perl
+- Python
+- Ruby (requires rake, rubygems, and rake-compiler)
+
+C++ bindings are made available through the wrapper header
+libcueify/cueify.hxx.
+
+Perl, Python, and Ruby, on the other hand, are provided by way of SWIG
+(http://www.swig.org/), which is required in order to generate the
+wrapper libraries for these scripting languages.
+
+SWIG >= 1.3.40 is required to compile the bindings for Perl, Python,
+and Ruby (>= 2.0.1 for Ruby 1.9.0+), and bindings may be compiled by
+invoking the language appropriate installation method for each
+language after libcueify has been installed:
+
+- Perl:
+  "make perl-cueify; cd build/swig/perl; perl Makefile.PL; make; make install"
+  (as with other Perl extensions; note that make perl-cueify must be
+  called first to generate Makefile.PL in build/swig/perl and the
+  appropriate PM files in build/swig/perl.)
+- Python: "python ./setup.py" (as with other Python extensions)
+- Ruby: "rake native gem" (generates a native gem in the pkg/ directory)
+
+Please note that the rubygem created for the Ruby extension may then
+be installed as any other rubygem.  If need be, the prefix in which
+libcueify was installed may be specified for Ruby by calling "rake
+native gem -- --with-cueify-dir=<PREFIX>" as you would with a normal
+extconf.rb.
+
+The APIs in these languages follow the same design as the C++
+bindings, with some caveats:
+
+- Most getters aside from the cueify::Device.read*() functions are
+  implemented as properties or attributes, rather than functions on
+  the objects and return appropriate data-types. (e.g. std::vectors
+  become language-specific array types, std::strings become strings)
+
+- Where possible (mostly in Ruby), names of constants, classes, and
+  methods have been renamed to match standard practice within the
+  language (e.g. in Ruby, Device.readCDText() becomes
+  Device::read_cdtext() and the hasTitle() getter becomes
+  "has_title?")
+
+- The nested classes of the C++ API are, due to limitations of SWIG,
+  flattened into the global Cueify namespace by removing the
+  double-colons.  (e.g. the class cueify::CDText::TOC::Track::Interval
+  is cueify.CDTextTOCTrackInterval in Python)
+
 NOTES:
 
-Some calls use SCSI pass-through logic, and as such, may misbehave on
-older drives which don't support the SCSI commands used (Specifically,
-READ TOC/PMA/ATIP with CD-Text support and READ CD with subchannel
-read support).  Furthermore, I have not tested this code with any
-IDE/ATAPI drives, so I am unsure whether these SCSI commands will work
-correctly with them either.
+Some calls in some OSs use SCSI pass-through logic, and as such, may
+misbehave on older drives which don't support the SCSI commands used
+(Specifically, READ TOC/PMA/ATIP with CD-Text support and READ CD with
+subchannel read support).  Furthermore, I have not tested this code
+with any IDE/ATAPI drives, so I am unsure whether these SCSI commands
+will work correctly with them either.
 
 libcueify should support CDs with CD-TEXT in the Japanese MS-JIS
 encoding.  However, this encoding has been reverse engineered without

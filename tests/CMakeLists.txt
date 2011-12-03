@@ -7,12 +7,12 @@ LINK_LIBRARIES(cueify)
 
 ENABLE_TESTING()
 
+ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
+
 FIND_PACKAGE(LibCheck)
 IF(LIBCHECK_FOUND)
     INCLUDE_DIRECTORIES(${LIBCHECK_INCLUDE_DIRS})
     LINK_LIBRARIES(${LIBCHECK_LIBRARIES})
-    
-    ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
     
     ADD_EXECUTABLE(check_toc check_toc.c)
     ADD_TEST(check_toc check_toc)
@@ -54,6 +54,37 @@ IF(LIBCHECK_FOUND)
     ADD_DEPENDENCIES(check check_track_control)
     ADD_DEPENDENCIES(check-track-control check_track_control)
 ENDIF(LIBCHECK_FOUND)
+
+FIND_PACKAGE(SWIG)
+IF(SWIG_FOUND)
+FIND_PACKAGE(PythonLibs)
+IF(PYTHONLIBS_FOUND)
+FIND_PACKAGE(PythonInterp)
+IF(PYTHONINTERP_FOUND)
+    ADD_TEST(check_toc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_toc.py)
+    ADD_TEST(check_sessions.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_sessions.py)
+    ADD_TEST(check_full_toc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_full_toc.py)
+    ADD_TEST(check_cdtext.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_cdtext.py)
+    ADD_DEPENDENCIES(check _cueify)
+
+    ADD_CUSTOM_TARGET(check_unportable.py
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_unportable.py)
+    ADD_DEPENDENCIES(check-unportable check_unportable.py)
+
+    ADD_CUSTOM_TARGET(check_indices.py
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_indices.py)
+    ADD_DEPENDENCIES(check-indices check_indices.py)
+
+    ADD_CUSTOM_TARGET(check_pregaps.py
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_pregaps.py)
+    ADD_DEPENDENCIES(check-pregaps check_pregaps.py)
+
+    ADD_CUSTOM_TARGET(check_track_control.py
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_track_control.py)
+    ADD_DEPENDENCIES(check-track-control check_track_control.py)
+ENDIF(PYTHONINTERP_FOUND)
+ENDIF(PYTHONLIBS_FOUND)
+ENDIF(SWIG_FOUND)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra")
