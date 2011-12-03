@@ -2,7 +2,7 @@ This is libcueify 0.5.0
 
 Changes in 0.5.0:
 
-	* Newly supported OSs: Darwin (Mac OS X)
+	* Newly supported OSs: Linux, Darwin (Mac OS X)
 	* Added C++ bindings <cueify/cueify.hxx>
 	* Added Perl, Python, and Ruby bindings through SWIG
 	* Header files have been refactored (NOTE: BREAKS SOURCE COMPATIBILITY):

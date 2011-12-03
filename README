@@ -8,16 +8,20 @@ data, and CD-TEXT data.
 libcueify requires:
 
 - cmake (>= 2.6) <http://www.cmake.org/>
-- check <http://check.sourceforge.net/> to run its unit tests
+
+For unit tests (make check), libcueify additionally requires:
+
+- check <http://check.sourceforge.net/>
+- SWIG <http://www.swig.org/>
+- Python development libraries <http://www.python.org/>
 
 libcueify has been tested (and compiles) with the following configurations:
 
+- Linux
 - FreeBSD
 - Darwin (Mac OS X)
 - Cygwin
 - MinGW (libcheck tests cannot be run)
-
-Support for Linux will be added in the future.
 
 It likely requires little modification to work with Visual Studio directly.
 
