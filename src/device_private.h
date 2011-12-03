@@ -49,7 +49,7 @@ typedef struct {
     uint8_t data_mode;  /** The data mode flag. */
     /** Sector data after the data mode. */
     uint8_t reserved2[RAW_SECTOR_SIZE - 0x10];
-#if defined(__FreeBSD__) || defined(_WIN32) || defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(_WIN32) || defined(__APPLE__) || defined(linux)
 #define READ_RAW_SUPPORTS_SUBQ 1
     /*
      * Subchannel Q data used to construct current position from READ

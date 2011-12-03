@@ -20,6 +20,7 @@ INCLUDE(CheckSymbolExists)
 CHECK_SYMBOL_EXISTS(_WIN32 windows.h OS_IS_WINDOWS)
 CHECK_SYMBOL_EXISTS(__FreeBSD__ sys/param.h OS_IS_FREEBSD)
 CHECK_SYMBOL_EXISTS(__APPLE__ sys/param.h OS_IS_DARWIN)
+CHECK_SYMBOL_EXISTS(linux sys/param.h OS_IS_LINUX)
 CHECK_SYMBOL_EXISTS(NULL stddef.h HAVE_NULL)
 
 IF(OS_IS_WINDOWS)
@@ -31,6 +32,9 @@ ENDIF(OS_IS_FREEBSD)
 IF(OS_IS_DARWIN)
     SET(_os_sources darwin.c)
 ENDIF(OS_IS_DARWIN)
+IF(OS_IS_LINUX)
+    SET(_os_sources linux.c)
+ENDIF(OS_IS_LINUX)
 
 ADD_LIBRARY(cueify SHARED ${_sources} ${_os_sources})
 
