@@ -31,7 +31,7 @@
 #include <cueify/error.h>
 #include <cueify/device.h>
 #include <cueify/mcn_isrc.h>
-#include <cueify/indices.h>
+#include <cueify/track_data.h>
 
 
 cueify_device *dev;

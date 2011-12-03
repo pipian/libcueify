@@ -31,7 +31,7 @@
 #include <cueify/error.h>
 #include <cueify/device.h>
 #include <cueify/toc.h>
-#include <cueify/data_mode.h>
+#include <cueify/track_data.h>
 
 
 cueify_device *dev;

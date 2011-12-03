@@ -520,7 +520,7 @@ if _newclass:CDTextBlock.discid = _swig_property(lambda self: None if not self.h
 
 #define CDTEXT_ALBUM  0x00
 
-/* Imported from data_mode.h */
+/* Imported from track_data.h */
 #define DATA_MODE_CDDA     0x00
 #define DATA_MODE_MODE_1   0x01
 #define DATA_MODE_MODE_2   0x02

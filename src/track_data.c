@@ -1,6 +1,5 @@
-/* data_mode.c - CD-ROM functions which read the mode in which a data
- * track was written on a CD or the control flags of a track from the
- * CD.
+/* track_data.c - CD-ROM functions which read track data directly
+ * (e.g. data mode, track control flags) but not indices
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -27,7 +26,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <cueify/data_mode.h>
+#include <cueify/track_data.h>
 #include <cueify/error.h>
 #include "device_private.h"
 #include "toc_private.h"

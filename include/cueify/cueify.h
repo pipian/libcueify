@@ -35,7 +35,6 @@
 #include <cueify/full_toc.h>
 #include <cueify/cdtext.h>
 #include <cueify/mcn_isrc.h>
-#include <cueify/indices.h>
-#include <cueify/data_mode.h>
+#include <cueify/track_data.h>
 
 #endif /* _CUEIFY_CUEIFY_H */

@@ -37,7 +37,7 @@
 #include <cueify/sessions.h>
 #include <cueify/full_toc.h>
 #include <cueify/cdtext.h>
-#include <cueify/indices.h>
+#include <cueify/track_data.h>
 #include <cueify/error.h>
 #include "device_private.h"
 #include "toc_private.h"
