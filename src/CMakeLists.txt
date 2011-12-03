@@ -1,8 +1,8 @@
 SET(CMAKE_INCLUDE_CURRENT_DIR ON)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/../include)
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/libcueify/types.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/../include/libcueify/types.h)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/cueify/types.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/../include/cueify/types.h)
 
 SET(_sources device.c toc.c sessions.c full_toc.c cdtext.c latin1.c msjis.c
              ascii.c mcn_isrc.c indices.c data_mode.c cdtext_crc.c)

@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_CONSTANTS_H
-#define _LIBCUEIFY_CONSTANTS_H
+#ifndef _CUEIFY_CONSTANTS_H
+#define _CUEIFY_CONSTANTS_H
 
 /** Track number of the lead-out of a disc. */
 #define CUEIFY_LEAD_OUT_TRACK  0xAA
@@ -53,4 +53,4 @@
 #define CUEIFY_SUB_Q_ISRC      0x3
 
 
-#endif /* _LIBCUEIFY_CONSTANTS_H */
+#endif /* _CUEIFY_CONSTANTS_H */

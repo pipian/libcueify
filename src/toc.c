@@ -25,8 +25,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libcueify/toc.h>
-#include <libcueify/error.h>
+#include <cueify/toc.h>
+#include <cueify/error.h>
 #include "device_private.h"
 #include "toc_private.h"
 

@@ -25,16 +25,7 @@
 
 #include <stdio.h>
 #include <time.h>
-#include <libcueify/device.h>
-#include <libcueify/error.h>
-#include <libcueify/toc.h>
-#include <libcueify/sessions.h>
-#include <libcueify/full_toc.h>
-#include <libcueify/cdtext.h>
-#include <libcueify/mcn_isrc.h>
-#include <libcueify/indices.h>
-#include <libcueify/data_mode.h>
-#include <libcueify/types.h>
+#include <cueify/cueify.h>
 
 const char * const genre_names[0x1D] = {
     "NULL",

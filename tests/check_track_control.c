@@ -27,11 +27,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <check.h>
-#include <libcueify/types.h>
-#include <libcueify/error.h>
-#include <libcueify/device.h>
-#include <libcueify/toc.h>
-#include <libcueify/data_mode.h>
+#include <cueify/types.h>
+#include <cueify/error.h>
+#include <cueify/device.h>
+#include <cueify/toc.h>
+#include <cueify/data_mode.h>
 
 
 cueify_device *dev;

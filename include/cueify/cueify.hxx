@@ -23,21 +23,12 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_CUEIFY_HPP
-#define _LIBCUEIFY_CUEIFY_HPP
+#ifndef _CUEIFY_CUEIFY_HPP
+#define _CUEIFY_CUEIFY_HPP
 
 #include <string>
 #include <vector>
-#include <libcueify/error.h>
-#include <libcueify/types.h>
-#include <libcueify/device.h>
-#include <libcueify/toc.h>
-#include <libcueify/sessions.h>
-#include <libcueify/full_toc.h>
-#include <libcueify/cdtext.h>
-#include <libcueify/mcn_isrc.h>
-#include <libcueify/indices.h>
-#include <libcueify/data_mode.h>
+#include <cueify/cueify.h>
 
 #define CUEIFY_SERIALIZER(serializer, variable)	\
     uint8_t *buffer = NULL; \
@@ -1649,5 +1640,5 @@ public:
 
 }  /* namespace cueify */
 
-#endif  /* _LIBCUEIFY_CUEIFY_HPP */
+#endif  /* _CUEIFY_CUEIFY_HPP */
 

@@ -24,11 +24,11 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_SESSIONS_H
-#define _LIBCUEIFY_SESSIONS_H
+#ifndef _CUEIFY_SESSIONS_H
+#define _CUEIFY_SESSIONS_H
 
-#include <libcueify/device.h>
-#include <libcueify/types.h>
+#include <cueify/device.h>
+#include <cueify/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -194,4 +194,4 @@ uint32_t cueify_sessions_get_last_session_address(cueify_sessions *s);
 };  /* extern "C" */
 #endif  /* __cplusplus */
 
-#endif /* _LIBCUEIFY_SESSIONS_H */
+#endif /* _CUEIFY_SESSIONS_H */

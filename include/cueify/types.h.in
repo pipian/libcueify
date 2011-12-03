@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_TYPES_H
-#define _LIBCUEIFY_TYPES_H
+#ifndef _CUEIFY_TYPES_H
+#define _CUEIFY_TYPES_H
 
 #ifndef HAVE_STDINT_H
 #cmakedefine HAVE_STDINT_H
@@ -99,4 +99,4 @@ typedef struct {
     uint8_t frm;  /** The number of frames */
 } cueify_msf_t;
 
-#endif /* _LIBCUEIFY_TYPES_H */
+#endif /* _CUEIFY_TYPES_H */

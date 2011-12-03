@@ -1,8 +1,8 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../src)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/../include)
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/libcueify/types.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/../include/libcueify/types.h)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/cueify/types.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/../include/cueify/types.h)
 LINK_LIBRARIES(cueify)
 
 ENABLE_TESTING()
@@ -65,22 +65,26 @@ IF(PYTHONINTERP_FOUND)
     ADD_TEST(check_sessions.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_sessions.py)
     ADD_TEST(check_full_toc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_full_toc.py)
     ADD_TEST(check_cdtext.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_cdtext.py)
-    ADD_DEPENDENCIES(check _cueify)
+    ADD_DEPENDENCIES(check _python-cueify)
 
     ADD_CUSTOM_TARGET(check_unportable.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_unportable.py)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_unportable.py
+                      DEPENDS _python-cueify)
     ADD_DEPENDENCIES(check-unportable check_unportable.py)
 
     ADD_CUSTOM_TARGET(check_indices.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_indices.py)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_indices.py
+                      DEPENDS _python-cueify)
     ADD_DEPENDENCIES(check-indices check_indices.py)
 
     ADD_CUSTOM_TARGET(check_pregaps.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_pregaps.py)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_pregaps.py
+                      DEPENDS _python-cueify)
     ADD_DEPENDENCIES(check-pregaps check_pregaps.py)
 
     ADD_CUSTOM_TARGET(check_track_control.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_track_control.py)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_track_control.py
+                      DEPENDS _python-cueify)
     ADD_DEPENDENCIES(check-track-control check_track_control.py)
 ENDIF(PYTHONINTERP_FOUND)
 ENDIF(PYTHONLIBS_FOUND)

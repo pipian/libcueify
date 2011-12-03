@@ -26,15 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <check.h>
-#include <libcueify/types.h>
-#include <libcueify/error.h>
-#include <libcueify/device.h>
-#include <libcueify/toc.h>
-#include <libcueify/sessions.h>
-#include <libcueify/full_toc.h>
-#include <libcueify/cdtext.h>
-#include <libcueify/mcn_isrc.h>
-#include <libcueify/data_mode.h>
+#include <cueify/cueify.h>
 
 #include "check_unportable.cdt.h"
 

@@ -26,8 +26,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libcueify/indices.h>
-#include <libcueify/error.h>
+#include <cueify/indices.h>
+#include <cueify/error.h>
 #include "device_private.h"
 #include "full_toc_private.h"
 #include "indices_private.h"

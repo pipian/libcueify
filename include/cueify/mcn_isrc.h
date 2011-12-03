@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_MCN_ISRC_H
-#define _LIBCUEIFY_MCN_ISRC_H
+#ifndef _CUEIFY_MCN_ISRC_H
+#define _CUEIFY_MCN_ISRC_H
 
-#include <libcueify/device.h>
-#include <libcueify/constants.h>
-#include <libcueify/types.h>
+#include <cueify/device.h>
+#include <cueify/constants.h>
+#include <cueify/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,4 +84,4 @@ int cueify_device_read_isrc(cueify_device *d, uint8_t track,
 };  /* extern "C" */
 #endif  /* __cplusplus */
 
-#endif /* _LIBCUEIFY_MCN_ISRC_H */
+#endif /* _CUEIFY_MCN_ISRC_H */

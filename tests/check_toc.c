@@ -25,9 +25,9 @@
 
 #include <stdlib.h>
 #include <check.h>
-#include <libcueify/types.h>
-#include <libcueify/error.h>
-#include <libcueify/toc.h>
+#include <cueify/types.h>
+#include <cueify/error.h>
+#include <cueify/toc.h>
 #include "toc_private.h"
 
 /* Create a binary track descriptor from a TOC. */

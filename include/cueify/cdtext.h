@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_CDTEXT_H
-#define _LIBCUEIFY_CDTEXT_H
+#ifndef _CUEIFY_CDTEXT_H
+#define _CUEIFY_CDTEXT_H
 
-#include <libcueify/device.h>
-#include <libcueify/constants.h>
-#include <libcueify/types.h>
+#include <cueify/device.h>
+#include <cueify/constants.h>
+#include <cueify/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -600,4 +600,4 @@ const char *cueify_cdtext_block_get_genre_name(cueify_cdtext_block *b);
 };  /* extern "C" */
 #endif  /* __cplusplus */
 
-#endif /* _LIBCUEIFY_CDTEXT_H */
+#endif /* _CUEIFY_CDTEXT_H */

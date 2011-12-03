@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_FULL_TOC_H
-#define _LIBCUEIFY_FULL_TOC_H
+#ifndef _CUEIFY_FULL_TOC_H
+#define _CUEIFY_FULL_TOC_H
 
-#include <libcueify/device.h>
-#include <libcueify/constants.h>
-#include <libcueify/types.h>
+#include <cueify/device.h>
+#include <cueify/constants.h>
+#include <cueify/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -424,4 +424,4 @@ cueify_msf_t cueify_full_toc_get_session_length(cueify_full_toc *t,
 };  /* extern "C" */
 #endif  /* __cplusplus */
 
-#endif /* _LIBCUEIFY_FULL_TOC_H */
+#endif /* _CUEIFY_FULL_TOC_H */

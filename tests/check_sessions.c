@@ -25,10 +25,10 @@
 
 #include <stdlib.h>
 #include <check.h>
-#include <libcueify/types.h>
-#include <libcueify/constants.h>
-#include <libcueify/error.h>
-#include <libcueify/sessions.h>
+#include <cueify/types.h>
+#include <cueify/constants.h>
+#include <cueify/error.h>
+#include <cueify/sessions.h>
 #include "sessions_private.h"
 
 /* Create a binary track descriptor from a TOC. */

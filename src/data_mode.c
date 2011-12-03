@@ -27,8 +27,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libcueify/data_mode.h>
-#include <libcueify/error.h>
+#include <cueify/data_mode.h>
+#include <cueify/error.h>
 #include "device_private.h"
 #include "toc_private.h"
 

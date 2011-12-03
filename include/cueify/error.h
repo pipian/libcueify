@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_ERROR_H
-#define _LIBCUEIFY_ERROR_H
+#ifndef _CUEIFY_ERROR_H
+#define _CUEIFY_ERROR_H
 
 /** Possible return values for functions in libcueify. */
 enum cueify_error {
@@ -50,4 +50,4 @@ enum cueify_error {
     CUEIFY_ERR_INVALID_CDTEXT
 };
 
-#endif /* _LIBCUEIFY_ERROR_H */
+#endif /* _CUEIFY_ERROR_H */

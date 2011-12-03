@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_DEVICE_PRIVATE_H
-#define _LIBCUEIFY_DEVICE_PRIVATE_H
+#ifndef _CUEIFY_DEVICE_PRIVATE_H
+#define _CUEIFY_DEVICE_PRIVATE_H
 
-#include <libcueify/types.h>
+#include <cueify/types.h>
 
 /** OS-specific device handle types. */
 #ifdef _WIN32
@@ -124,4 +124,4 @@ int cueify_device_get_supported_apis_unportable(cueify_device_private *d);
  */
 const char *cueify_device_get_default_device_unportable();
 
-#endif  /* _LIBCUEIFY_DEVICE_PRIVATE_H */
+#endif  /* _CUEIFY_DEVICE_PRIVATE_H */

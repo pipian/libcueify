@@ -34,11 +34,11 @@
 #include <cam/scsi/scsi_message.h>
 #include <sys/ioctl.h>
 #include <sys/cdio.h>
-#include <libcueify/sessions.h>
-#include <libcueify/full_toc.h>
-#include <libcueify/cdtext.h>
-#include <libcueify/indices.h>
-#include <libcueify/error.h>
+#include <cueify/sessions.h>
+#include <cueify/full_toc.h>
+#include <cueify/cdtext.h>
+#include <cueify/indices.h>
+#include <cueify/error.h>
 #include "device_private.h"
 #include "toc_private.h"
 #include "sessions_private.h"

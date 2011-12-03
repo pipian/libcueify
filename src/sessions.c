@@ -26,8 +26,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libcueify/sessions.h>
-#include <libcueify/error.h>
+#include <cueify/sessions.h>
+#include <cueify/error.h>
 #include "device_private.h"
 #include "sessions_private.h"
 

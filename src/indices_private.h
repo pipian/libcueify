@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_INDICES_PRIVATE_H
-#define _LIBCUEIFY_INDICES_PRIVATE_H
+#ifndef _CUEIFY_INDICES_PRIVATE_H
+#define _CUEIFY_INDICES_PRIVATE_H
 
-#include <libcueify/types.h>
+#include <cueify/types.h>
 #include "device_private.h"
 
 /** Internal structure to hold track index data. */
@@ -67,4 +67,4 @@ int cueify_device_read_position_unportable(cueify_device_private *d,
 					   uint8_t track, uint32_t lba,
 					   cueify_position_t *pos);
 
-#endif  /* _LIBCUEIFY_INDICES_PRIVATE_H */
+#endif  /* _CUEIFY_INDICES_PRIVATE_H */

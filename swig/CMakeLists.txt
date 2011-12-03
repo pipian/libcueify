@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../include)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/../include)
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/libcueify/types.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/../include/libcueify/types.h)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/cueify/types.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/../include/cueify/types.h)
 
 FIND_PACKAGE(SWIG)
 IF(SWIG_FOUND)

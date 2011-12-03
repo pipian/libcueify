@@ -25,10 +25,10 @@
 
 #include <stdlib.h>
 #include <check.h>
-#include <libcueify/types.h>
-#include <libcueify/constants.h>
-#include <libcueify/error.h>
-#include <libcueify/full_toc.h>
+#include <cueify/types.h>
+#include <cueify/constants.h>
+#include <cueify/error.h>
+#include <cueify/full_toc.h>
 #include "full_toc_private.h"
 
 /* Create a binary track descriptor from a full TOC. */

@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_CHARSETS_H
-#define _LIBCUEIFY_CHARSETS_H
+#ifndef _CUEIFY_CHARSETS_H
+#define _CUEIFY_CHARSETS_H
 
-#include <libcueify/types.h>
+#include <cueify/types.h>
 
 /** Multi-byte codepoint data for encoding. */
 struct multibyte_codepoint {

@@ -25,10 +25,10 @@
 
 #include <stdlib.h>
 #include <check.h>
-#include <libcueify/types.h>
-#include <libcueify/constants.h>
-#include <libcueify/error.h>
-#include <libcueify/cdtext.h>
+#include <cueify/types.h>
+#include <cueify/constants.h>
+#include <cueify/error.h>
+#include <cueify/cdtext.h>
 #include "cdtext_private.h"
 
 #include "check_cdtext.cdt.h"

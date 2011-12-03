@@ -25,8 +25,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libcueify/cdtext.h>
-#include <libcueify/error.h>
+#include <cueify/cdtext.h>
+#include <cueify/error.h>
 #include "device_private.h"
 #include "cdtext_private.h"
 #include "cdtext_crc.h"

@@ -25,8 +25,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <libcueify/device.h>
-#include <libcueify/error.h>
+#include <cueify/device.h>
+#include <cueify/error.h>
 #include "device_private.h"
 
 cueify_device *cueify_device_new() {

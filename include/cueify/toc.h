@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_TOC_H
-#define _LIBCUEIFY_TOC_H
+#ifndef _CUEIFY_TOC_H
+#define _CUEIFY_TOC_H
 
-#include <libcueify/device.h>
-#include <libcueify/constants.h>
-#include <libcueify/types.h>
+#include <cueify/device.h>
+#include <cueify/constants.h>
+#include <cueify/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -218,4 +218,4 @@ uint32_t cueify_toc_get_track_length(cueify_toc *t, uint8_t track);
 };  /* extern "C" */
 #endif  /* __cplusplus */
 
-#endif /* _LIBCUEIFY_TOC_H */
+#endif /* _CUEIFY_TOC_H */

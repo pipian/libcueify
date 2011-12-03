@@ -5,9 +5,9 @@
 #pragma SWIG nowarn=SWIGWARN_PARSE_NESTED_CLASS
 
 %{
-#include <libcueify/cueify.hxx>
-#include <libcueify/error.h>
-#include <libcueify/constants.h>
+#include <cueify/cueify.hxx>
+#include <cueify/error.h>
+#include <cueify/constants.h>
 %}
 
 %{
@@ -363,7 +363,7 @@ if _newclass:CDTextBlock.discid = _swig_property(lambda self: None if not self.h
 %ignore cueify::TrackIndex::number;
 %ignore cueify::TrackIndex::offset;
 
-%include <libcueify/cueify.hxx>
+%include <cueify/cueify.hxx>
 
 /* Imported from constants.h */
 #define LEAD_OUT_TRACK  0xAA

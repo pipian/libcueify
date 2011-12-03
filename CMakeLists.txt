@@ -40,16 +40,16 @@ SET(INCLUDE_INSTALL_DIR ${EXEC_INSTALL_PREFIX}/include CACHE PATH
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
-ADD_SUBDIRECTORY(swig)
+ADD_SUBDIRECTORY(swig EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
 	       ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
 
-FILE(GLOB cheaders ${CMAKE_CURRENT_SOURCE_DIR}/include/libcueify/*.h)
-FILE(GLOB cppheaders ${CMAKE_CURRENT_SOURCE_DIR}/include/libcueify/*.hxx)
+FILE(GLOB cheaders ${CMAKE_CURRENT_SOURCE_DIR}/include/cueify/*.h)
+FILE(GLOB cppheaders ${CMAKE_CURRENT_SOURCE_DIR}/include/cueify/*.hxx)
 INSTALL(FILES ${cheaders} ${cppheaders}
-        ${CMAKE_CURRENT_BINARY_DIR}/include/libcueify/types.h
-        DESTINATION ${INCLUDE_INSTALL_DIR}/libcueify)
+        ${CMAKE_CURRENT_BINARY_DIR}/include/cueify/types.h
+        DESTINATION ${INCLUDE_INSTALL_DIR}/cueify)
 
 ADD_CUSTOM_TARGET(docs doxygen WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

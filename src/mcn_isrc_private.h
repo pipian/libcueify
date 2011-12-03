@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_MCN_ISRC_PRIVATE_H
-#define _LIBCUEIFY_MCN_ISRC_PRIVATE_H
+#ifndef _CUEIFY_MCN_ISRC_PRIVATE_H
+#define _CUEIFY_MCN_ISRC_PRIVATE_H
 
-#include <libcueify/types.h>
+#include <cueify/types.h>
 #include "mcn_isrc_private.h"
 
 /**
@@ -63,4 +63,4 @@ int cueify_device_read_mcn_unportable(cueify_device_private *d,
 int cueify_device_read_isrc_unportable(cueify_device_private *d, uint8_t track,
 				       char *buffer, size_t *size);
 
-#endif  /* _LIBCUEIFY_CDTEXT_PRIVATE_H */
+#endif  /* _CUEIFY_CDTEXT_PRIVATE_H */

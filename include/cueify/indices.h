@@ -24,12 +24,12 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_INDICES_H
-#define _LIBCUEIFY_INDICES_H
+#ifndef _CUEIFY_INDICES_H
+#define _CUEIFY_INDICES_H
 
-#include <libcueify/device.h>
-#include <libcueify/constants.h>
-#include <libcueify/types.h>
+#include <cueify/device.h>
+#include <cueify/constants.h>
+#include <cueify/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -117,4 +117,4 @@ cueify_msf_t cueify_indices_get_index_offset(cueify_indices *i, uint8_t index);
 };  /* extern "C" */
 #endif  /* __cplusplus */
 
-#endif /* _LIBCUEIFY_INDICES_H */
+#endif /* _CUEIFY_INDICES_H */

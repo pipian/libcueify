@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_TOC_PRIVATE_H
-#define _LIBCUEIFY_TOC_PRIVATE_H
+#ifndef _CUEIFY_TOC_PRIVATE_H
+#define _CUEIFY_TOC_PRIVATE_H
 
-#include <libcueify/types.h>
+#include <cueify/types.h>
 #include "device_private.h"
 
 #define MAX_TRACKS  100  /** Maximum number of tracks on a CD. */
@@ -65,4 +65,4 @@ typedef struct {
 int cueify_device_read_toc_unportable(cueify_device_private *d,
 				      cueify_toc_private *t);
 
-#endif  /* _LIBCUEIFY_TOC_PRIVATE_H */
+#endif  /* _CUEIFY_TOC_PRIVATE_H */

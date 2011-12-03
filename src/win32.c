@@ -24,9 +24,9 @@
  */
 
 #include <windows.h>
-#include <libcueify/error.h>
-#include <libcueify/cdtext.h>
-#include <libcueify/full_toc.h>
+#include <cueify/error.h>
+#include <cueify/cdtext.h>
+#include <cueify/full_toc.h>
 #include "device_private.h"
 #include "toc_private.h"
 #include "sessions_private.h"

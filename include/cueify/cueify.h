@@ -1,5 +1,4 @@
-/* mcn_isrc.c - CD-ROM functions which read the Media Catalog Number
- * or ISRCs from a CD.
+/* cueify.h - Combined header for libcueify.
  *
  * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
  * 
@@ -24,31 +23,19 @@
  * SOFTWARE.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <cueify/mcn_isrc.h>
+#ifndef _CUEIFY_CUEIFY_H
+#define _CUEIFY_CUEIFY_H
+
+#include <cueify/types.h>
+#include <cueify/constants.h>
 #include <cueify/error.h>
-#include "device_private.h"
-#include "mcn_isrc_private.h"
+#include <cueify/device.h>
+#include <cueify/toc.h>
+#include <cueify/sessions.h>
+#include <cueify/full_toc.h>
+#include <cueify/cdtext.h>
+#include <cueify/mcn_isrc.h>
+#include <cueify/indices.h>
+#include <cueify/data_mode.h>
 
-int cueify_device_read_mcn(cueify_device *d, char *buffer, size_t *size) {
-    cueify_device_private *dev = (cueify_device_private *)d;
-
-    if (d == NULL || buffer == NULL || size == NULL) {
-	return CUEIFY_ERR_BADARG;
-    }
-
-    return cueify_device_read_mcn_unportable(dev, buffer, size);
-}  /* cueify_device_read_mcn */
-
-
-int cueify_device_read_isrc(cueify_device *d, uint8_t track,
-			    char *buffer, size_t *size) {
-    cueify_device_private *dev = (cueify_device_private *)d;
-
-    if (d == NULL || buffer == NULL || size == NULL) {
-	return CUEIFY_ERR_BADARG;
-    }
-
-    return cueify_device_read_isrc_unportable(dev, track, buffer, size);
-}  /* cueify_device_read_isrc */
+#endif /* _CUEIFY_CUEIFY_H */

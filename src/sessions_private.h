@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_SESSIONS_PRIVATE_H
-#define _LIBCUEIFY_SESSIONS_PRIVATE_H
+#ifndef _CUEIFY_SESSIONS_PRIVATE_H
+#define _CUEIFY_SESSIONS_PRIVATE_H
 
-#include <libcueify/types.h>
+#include <cueify/types.h>
 #include "device_private.h"
 
 /** Internal structure to hold multi-session data. */
@@ -58,4 +58,4 @@ typedef struct {
 int cueify_device_read_sessions_unportable(cueify_device_private *d,
 					   cueify_sessions_private *s);
 
-#endif  /* _LIBCUEIFY_SESSIONS_PRIVATE_H */
+#endif  /* _CUEIFY_SESSIONS_PRIVATE_H */

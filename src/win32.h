@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_WIN32_H
-#define _LIBCUEIFY_WIN32_H
+#ifndef _CUEIFY_WIN32_H
+#define _CUEIFY_WIN32_H
 
 #include <windows.h>
 
@@ -277,4 +277,4 @@ typedef struct _SCSI_PASS_THROUGH_DIRECT_WITH_BUFFERS {
     UCHAR             SenseBuf[32];
 } SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, *PSCSI_PASS_THROUGH_DIRECT_WITH_BUFFER;
 
-#endif  /* _LIBCUEIFY_WIN32_H */
+#endif  /* _CUEIFY_WIN32_H */

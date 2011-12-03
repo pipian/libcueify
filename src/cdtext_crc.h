@@ -13,8 +13,8 @@
  *    ReflectOut   = False
  *    Algorithm    = table-driven
  *****************************************************************************/
-#ifndef _LIBCUEIFY_CDTEXT_CRC_H
-#define _LIBCUEIFY_CDTEXT_CRC_H
+#ifndef _CUEIFY_CDTEXT_CRC_H
+#define _CUEIFY_CDTEXT_CRC_H
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -77,4 +77,4 @@ static inline cdtext_crc_t cdtext_crc_finalize(cdtext_crc_t crc)
 }           /* closing brace for extern "C" */
 #endif
 
-#endif      /* _LIBCUEIFY_CDTEXT_CRC_H */
+#endif      /* _CUEIFY_CDTEXT_CRC_H */

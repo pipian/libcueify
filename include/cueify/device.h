@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _LIBCUEIFY_DEVICE_H
-#define _LIBCUEIFY_DEVICE_H
+#ifndef _CUEIFY_DEVICE_H
+#define _CUEIFY_DEVICE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -142,4 +142,4 @@ const char *cueify_device_get_default_device();
 };  /* extern "C" */
 #endif  /* __cplusplus */
 
-#endif /* _LIBCUEIFY_DEVICE_H */
+#endif /* _CUEIFY_DEVICE_H */
