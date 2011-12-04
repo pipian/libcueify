@@ -741,6 +741,28 @@ int print_cuesheet(const char *device) {
 		    }
 		    printf("\n");
 		}
+	    } else if (cueify_device_read_track_control_flags(dev, i) != 0xF) {
+		int control = cueify_toc_get_track_control_flags(toc, i);
+		int track_control =
+		    cueify_device_read_track_control_flags(dev, i);
+
+		if ((control ^ track_control) != 0) {
+		    printf("      REM FLAGS");
+
+		    if ((track_control &
+			 CUEIFY_TOC_TRACK_HAS_PREEMPHASIS) > 0) {
+			printf(" PRE");
+		    }
+		    if ((track_control &
+			 CUEIFY_TOC_TRACK_PERMITS_COPYING) > 0) {
+			printf(" DCP");
+		    }
+		    if ((track_control &
+			 CUEIFY_TOC_TRACK_IS_QUADRAPHONIC) > 0) {
+			printf(" 4CH");
+		    }
+		    printf("\n");
+		}
 	    }
 
 	    offset = lba_to_msf(cueify_toc_get_track_address(toc, i));
