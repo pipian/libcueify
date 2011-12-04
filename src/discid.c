@@ -287,13 +287,13 @@ char *cueify_toc_get_musicbrainz_id(cueify_toc *t, cueify_sessions *s) {
     } else if (
 	sessions == NULL &&
 	(toc->tracks[toc->first_track_number].control &
-	 CUEIFY_TOC_TRACK_IS_DATA) !=
+	 CUEIFY_TOC_TRACK_IS_DATA) == 0 &&
 	(toc->tracks[toc->last_track_number].control &
-	 CUEIFY_TOC_TRACK_IS_DATA)) {
+	 CUEIFY_TOC_TRACK_IS_DATA) == CUEIFY_TOC_TRACK_IS_DATA) {
 	/*
 	 * Heuristic: If the first track is not data and the last
-	 * track IS (or vice versa), assume this is a multi-session
-	 * disc and that there is only one track in the last session.
+	 * track IS, assume this is a multi-session disc and that
+	 * there is only one track in the last session.
 	 */
 	last_track = toc->last_track_number - 1;
 	leadout = toc->tracks[toc->last_track_number].lba - 11400;
