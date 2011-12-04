@@ -2,15 +2,22 @@ This is libcueify 0.5.0
 
 Changes in 0.5.0:
 
-	* Newly supported OSs: Linux, Darwin (Mac OS X)
-	* Added C++ bindings <cueify/cueify.hxx>
-	* Added Perl, Python, and Ruby bindings through SWIG
-	* Header files have been refactored (NOTE: BREAKS SOURCE COMPATIBILITY):
+	* New API: cueify_device_read_track_control_flags in
+          <cueify/track_data.h> adds support for testing control flags on
+	  the tracks themselves (e.g. "hidden" preemphasis flags).
+	  - The cueify example has been modified to exercise this API
+	* New API: <cueify/discid.h> adds support for calculating freedb
+          and MusicBrainz discids from cueify TOC data.
+	  - The discid example has been added to exercise this API
+	* Header files have been refactored (NOTE: SOURCE COMPATIBILITY BREAK):
           - The <libcueify> include directory has been renamed to <cueify>.
 	  - There is now a <cueify/cueify.h> include which collects all
 	    C headers.
 	  - <libcueify/data_mode.h> and <libcueify/indices.h> have
             been merged into a single header: <cueify/track_data.h>
+	* Newly supported OSs: Linux, Darwin (Mac OS X)
+	* Added C++ bindings <cueify/cueify.hxx>
+	* Added Perl, Python, and Ruby bindings through SWIG
 
 Changes in 0.1.1:
 
