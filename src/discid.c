@@ -124,7 +124,7 @@ uint32_t cueify_full_toc_get_freedb_id(cueify_full_toc *t,
     int i, freedb_address;
     cueify_msf_t leadout;
 
-    if (use_data_tracks &&
+    if (use_data_tracks == 0 &&
 	toc->first_session_number != toc->last_session_number) {
 	/* Behave like MusicBrainz and ignore the last track. */
 	tracks = toc->sessions[toc->last_session_number].first_track_number -
