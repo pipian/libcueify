@@ -206,51 +206,6 @@ cueify_msf_t lba_to_msf(uint32_t offset)
     return retval;
 }
 
-/** Perform a partial sum of the CDDB DiscID.
- *
- * @param n The number of seconds in a track.
- * @return The partial sum of the CDDB DiscID so far.
- */
-/*
-int cddb_sum(int n)
-{
-    int ret;
-
-    * For backward compatibility this algorithm must not change *
-
-    ret = 0;
-    while (n > 0) {
-	ret = ret + (n % 10);
-	n = n / 10;
-    }
-    return (ret);
-}
-*/
-
-/** Generate the CDDB DiscID for a given CDROM_TOC.
- *
- * @param toc A pointer to the CDROM_TOC to generate a DiscID for.
- * @return The CDDB DiscID for this disc.
- */
-/*
-unsigned long cddb_discid(CDROM_TOC *toc)
-{
-    int i,
-	t = 0,
-	n = 0;
-    
-    * For backward compatibility this algorithm must not change *
-
-    i = 0;
-    while (i < toc->LastTrack) {
-	n = n + cddb_sum((toc->TrackData[i].Address[1] * 60) + toc->TrackData[i].Address[2]);
-	i++;
-    }
-    t = ((toc->TrackData[toc->LastTrack].Address[1] * 60) + toc->TrackData[toc->LastTrack].Address[2]) - ((toc->TrackData[0].Address[1] * 60) + toc->TrackData[0].Address[2]);
-    return ((n % 0xff) << 24 | t << 8 | toc->LastTrack);
-}
-*/
-
 /** Write a cuesheet file to STDOUT based on the contents of an optical
  * disc (CD-ROM) device.
  *
