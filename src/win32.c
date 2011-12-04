@@ -412,6 +412,9 @@ int cueify_device_read_cdtext_unportable(cueify_device_private *d,
 }  /* cueify_device_read_cdtext_unportable */
 
 
+#define min(x, y)  ((x > y) ? y : x)  /** Return the minimum of x and y. */
+
+
 int cueify_device_read_mcn_unportable(cueify_device_private *d,
 				      char *buffer, size_t *size) {
     DWORD dwReturned;
