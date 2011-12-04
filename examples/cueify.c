@@ -748,6 +748,8 @@ int print_cuesheet(const char *device) {
 	    if ((cueify_toc_get_track_control_flags(toc, i) &
 		 ~CUEIFY_TOC_TRACK_IS_DATA) != 0) {
 		int control = cueify_toc_get_track_control_flags(toc, i);
+		int track_control =
+		    cueify_device_read_track_control_flags(dev, i);
 
 		printf("      FLAGS");
 
@@ -761,6 +763,29 @@ int print_cuesheet(const char *device) {
 		    printf(" 4CH");
 		}
 		printf("\n");
+
+		if (track_control != 0xF &&
+		    (control ^ track_control) != 0) {
+		    /*
+		     * There are differences between what's on the
+		     * track and what's in the TOC.
+		     */
+		    printf("      REM FLAGS");
+
+		    if ((track_control &
+			 CUEIFY_TOC_TRACK_HAS_PREEMPHASIS) > 0) {
+			printf(" PRE");
+		    }
+		    if ((track_control &
+			 CUEIFY_TOC_TRACK_PERMITS_COPYING) > 0) {
+			printf(" DCP");
+		    }
+		    if ((track_control &
+			 CUEIFY_TOC_TRACK_IS_QUADRAPHONIC) > 0) {
+			printf(" 4CH");
+		    }
+		    printf("\n");
+		}
 	    }
 
 	    offset = lba_to_msf(cueify_toc_get_track_address(toc, i));
