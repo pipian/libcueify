@@ -302,11 +302,11 @@ char *cueify_toc_get_musicbrainz_id(cueify_toc *t, cueify_sessions *s) {
 	leadout = toc->tracks[0].lba;
     }
 
-    SHA1_Init(&sha);
+    cueify_sha1_init(&sha);
     sprintf(temp, "%02X", toc->first_track_number);
-    SHA1_Update(&sha, (uint8_t *)temp, 2);
+    cueify_sha1_update(&sha, (uint8_t *)temp, 2);
     sprintf(temp, "%02X", last_track);
-    SHA1_Update(&sha, (uint8_t *)temp, 2);
+    cueify_sha1_update(&sha, (uint8_t *)temp, 2);
     for (i = 0; i < MAX_TRACKS; i++) {
 	if (i == 0) {
 	    sprintf(temp, "%08X", leadout + 150);
@@ -316,9 +316,9 @@ char *cueify_toc_get_musicbrainz_id(cueify_toc *t, cueify_sessions *s) {
 	} else {
 	    sprintf(temp, "%08X", 0);
 	}
-	SHA1_Update(&sha, (uint8_t *)temp, 8);
+	cueify_sha1_update(&sha, (uint8_t *)temp, 8);
     }
-    SHA1_Final(&sha, digest);
+    cueify_sha1_final(&sha, digest);
 
     return base64_encode(digest, SHA1_DIGEST_SIZE, "._-");
 }  /* cueify_toc_get_musicbrainz_id */
@@ -343,11 +343,11 @@ char *cueify_full_toc_get_musicbrainz_id(cueify_full_toc *t) {
 	leadout = msf_to_lba(toc->sessions[toc->last_session_number].leadout);
     }
 
-    SHA1_Init(&sha);
+    cueify_sha1_init(&sha);
     sprintf(temp, "%02X", toc->first_track_number);
-    SHA1_Update(&sha, (uint8_t *)temp, 2);
+    cueify_sha1_update(&sha, (uint8_t *)temp, 2);
     sprintf(temp, "%02X", last_track);
-    SHA1_Update(&sha, (uint8_t *)temp, 2);
+    cueify_sha1_update(&sha, (uint8_t *)temp, 2);
     for (i = 0; i < MAX_TRACKS; i++) {
 	if (i == 0) {
 	    sprintf(temp, "%08X", leadout + 150);
@@ -357,9 +357,9 @@ char *cueify_full_toc_get_musicbrainz_id(cueify_full_toc *t) {
 	} else {
 	    sprintf(temp, "%08X", 0);
 	}
-	SHA1_Update(&sha, (uint8_t *)temp, 8);
+	cueify_sha1_update(&sha, (uint8_t *)temp, 8);
     }
-    SHA1_Final(&sha, digest);
+    cueify_sha1_final(&sha, digest);
 
     return base64_encode(digest, SHA1_DIGEST_SIZE, "._-");
 }  /* cueify_full_toc_get_musicbrainz_id */
