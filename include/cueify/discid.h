@@ -84,6 +84,10 @@ uint32_t cueify_device_get_freedb_id(cueify_device *d, int use_data_tracks);
  * Calculate the MusicBrainz discid from the provided TOC and
  * multisession data.
  *
+ * @note Although it is possible to generate a MusicBrainz ID without
+ *       specifying the multisession data as well, this is strongly
+ *       discouraged, as it may generate incorrect discids.
+ *
  * @pre { t has been initialized }
  * @param t the TOC of the disc for which the MusicBrainz discid
  *          should be calculated

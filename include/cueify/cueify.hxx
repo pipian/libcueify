@@ -169,6 +169,10 @@ public:
     /**
      * Calculate the MusicBrainz discid.
      *
+     * @note Although it is possible to generate a MusicBrainz ID without
+     *       specifying the multisession data as well, this is strongly
+     *       discouraged, as it may generate incorrect discids.
+     *
      * @param s the multisession data of the CD.  If NULL, heuristics
      *          will be applied to guess whether or not the disc has
      *          multiple sessions.
