@@ -205,27 +205,28 @@ int cueify_device_read_toc_unportable(cueify_device_private *d,
 
     toc.cdte_format = CDROM_LBA;
 
-    for (i = 0; i < MAX_TRACKS; i++) {
-	toc.cdte_track = i + 1;
-	if (i == MAX_TRACKS - 1) {
-	    toc.cdte_track = 0xAA;
-	}
+    for (i = t->first_track_number; i <= t->last_track_number; i++) {
+	toc.cdte_track = i;
 
 	if (ioctl(d->handle, CDROMREADTOCENTRY, &toc) < 0) {
 	    return CUEIFY_ERR_INTERNAL;
 	}
 
-	if (toc.cdte_track == 0xAA) {
-	    /* Lead-out Track */
-	    t->tracks[0].control = toc.cdte_ctrl;
-	    t->tracks[0].adr = toc.cdte_adr;
-	    t->tracks[0].lba = toc.cdte_addr.lba;
-	} else if (toc.cdte_track != 0) {
-	    t->tracks[toc.cdte_track].control = toc.cdte_ctrl;
-	    t->tracks[toc.cdte_track].adr = toc.cdte_adr;
-	    t->tracks[toc.cdte_track].lba = toc.cdte_addr.lba;
-	}
+	t->tracks[toc.cdte_track].control = toc.cdte_ctrl;
+	t->tracks[toc.cdte_track].adr = toc.cdte_adr;
+	t->tracks[toc.cdte_track].lba = toc.cdte_addr.lba;
     }
+
+    /* Finally, read lead-out track. */
+    toc.cdte_track = CDROM_LEADOUT;
+
+    if (ioctl(d->handle, CDROMREADTOCENTRY, &toc) < 0) {
+	return CUEIFY_ERR_INTERNAL;
+    }
+
+    t->tracks[0].control = toc.cdte_ctrl;
+    t->tracks[0].adr = toc.cdte_adr;
+    t->tracks[0].lba = toc.cdte_addr.lba;
 
     return CUEIFY_OK;
 }  /* cueify_device_read_toc_unportable */
