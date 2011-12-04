@@ -500,7 +500,7 @@ int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
     scsi_cmd->op_code = GPCMD_READ_CD;
 
     gpcmd.buffer = (unsigned char *)buffer;
-    gpcmd.buflen = sizeof(buffer);
+    gpcmd.buflen = sizeof(cueify_raw_read_private);
     gpcmd.sense = &sense;
     gpcmd.data_direction = CGC_DATA_READ;
     gpcmd.timeout = 50000;
