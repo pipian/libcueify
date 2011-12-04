@@ -989,6 +989,9 @@ public:
     class Block {
     protected:
 	cueify_cdtext_block *_b;
+
+	/* Workaround for SWIG temporary variable bug. */
+	std::string _discid, _genreName;
     public:
 	Block() : _b(NULL) { }
 
@@ -1089,6 +1092,10 @@ public:
 	protected:
 	    const Block *_b;
 	    uint8_t _track;
+
+	    /* Workaround for SWIG temporary variable bug. */
+	    std::string _title, _performer, _songwriter, _composer, _arranger,
+		_message, _privateData, _upcISRC;
 	public:
 	    Track() : _b(NULL), _track(0) { }
 
@@ -1103,13 +1110,14 @@ public:
 
 #define CUEIFY_CDTEXT_TESTER(getter)		\
 	    return getter(_b->_b, _track) != NULL
-#define CUEIFY_CDTEXT_GETTER(getter)					\
+#define CUEIFY_CDTEXT_GETTER(getter, variable)				\
 	    const char *datum = getter(_b->_b, _track);			\
 	    if (datum == NULL) {					\
-		return std::string();					\
+	        variable = std::string();				\
 	    } else {							\
-		return std::string(datum);				\
+		variable = std::string(datum);				\
 	    }								\
+	    return variable;
 
 	    /**
 	     * Get whether or not the title of the track is set.
@@ -1126,8 +1134,8 @@ public:
 	     * @return the title of the track, or the empty string if it is
 	     *         not set
 	     */
-	    const std::string title() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_title);
+	    const std::string& title() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_title, _title);
 	    };  /* CDText::Block::Track::title */
 
 	    /**
@@ -1145,8 +1153,9 @@ public:
 	     * @return the performer of the track, or the empty string if it is
 	     *         not set
 	     */
-	    const std::string performer() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_performer);
+	    const std::string& performer() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_performer,
+				     _performer);
 	    };  /* CDText::Block::Track::performer */
 
 	    /**
@@ -1164,8 +1173,9 @@ public:
 	     * @return the songwriter of the track, or the empty
 	     *         string if it is not set
 	     */
-	    const std::string songwriter() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_songwriter);
+	    const std::string& songwriter() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_songwriter,
+				     _songwriter);
 	    };  /* CDText::Block::Track::songwriter */
 
 	    /**
@@ -1183,8 +1193,9 @@ public:
 	     * @return the composer of the track, or the empty string if it is
 	     *         not set
 	     */
-	    const std::string composer() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_composer);
+	    const std::string& composer() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_composer,
+				     _composer);
 	    };  /* CDText::Block::Track::composer */
 
 	    /**
@@ -1202,8 +1213,9 @@ public:
 	     * @return the arranger of the track, or the empty string if it is
 	     *         not set
 	     */
-	    const std::string arranger() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_arranger);
+	    const std::string& arranger() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_arranger,
+				     _arranger);
 	    };  /* CDText::Block::Track::arranger */
 
 	    /**
@@ -1221,8 +1233,8 @@ public:
 	     * @return the message of the track, or the empty string if it is
 	     *         not set
 	     */
-	    const std::string message() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_message);
+	    const std::string& message() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_message, _message);
 	    };  /* CDText::Block::Track::message */
 
 	    /**
@@ -1240,8 +1252,9 @@ public:
 	     * @return the private data of the track, or the empty
 	     *         string if it is not set
 	     */
-	    const std::string privateData() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_private);
+	    const std::string& privateData() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_private,
+				     _privateData);
 	    };  /* CDText::Block::Track::privateData */
 
 	    /**
@@ -1259,8 +1272,9 @@ public:
 	     * @return the UPC/ISRC of the track, or the empty
 	     *         string if it is not set
 	     */
-	    const std::string upcISRC() const {
-		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_upc_isrc);
+	    const std::string& upcISRC() {
+		CUEIFY_CDTEXT_GETTER(cueify_cdtext_block_get_upc_isrc,
+				     _upcISRC);
 	    };  /* CDText::Block::Track::upcISRC */
 	};  /* CDText::Block::Track */
 
@@ -1300,13 +1314,14 @@ public:
 	 *
 	 * @return the discid, or the empty string if it is not set
 	 */
-	const std::string discid() const {
+	const std::string& discid() {
 	    const char *datum = cueify_cdtext_block_get_discid(_b);
 	    if (datum == NULL) {
-		return std::string();
+		_discid = std::string();
 	    } else {
-		return std::string(datum);
+		_discid = std::string(datum);
 	    }
+	    return _discid;
 	};  /* CDText::Block::discid */
 
 	/**
@@ -1325,13 +1340,14 @@ public:
 	 *         set.  A genre code of 0 implies that the string is
 	 *         not merely empty, but is truly unset.
 	 */
-	const std::string genreName() const {
+	const std::string& genreName() {
 	    const char *datum = cueify_cdtext_block_get_genre_name(_b);
 	    if (datum == NULL) {
-		return std::string();
+		_genreName = std::string();
 	    } else {
-		return std::string(datum);
+		_genreName = std::string(datum);
 	    }
+	    return _genreName;
 	};  /* CDText::Block::genreName */
     };  /* CDText::Block */
 

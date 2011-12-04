@@ -746,7 +746,7 @@ bool cueify_CDTextBlockTrack_hasTitle_get(cueify::CDTextBlockTrack *t) {
     return t->hasTitle();
 }
 
-const std::string cueify_CDTextBlockTrack_title_get(
+const std::string& cueify_CDTextBlockTrack_title_get(
     cueify::CDTextBlockTrack *t) {
     return t->title();
 }
@@ -755,7 +755,7 @@ bool cueify_CDTextBlockTrack_hasPerformer_get(cueify::CDTextBlockTrack *t) {
     return t->hasPerformer();
 }
 
-const std::string cueify_CDTextBlockTrack_performer_get(
+const std::string& cueify_CDTextBlockTrack_performer_get(
     cueify::CDTextBlockTrack *t) {
     return t->performer();
 }
@@ -764,7 +764,7 @@ bool cueify_CDTextBlockTrack_hasSongwriter_get(cueify::CDTextBlockTrack *t) {
     return t->hasSongwriter();
 }
 
-const std::string cueify_CDTextBlockTrack_songwriter_get(
+const std::string& cueify_CDTextBlockTrack_songwriter_get(
     cueify::CDTextBlockTrack *t) {
     return t->songwriter();
 }
@@ -773,7 +773,7 @@ bool cueify_CDTextBlockTrack_hasComposer_get(cueify::CDTextBlockTrack *t) {
     return t->hasComposer();
 }
 
-const std::string cueify_CDTextBlockTrack_composer_get(
+const std::string& cueify_CDTextBlockTrack_composer_get(
     cueify::CDTextBlockTrack *t) {
     return t->composer();
 }
@@ -782,7 +782,7 @@ bool cueify_CDTextBlockTrack_hasArranger_get(cueify::CDTextBlockTrack *t) {
     return t->hasArranger();
 }
 
-const std::string cueify_CDTextBlockTrack_arranger_get(
+const std::string& cueify_CDTextBlockTrack_arranger_get(
     cueify::CDTextBlockTrack *t) {
     return t->arranger();
 }
@@ -791,7 +791,7 @@ bool cueify_CDTextBlockTrack_hasMessage_get(cueify::CDTextBlockTrack *t) {
     return t->hasMessage();
 }
 
-const std::string cueify_CDTextBlockTrack_message_get(
+const std::string& cueify_CDTextBlockTrack_message_get(
     cueify::CDTextBlockTrack *t) {
     return t->message();
 }
@@ -800,7 +800,7 @@ bool cueify_CDTextBlockTrack_hasPrivateData_get(cueify::CDTextBlockTrack *t) {
     return t->hasPrivateData();
 }
 
-const std::string cueify_CDTextBlockTrack_privateData_get(
+const std::string& cueify_CDTextBlockTrack_privateData_get(
     cueify::CDTextBlockTrack *t) {
     return t->privateData();
 }
@@ -809,7 +809,7 @@ bool cueify_CDTextBlockTrack_hasUPCISRC_get(cueify::CDTextBlockTrack *t) {
     return t->hasUPCISRC();
 }
 
-const std::string cueify_CDTextBlockTrack_upcISRC_get(
+const std::string& cueify_CDTextBlockTrack_upcISRC_get(
     cueify::CDTextBlockTrack *t) {
     return t->upcISRC();
 }
@@ -859,7 +859,7 @@ bool cueify_CDTextBlock_hasDiscid_get(cueify::CDTextBlock *b) {
     return b->hasDiscid();
 }
 
-const std::string cueify_CDTextBlock_discid_get(cueify::CDTextBlock *b) {
+const std::string& cueify_CDTextBlock_discid_get(cueify::CDTextBlock *b) {
     return b->discid();
 }
 
@@ -867,7 +867,7 @@ uint16_t cueify_CDTextBlock_genreCode_get(cueify::CDTextBlock *b) {
     return b->genreCode();
 }
 
-const std::string cueify_CDTextBlock_genreName_get(cueify::CDTextBlock *b) {
+const std::string& cueify_CDTextBlock_genreName_get(cueify::CDTextBlock *b) {
     return b->genreName();
 }
 
