@@ -250,6 +250,22 @@ START_TEST (test_data_mode)
 END_TEST
 
 
+START_TEST (test_discid)
+{
+    char *mbid;
+
+    /* use_data_tracks = 0 */
+    fail_unless(cueify_device_get_freedb_id(dev, 0) == 0xae0c1e0c,
+		"Failed to calculate non-data-track freedb ID from device");
+    fail_unless(cueify_device_get_freedb_id(dev, 1) == 0xbe0d7d0d,
+		"Failed to calculate data-track freedb ID from device");
+    mbid = cueify_device_get_musicbrainz_id(dev);
+    fail_unless(strcmp(mbid, "iIqthNFjPeboX2O1GKpqvcQIWDc-") == 0,
+		"Failed to calculate MusicBrainz ID from device");
+}
+END_TEST
+
+
 Suite *toc_suite() {
     Suite *s = suite_create("unportable");
     TCase *tc_core = tcase_create("core");
@@ -259,6 +275,7 @@ Suite *toc_suite() {
     tcase_add_test(tc_core, test_sessions);
     tcase_add_test(tc_core, test_full_toc);
     tcase_add_test(tc_core, test_cdtext);
+    tcase_add_test(tc_core, test_discid);
     suite_add_tcase(s, tc_core);
 
     /* Extra test-case for seek-based tests, which are slower. */

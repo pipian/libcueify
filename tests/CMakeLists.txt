@@ -30,6 +30,10 @@ IF(LIBCHECK_FOUND)
     ADD_TEST(check_cdtext check_cdtext)
     ADD_DEPENDENCIES(check check_cdtext)
     
+    ADD_EXECUTABLE(check_discid check_discid.c)
+    ADD_TEST(check_discid check_discid)
+    ADD_DEPENDENCIES(check check_discid)
+    
     ADD_CUSTOM_TARGET(check-unportable)
     ADD_CUSTOM_TARGET(check-unportable-exe
 		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_unportable)
@@ -73,6 +77,7 @@ IF(PYTHONINTERP_FOUND)
     ADD_TEST(check_sessions.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_sessions.py)
     ADD_TEST(check_full_toc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_full_toc.py)
     ADD_TEST(check_cdtext.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_cdtext.py)
+    ADD_TEST(check_discid.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_discid.py)
     ADD_DEPENDENCIES(check _python-cueify)
 
     ADD_CUSTOM_TARGET(check_unportable.py

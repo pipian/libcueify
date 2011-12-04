@@ -329,6 +329,14 @@ class TestUnportableFunctions(unittest.TestCase):
         for i in range(13):
             self.assertEqual(self.dev.readDataMode(i + 1), data_modes[i])
 
+    def test_discid(self):
+        # useDataTracks = False
+        self.assertEqual(self.dev.freedbID(), 0xae0c1e0c)
+        self.assertEqual(self.dev.freedbID(False), 0xae0c1e0c)
+        self.assertEqual(self.dev.freedbID(True), 0xbe0d7d0d)
+        self.assertEqual(self.dev.musicbrainzID(),
+                         "iIqthNFjPeboX2O1GKpqvcQIWDc-")
+
 if __name__ == '__main__':
     print ("NOTE: These tests are expected to fail except when (certain\n" +
 	   "      printings of) David Bowie's Heathen is present in the\n" +
