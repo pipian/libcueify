@@ -8,5 +8,5 @@ ADD_EXECUTABLE(cueify-exe cueify.c)
 SET_TARGET_PROPERTIES(cueify-exe PROPERTIES OUTPUT_NAME "cueify")
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic-errors")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)

@@ -7,6 +7,9 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/cueify/types.h.in
 SET(_sources device.c toc.c sessions.c full_toc.c cdtext.c latin1.c msjis.c
              ascii.c mcn_isrc.c indices.c track_data.c cdtext_crc.c)
 
+INCLUDE(CheckIncludeFiles)
+CHECK_INCLUDE_FILES(windows.h HAVE_WINDOWS_H)
+
 INCLUDE(CheckTypeSize)
 CHECK_TYPE_SIZE(uint8_t UINT8_T)
 CHECK_TYPE_SIZE(uint16_t UINT16_T)

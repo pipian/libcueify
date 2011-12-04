@@ -2,7 +2,7 @@
 # This kludge may not play nicely when gcc isn't available...
 CMAKE_COMMAND = cmake
 ifeq ($(shell gcc -dumpmachine),mingw32)
-CMAKE_COMMAND = "/c/Program Files/CMake 2.8/bin/cmake.exe"
+CMAKE_COMMAND = "/c/Program Files/CMake 2.8/bin/cmake.exe" -G "MSYS Makefiles"
 endif
 
 .PHONY: check check-unportable check-indices check-pregaps docs install clean distclean
