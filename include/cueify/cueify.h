@@ -36,5 +36,6 @@
 #include <cueify/cdtext.h>
 #include <cueify/mcn_isrc.h>
 #include <cueify/track_data.h>
+#include <cueify/discid.h>
 
 #endif /* _CUEIFY_CUEIFY_H */

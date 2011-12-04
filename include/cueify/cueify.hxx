@@ -77,6 +77,10 @@ public:
 	min(min), sec(sec), frm(frm) { };
 };
 
+
+class Sessions;
+
+
 /** The table of contents (TOC) of an audio CD. */
 class TOC {
 protected:
@@ -149,6 +153,28 @@ public:
      *         appropriately
      */
     std::string serialize() { CUEIFY_SERIALIZER(cueify_toc_serialize, _t); };
+
+    /**
+     * Calculate the freedb discid.
+     *
+     * @param s the multisession data of the CD.  If not NULL, the
+     *          discid will be calculated like MusicBrainz, by
+     *          ignoring the data tracks at the end of the disc as
+     *          hinted by the multisession data.  Otherwise, data
+     *          tracks will be included.
+     * @return the freedb discid as an unsigned integer
+     */
+    uint32_t freedbID(Sessions *s=NULL) const;
+
+    /**
+     * Calculate the MusicBrainz discid.
+     *
+     * @param s the multisession data of the CD.  If NULL, heuristics
+     *          will be applied to guess whether or not the disc has
+     *          multiple sessions.
+     * @return the MusicBrainz discid
+     */
+    std::string musicbrainzID(Sessions *s=NULL) const;
 
     /**
      * Get the number of the first track.
@@ -262,6 +288,8 @@ protected:
     int _errorCode;
 public:
     friend class Device;
+    friend uint32_t TOC::freedbID(Sessions *) const;
+    friend std::string TOC::musicbrainzID(Sessions *) const;
 
     /**
      * Create a new multisession instance. The instance is created
@@ -377,7 +405,6 @@ public:
 	return cueify_sessions_get_last_session_track_number(_s);
     };  /* Sessions::lastSessionTrackNumber */
 
-
     /**
      * Get the absolute CD-frame address (LBA) of the start of the
      * first track in the last complete session.
@@ -391,11 +418,40 @@ public:
 };  /* Sessions */
 
 
+/* We can now define TOC::freedbID and TOC::musicbrainzID */
+inline uint32_t TOC::freedbID(Sessions *s) const {
+    if (s == NULL) {
+	return cueify_toc_get_freedb_id(_t, NULL);
+    } else {
+	return cueify_toc_get_freedb_id(_t, s->_s);
+    }
+}  /* TOC::freedbID */
+
+
+inline std::string TOC::musicbrainzID(Sessions *s) const {
+    std::string retval;
+    char *discid;
+    if (s == NULL) {
+	discid = cueify_toc_get_musicbrainz_id(_t, NULL);
+    } else {
+	discid = cueify_toc_get_musicbrainz_id(_t, s->_s);
+    }
+    if (discid != NULL) {
+	retval = std::string(discid);
+	free(discid);
+    }
+    return retval;
+}  /* TOC::musicbrainzID */
+
+
 /** The full table of contents (TOC) of an audio CD. */
 class FullTOC {
 protected:
     cueify_full_toc *_t;
     int _errorCode;
+
+    /* Workaround for SWIG temporary variable bug. */
+    std::string _musicbrainzID;
 public:
     friend class Device;
 
@@ -462,6 +518,36 @@ public:
     std::string serialize() {
 	CUEIFY_SERIALIZER(cueify_full_toc_serialize, _t);
     };  /* FullTOC::serialize */
+
+    /**
+     * Calculate the freedb discid.
+     *
+     * @param useDataTracks if true, the data tracks will be used to
+     *                      calculate the freedb discid.  If false,
+     *                      the data tracks will not be used, and the
+     *                      discid will be calculated like the
+     *                      MusicBrainz discid.
+     * @return the freedb discid as an unsigned integer
+     */
+    uint32_t freedbID(bool useDataTracks=false) const {
+	return cueify_full_toc_get_freedb_id(_t, useDataTracks ? 1 : 0);
+    };  /* FullTOC::freedbID */
+
+    /**
+     * Calculate the MusicBrainz discid.
+     *
+     * @return the MusicBrainz discid
+     */
+    const std::string& musicbrainzID() {
+	char *discid = cueify_full_toc_get_musicbrainz_id(_t);
+	if (discid == NULL) {
+	    _musicbrainzID = std::string();
+	} else {
+	    _musicbrainzID = std::string(discid);
+	    free(discid);
+	}
+	return _musicbrainzID;
+    };  /* FullTOC::musicbrainzID */
 
     /**
      * Get the number of the first session.
@@ -1471,6 +1557,37 @@ public:
      * @return the most recent error code
      */
     int errorCode() { return _errorCode; };
+
+    /**
+     * Read the disc in the optical disc device and calculate its
+     * freedb discid.
+     *
+     * @param useDataTracks if true, the data tracks will be used to
+     *                      calculate the freedb discid.  If false,
+     *                      the data tracks will not be used, and the
+     *                      discid will be calculated like the
+     *                      MusicBrainz discid.
+     * @return the freedb discid as an unsigned integer
+     */
+    uint32_t freedbID(bool useDataTracks=false) {
+	return cueify_device_get_freedb_id(_d, useDataTracks ? 1 : 0);
+    };  /* Device::freedbID */
+
+    /**
+     * Read the disc in the optical disc device and calculate its
+     * MusicBrainz discid.
+     *
+     * @return the MusicBrainz discid
+     */
+    std::string musicbrainzID() {
+	std::string retval;
+	char *discid = cueify_device_get_musicbrainz_id(_d);
+	if (discid != NULL) {
+	    retval = std::string(discid);
+	    free(discid);
+	}
+	return retval;
+    };  /* Device::musicbrainzID */
 
     /**
      * Read the TOC of the disc in the optical disc device.  The

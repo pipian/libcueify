@@ -5,7 +5,8 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/../include/cueify/types.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/../include/cueify/types.h)
 
 SET(_sources device.c toc.c sessions.c full_toc.c cdtext.c latin1.c msjis.c
-             ascii.c mcn_isrc.c indices.c track_data.c cdtext_crc.c)
+             ascii.c mcn_isrc.c indices.c track_data.c cdtext_crc.c discid.c
+	     sha1.c)
 
 INCLUDE(CheckIncludeFiles)
 CHECK_INCLUDE_FILES(windows.h HAVE_WINDOWS_H)
@@ -63,7 +64,7 @@ SET_TARGET_PROPERTIES(cueify PROPERTIES
 IF(CMAKE_COMPILER_IS_GNUCC)
     # Unfortunately, libcam and w32api fail -pedantic-errors
     # (and -isystem fails to help)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -std=gnu99 -pedantic -g")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -std=gnu99 -pedantic")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 INSTALL(TARGETS cueify DESTINATION ${LIB_INSTALL_DIR})

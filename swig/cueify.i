@@ -39,6 +39,8 @@ namespace std {
 #if defined(SWIGRUBY)
 %rename(supported_apis) supportedAPIs;
 %rename(error_code) errorCode;
+%rename(freedb_id) freedbID;
+%rename(musicbrainz_id) musicbrainzID;
 #endif
 
 %extend cueify::Device {
@@ -71,6 +73,8 @@ public:
 
 #if defined(SWIGRUBY)
 %rename(error_code) errorCode;
+%rename(freedb_id) freedbID;
+%rename(musicbrainz_id) musicbrainzID;
 %rename(first_track) firstTrack;
 %rename(last_track) lastTrack;
 %rename(leadout_track) leadoutTrack;
@@ -178,6 +182,8 @@ public:
 
 #if defined(SWIGRUBY)
 %rename(error_code) errorCode;
+%rename(freedb_id) freedbID;
+%rename(musicbrainz_id) musicbrainzID;
 %rename(first_session) firstSession;
 %rename(last_session) lastSession;
 %rename(first_track) firstTrack;
@@ -187,6 +193,7 @@ public:
 
 %extend cueify::FullTOC {
     const int errorCode;
+    const std::string musicbrainzID;
     const uint8_t firstSession;
     const uint8_t lastSession;
     const std::vector<cueify::FullTOCTrack> tracks;
@@ -196,6 +203,7 @@ public:
     const cueify::MSFAddress discLength;
 }
 %ignore cueify::FullTOC::errorCode;
+%ignore cueify::FullTOC::musicbrainzID;
 %ignore cueify::FullTOC::firstSession;
 %ignore cueify::FullTOC::lastSession;
 %ignore cueify::FullTOC::tracks;
@@ -676,6 +684,10 @@ cueify::MSFAddress* cueify_FullTOCSession_length_get(
 
 int cueify_FullTOC_errorCode_get(cueify::FullTOC *t) {
     return t->errorCode();
+}
+
+const std::string &cueify_FullTOC_musicbrainzID_get(cueify::FullTOC *t) {
+    return t->musicbrainzID();
 }
 
 uint8_t cueify_FullTOC_firstSession_get(cueify::FullTOC *t) {

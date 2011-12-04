@@ -37,6 +37,12 @@ cueify_indices *cueify_indices_new() {
 }  /* cueify_indices_new */
 
 
+/**
+ * Convert an LBA absolute address to an MSF time address.
+ *
+ * @param lba the LBA address to convert
+ * @param msf the MSF address to populate
+ */
 static inline void lba_to_msf(uint32_t lba, cueify_msf_t *msf) {
     msf->min = lba / 75 / 60;
     msf->sec = lba / 75 % 60;
@@ -51,6 +57,12 @@ static inline void lba_to_msf(uint32_t lba, cueify_msf_t *msf) {
 }  /* lba_to_msf */
 
 
+/**
+ * Convert an MSF time address to an LBA absolute address.
+ *
+ * @param msf the MSF address to convert
+ * @return the LBA address
+ */
 static inline uint32_t msf_to_lba(cueify_msf_t msf) {
     uint32_t lba = 0;
 
