@@ -39,6 +39,10 @@ extern "C" {
  * Read the Media Catalog Number of the disc in the optical disc device
  * associated with a device handle.
  *
+ * @note Reading from the sub-Q-channel is notoriously erratic
+ *       (particularly on some OSs/devices), and as a result, calls
+ *       MAY sometimes incorrectly report that there is no MCN.
+ *
  * @pre { d != NULL }
  * @param d an opened device handle
  * @param buffer a pointer to a location to write the media catalog
@@ -60,6 +64,11 @@ int cueify_device_read_mcn(cueify_device *d, char *buffer, size_t *size);
  * Read the International Standard Recording Code (ISRC) of a track in
  * the disc in the optical disc device associated with a device
  * handle.
+ *
+ * @note Reading from the sub-Q-channel is notoriously erratic
+ *       (particularly on some OSs/devices), and as a result, calls
+ *       MAY sometimes incorrectly return a nearby track's ISRC (or no
+ *       ISRC at all).
  *
  * @pre { d != NULL, track in range of track numbers on disc }
  * @param d an opened device handle
