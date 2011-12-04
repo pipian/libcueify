@@ -42,7 +42,7 @@ IF(SWIG_FOUND)
 			   ARGS -E rename ${CMAKE_CURRENT_BINARY_DIR}/cueify.py ${CMAKE_CURRENT_BINARY_DIR}/python/cueify.py)
         ADD_CUSTOM_COMMAND(TARGET _python-cueify POST_BUILD
 		   	   COMMAND "${CMAKE_COMMAND}"
-			   ARGS -E rename ${CMAKE_CURRENT_BINARY_DIR}/_python-cueify.so ${CMAKE_CURRENT_BINARY_DIR}/python/_cueify.so)
+			   ARGS -E rename ${CMAKE_CURRENT_BINARY_DIR}/_python-cueify${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_CURRENT_BINARY_DIR}/python/_cueify${CMAKE_SHARED_LIBRARY_SUFFIX})
     ENDIF(PYTHONLIBS_FOUND)
 
     FIND_PACKAGE(Ruby)
