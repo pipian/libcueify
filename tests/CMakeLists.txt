@@ -30,29 +30,37 @@ IF(LIBCHECK_FOUND)
     ADD_TEST(check_cdtext check_cdtext)
     ADD_DEPENDENCIES(check check_cdtext)
     
-    ADD_CUSTOM_TARGET(check-unportable
+    ADD_CUSTOM_TARGET(check-unportable)
+    ADD_CUSTOM_TARGET(check-unportable-exe
 		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_unportable)
     ADD_EXECUTABLE(check_unportable check_unportable.c)
     ADD_DEPENDENCIES(check check_unportable)
-    ADD_DEPENDENCIES(check-unportable check_unportable)
+    ADD_DEPENDENCIES(check-unportable-exe check_unportable)
+    ADD_DEPENDENCIES(check-unportable check-unportable-exe)
 
-    ADD_CUSTOM_TARGET(check-indices
+    ADD_CUSTOM_TARGET(check-indices)
+    ADD_CUSTOM_TARGET(check-indices-exe
 		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_indices)
     ADD_EXECUTABLE(check_indices check_indices.c)
     ADD_DEPENDENCIES(check check_indices)
-    ADD_DEPENDENCIES(check-indices check_indices)
+    ADD_DEPENDENCIES(check-indices-exe check_indices)
+    ADD_DEPENDENCIES(check-indices check-indices-exe)
 
-    ADD_CUSTOM_TARGET(check-pregaps
+    ADD_CUSTOM_TARGET(check-pregaps)
+    ADD_CUSTOM_TARGET(check-pregaps-exe
 		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_pregaps)
     ADD_EXECUTABLE(check_pregaps check_pregaps.c)
     ADD_DEPENDENCIES(check check_pregaps)
-    ADD_DEPENDENCIES(check-pregaps check_pregaps)
+    ADD_DEPENDENCIES(check-pregaps-exe check_pregaps)
+    ADD_DEPENDENCIES(check-pregaps check-pregaps-exe)
 
-    ADD_CUSTOM_TARGET(check-track-control
+    ADD_CUSTOM_TARGET(check-track-control)
+    ADD_CUSTOM_TARGET(check-track-control-exe
 		      COMMAND ${CMAKE_CURRENT_BINARY_DIR}/check_track_control)
     ADD_EXECUTABLE(check_track_control check_track_control.c)
     ADD_DEPENDENCIES(check check_track_control)
-    ADD_DEPENDENCIES(check-track-control check_track_control)
+    ADD_DEPENDENCIES(check-track-control-exe check_track_control)
+    ADD_DEPENDENCIES(check-track-control check-track-control-exe)
 ENDIF(LIBCHECK_FOUND)
 
 FIND_PACKAGE(SWIG)
