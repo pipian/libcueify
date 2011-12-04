@@ -68,23 +68,23 @@ IF(PYTHONINTERP_FOUND)
     ADD_DEPENDENCIES(check _python-cueify)
 
     ADD_CUSTOM_TARGET(check_unportable.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_unportable.py
-                      DEPENDS _python-cueify)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_unportable.py)
+    ADD_DEPENDENCIES(check_unportable.py _python-cueify)
     ADD_DEPENDENCIES(check-unportable check_unportable.py)
 
     ADD_CUSTOM_TARGET(check_indices.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_indices.py
-                      DEPENDS _python-cueify)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_indices.py)
+    ADD_DEPENDENCIES(check_indices.py _python-cueify)
     ADD_DEPENDENCIES(check-indices check_indices.py)
 
     ADD_CUSTOM_TARGET(check_pregaps.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_pregaps.py
-                      DEPENDS _python-cueify)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_pregaps.py)
+    ADD_DEPENDENCIES(check_pregaps.py _python-cueify)
     ADD_DEPENDENCIES(check-pregaps check_pregaps.py)
 
     ADD_CUSTOM_TARGET(check_track_control.py
-		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_track_control.py
-                      DEPENDS _python-cueify)
+		      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/swig/check_track_control.py)
+    ADD_DEPENDENCIES(check_track_control.py _python-cueify)
     ADD_DEPENDENCIES(check-track-control check_track_control.py)
 ENDIF(PYTHONINTERP_FOUND)
 ENDIF(PYTHONLIBS_FOUND)
