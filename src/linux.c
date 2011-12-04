@@ -139,7 +139,7 @@ int cueify_device_open_unportable(cueify_device_private *d,
     int fd;
 
     /* TODO: Test if the file is actually a CD-ROM device. */
-    fd = open(device, O_RDONLY, 0);
+    fd = open(device, O_RDONLY | O_NONBLOCK, 0);
     if (fd < 0) {
 	return CUEIFY_ERR_NO_DEVICE;
     }
