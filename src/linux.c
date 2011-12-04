@@ -100,9 +100,10 @@ struct subchannel_hdr {
 struct subchannel_mcn {
     struct subchannel_hdr header;
     uint8_t format_code;
-    uint8_t reserved[3];
+    uint8_t reserved1[3];
     uint8_t mcval;  /** If bit 7 is set, mcn is a valid media catalog number. */
-    uint8_t mcn[15];
+    uint8_t mcn[14];
+    uint8_t reserved2;
 };
 
 struct subchannel_isrc {
@@ -329,20 +330,46 @@ int cueify_device_read_cdtext_unportable(cueify_device_private *d,
 
 int cueify_device_read_mcn_unportable(cueify_device_private *d,
 				      char *buffer, size_t *size) {
-    struct cdrom_mcn mcn;
+    /* The CDROM_GET_MCN ioctl doesn't let us know when it's unset. */
+    struct cdrom_generic_command gpcmd;
+    struct scsi_read_subchannel *scsi_cmd;
+    struct request_sense sense;
+    union subchannel_data data;
 
-    memset(&mcn, 0, sizeof(mcn));
+    memset(&gpcmd, 0, sizeof(gpcmd));
 
-    if (ioctl(d->handle, CDROM_GET_MCN, &mcn) < 0) {
+    scsi_cmd = (struct scsi_read_subchannel *)&gpcmd.cmd;
+    scsi_cmd->read_subq |= 0x40;  /* SUBQ = 1 */
+    scsi_cmd->type = IOCTL_CDROM_MEDIA_CATALOG;
+    scsi_cmd->data_len[0] = (sizeof(data) >> 8) & 0xFF;
+    scsi_cmd->data_len[1] = sizeof(data) & 0xFF;
+    scsi_cmd->op_code = GPCMD_READ_SUBCHANNEL;
+
+    gpcmd.buffer = (unsigned char *)&data;
+    gpcmd.buflen = sizeof(data);
+    gpcmd.sense = &sense;
+    gpcmd.data_direction = CGC_DATA_READ;
+    gpcmd.timeout = 50000;
+
+    if (ioctl(d->handle, CDROM_SEND_PACKET, &gpcmd) < 0) {
 	return CUEIFY_ERR_INTERNAL;
     }
 
-    *size = min(sizeof(mcn.medium_catalog_number), *size);
-    memcpy(buffer, mcn.medium_catalog_number, *size - 1);
-    buffer[*size] = '\0';
-    if (buffer[0] == '\0') {
-	*size = 1;
+    /* MCVAL (MSB in byte 8) must equal 1 if there is MCN data. */
+    if (data.mcn.mcval != 0x80) {
+	/* No data. */
+	if (*size > 0) {
+	    *size = 1;
+	    buffer[0] = '\0';
+	}
 	return CUEIFY_NO_DATA;
+    }
+
+    /* OK.  Copy the MCN (starts at byte 9) */
+    *size = min(sizeof(data.mcn.mcn), *size);
+    if (*size > 0) {
+	memcpy(buffer, data.mcn.mcn, *size - 1);
+	buffer[*size - 1] = '\0';
     }
 
     return CUEIFY_OK;
