@@ -254,7 +254,7 @@ char *base64_encode(uint8_t *buffer, size_t len, char *extra) {
     }
 
     /* Fix to an integral number of bytes... */
-    if (residual != 0) {
+    if (i % 3 != 0) {
 	*bp++ = b64chars[residual];
     }
 
