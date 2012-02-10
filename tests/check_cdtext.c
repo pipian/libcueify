@@ -1,6 +1,6 @@
 /* check_cdtext.h - Unit tests for libcueify CD-Text APIs
  *
- * Copyright (c) 2011 Ian Jacobi <pipian@pipian.com>
+ * Copyright (c) 2011, 2012 Ian Jacobi <pipian@pipian.com>
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -125,6 +125,26 @@ void setup() {
     b->genre_name = "Genre #32";
 
     b = &(mock_cdtext.blocks[1]);
+    b->valid = 1;
+    b->charset = CUEIFY_CDTEXT_CHARSET_ISO8859_1;
+    b->language = CUEIFY_CDTEXT_LANG_FRENCH;
+    b->first_track_number = 1;
+    b->last_track_number = 12;
+    b->name_copyright = 1;
+    b->title_copyright = 1;
+    b->titles[0] = "Pa\xC3""\xAF""en";
+    b->titles[1] = "\t";
+    b->titles[2] = "\xE2\x96\x88\xE2\x96\x80\xE2\x99\xAA\xE2\x84\x97\xE2\x80\xA0";
+    b->titles[3] = "\t";
+    b->titles[4] = b->titles[5] = b->titles[6] = b->titles[7] = b->titles[8] =
+	b->titles[9] = b->titles[10] = b->titles[11] = b->titles[12] = "";
+    b->performers[0] = "David Bowie";
+    b->performers[1] = b->performers[2] = b->performers[3] = b->performers[4] =
+	b->performers[5] = b->performers[6] = b->performers[7] =
+	b->performers[8] = b->performers[9] = b->performers[10] =
+	b->performers[11] = b->performers[12] = "\t";
+
+    b = &(mock_cdtext.blocks[2]);
     b->valid = 1;
     b->charset = CUEIFY_CDTEXT_CHARSET_MSJIS;
     b->language = CUEIFY_CDTEXT_LANG_JAPANESE;
@@ -360,7 +380,7 @@ START_TEST (test_getters)
 		cueify_cdtext_get_toc_track_interval_end(cdtext,
 							 2, 2).frm == 10,
 		"Interval start in CD-Text TOC did not match");
-    fail_unless(cueify_cdtext_get_num_blocks(cdtext) == 2,
+    fail_unless(cueify_cdtext_get_num_blocks(cdtext) == 3,
 		"Number of blocks in CD-Text did not match");
 }
 END_TEST
@@ -466,10 +486,35 @@ START_TEST (test_block_getters)
 END_TEST
 
 
-START_TEST (test_japanese)
+START_TEST (test_french)
 {
     cueify_cdtext *cdtext = (cueify_cdtext *)&mock_cdtext;
     cueify_cdtext_block *block = cueify_cdtext_get_block(cdtext, 1);
+
+    fail_unless(block != NULL, "CD-Text block was null");
+    fail_unless(cueify_cdtext_block_get_charset(block) ==
+		CUEIFY_CDTEXT_CHARSET_ISO8859_1,
+		"Character set of French CD-Text block did not match");
+    fail_unless(cueify_cdtext_block_get_language(block) ==
+		CUEIFY_CDTEXT_LANG_FRENCH,
+		"Language of French CD-Text block did not match");
+    fail_unless(strcmp(cueify_cdtext_block_get_title(block,
+						     CUEIFY_CDTEXT_ALBUM),
+		       "Pa\xC3""\xAF""en")
+		== 0,
+		"Album title in CD-Text block did not match");
+    fail_unless(strcmp(cueify_cdtext_block_get_title(block, 2),
+		       "\xE2\x96\x88\xE2\x96\x80\xE2\x99\xAA\xE2\x84\x97\xE2\x80\xA0")
+		== 0,
+		"Track title in CD-Text block did not match");
+}
+END_TEST
+
+
+START_TEST (test_japanese)
+{
+    cueify_cdtext *cdtext = (cueify_cdtext *)&mock_cdtext;
+    cueify_cdtext_block *block = cueify_cdtext_get_block(cdtext, 2);
 
     fail_unless(block != NULL, "CD-Text block was null");
     fail_unless(cueify_cdtext_block_get_charset(block) ==
@@ -500,6 +545,7 @@ Suite *toc_suite() {
     tcase_add_test(tc_core, test_deserialize);
     tcase_add_test(tc_core, test_getters);
     tcase_add_test(tc_core, test_block_getters);
+    tcase_add_test(tc_core, test_french);
     tcase_add_test(tc_core, test_japanese);
     suite_add_tcase(s, tc_core);
 

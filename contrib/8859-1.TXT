@@ -1,5 +1,6 @@
 #
-#	Name:             ISO/IEC 8859-1:1998 to Unicode
+#	Name:             Enhanced CD "Modified" ISO 8859-1 to Unicode
+#	Based On:         ISO/IEC 8859-1:1998 to Unicode
 #	Unicode version:  3.0
 #	Table version:    1.0
 #	Table format:     Format A
@@ -45,6 +46,31 @@
 #	Please note that <errata@unicode.org> is an archival address;
 #	notices will be checked, but do not expect an immediate response.
 #
+
+#	This file has been updated with appropriate mappings provided by
+#	Stefan Briesenick <sbriesen@gentoo.org>
+#
+#	The CD-TEXT standard adopts a modified version of ISO 8859-1
+#	specified by in the Enhanced Music CD Specification, Appendix
+#	1, page 31 (Modified ISO-8859-1 character set)
+#
+#	The differences between traditional ISO 8859-1 and "modified" ISO
+#	8859-1 are the following:
+#
+# Original Codes:
+# 0x7F	U+007F	DELETE
+# 0xA0	U+00A0	NO-BREAK SPACE
+# 0xA8	U+00A8	DIAERESIS
+# 0xAD	U+00AD	SOFT HYPHEN
+# 0xB8	U+00B8	CEDILLA
+#
+# Modified Codes:
+# 0x7F	U+2588	FULL BLOCK
+# 0xA0	U+2580	UPPER HALF BLOCK
+# 0xA8	U+266A	EIGHTH NOTE
+# 0xAD	U+2117	SOUND RECORDING COPYRIGHT
+# 0xB8	U+2020	DAGGER
+
 0x00	0x0000	#	NULL
 0x01	0x0001	#	START OF HEADING
 0x02	0x0002	#	START OF TEXT
@@ -172,7 +198,7 @@
 0x7C	0x007C	#	VERTICAL LINE
 0x7D	0x007D	#	RIGHT CURLY BRACKET
 0x7E	0x007E	#	TILDE
-0x7F	0x007F	#	DELETE
+0x7F	0x2588	#	FULL BLOCK
 0x80	0x0080	#	<control>
 0x81	0x0081	#	<control>
 0x82	0x0082	#	<control>
@@ -205,7 +231,7 @@
 0x9D	0x009D	#	<control>
 0x9E	0x009E	#	<control>
 0x9F	0x009F	#	<control>
-0xA0	0x00A0	#	NO-BREAK SPACE
+0xA0	0x2580	#	UPPER HALF BLOCK
 0xA1	0x00A1	#	INVERTED EXCLAMATION MARK
 0xA2	0x00A2	#	CENT SIGN
 0xA3	0x00A3	#	POUND SIGN
@@ -213,12 +239,12 @@
 0xA5	0x00A5	#	YEN SIGN
 0xA6	0x00A6	#	BROKEN BAR
 0xA7	0x00A7	#	SECTION SIGN
-0xA8	0x00A8	#	DIAERESIS
+0xA8	0x266A	#	EIGHTH NOTE
 0xA9	0x00A9	#	COPYRIGHT SIGN
 0xAA	0x00AA	#	FEMININE ORDINAL INDICATOR
 0xAB	0x00AB	#	LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
 0xAC	0x00AC	#	NOT SIGN
-0xAD	0x00AD	#	SOFT HYPHEN
+0xAD	0x2117	#	SOUND RECORDING COPYRIGHT
 0xAE	0x00AE	#	REGISTERED SIGN
 0xAF	0x00AF	#	MACRON
 0xB0	0x00B0	#	DEGREE SIGN
@@ -229,7 +255,7 @@
 0xB5	0x00B5	#	MICRO SIGN
 0xB6	0x00B6	#	PILCROW SIGN
 0xB7	0x00B7	#	MIDDLE DOT
-0xB8	0x00B8	#	CEDILLA
+0xB8	0x2020	#	DAGGER
 0xB9	0x00B9	#	SUPERSCRIPT ONE
 0xBA	0x00BA	#	MASCULINE ORDINAL INDICATOR
 0xBB	0x00BB	#	RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
