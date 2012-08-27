@@ -207,9 +207,6 @@ int cueify_device_read_sessions_unportable(cueify_device_private *d,
 	return CUEIFY_ERR_INTERNAL;
     }
 
-    /* Some devices may need a rest between CAM commands. */
-    usleep(10000);
-
     ccb = cam_getccb(camdev);
     if (ccb == NULL) {
 	cam_close_device(camdev);
@@ -283,9 +280,6 @@ int cueify_device_read_full_toc_unportable(cueify_device_private *d,
     if (camdev == NULL) {
 	return CUEIFY_ERR_INTERNAL;
     }
-
-    /* Some devices may need a rest between CAM commands. */
-    usleep(10000);
 
     ccb = cam_getccb(camdev);
     if (ccb == NULL) {
@@ -361,9 +355,6 @@ int cueify_device_read_cdtext_unportable(cueify_device_private *d,
     if (camdev == NULL) {
 	return CUEIFY_ERR_INTERNAL;
     }
-
-    /* Some devices may need a rest between CAM commands. */
-    usleep(10000);
 
     ccb = cam_getccb(camdev);
     if (ccb == NULL) {
@@ -555,9 +546,6 @@ int cueify_device_read_raw_unportable(cueify_device_private *d, uint32_t lba,
     if (camdev == NULL) {
 	return CUEIFY_ERR_INTERNAL;
     }
-
-    /* Some devices may need a rest between CAM commands. */
-    usleep(10000);
 
     ccb = cam_getccb(camdev);
     if (ccb == NULL) {
