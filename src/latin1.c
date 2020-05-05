@@ -38,8 +38,8 @@ char *latin1_to_utf8(uint8_t *latin1, int size)
     if (size < 0) {
 	/* Count output size until we find a terminator/bad char. */
 	output = (char *)latin1;
-	while (table[(unsigned char)*output] != '\0') {
-	    output_size += strlen(table[(unsigned char)*output]);
+	while (*output != '\0') {
+		output_size += strlen(table[(unsigned char)*output++]);
 	}
 	/* And also include the terminator. */
 	output_size++;
