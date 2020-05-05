@@ -50,7 +50,7 @@ char *msjis_to_utf8(uint8_t *msjis, int size)
 	    } else if (table[(unsigned char)lo][0] != '\0') {
 		output_size += strlen(table[(unsigned char)lo]);
 	    }
-	} while (table[(unsigned char)lo] != '\0');
+	} while (table[(unsigned char)lo][0] != '\0');
 	/* And also include the terminator. */
 	output_size++;
     } else {
